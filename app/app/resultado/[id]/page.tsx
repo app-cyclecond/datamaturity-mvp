@@ -9,9 +9,10 @@ import { DIMENSIONS } from "@/lib/assessment/questions";
 type AssessmentResult = {
   id: string;
   user_id: string;
-  responses: Record<string, number>;
+  overall_score: number;
+  level: string;
+  dimension_scores: Record<string, number>;
   created_at: string;
-  updated_at: string;
 };
 
 export default function ResultadoPage() {
@@ -35,6 +36,7 @@ export default function ResultadoPage() {
           .single();
 
         if (fetchError) {
+          console.error("Fetch error:", fetchError);
           setError("Resultado não encontrado");
           setIsLoading(false);
           return;
@@ -42,6 +44,7 @@ export default function ResultadoPage() {
 
         setResult(data as AssessmentResult);
       } catch (err) {
+        console.error("Error:", err);
         setError("Erro ao carregar resultado");
       } finally {
         setIsLoading(false);
@@ -53,33 +56,11 @@ export default function ResultadoPage() {
     }
   }, [id]);
 
-  // Calcular score geral
-  const calculateOverallScore = () => {
-    if (!result?.responses) return 0;
-    const scores = Object.values(result.responses);
-    return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
-  };
-
-  // Calcular score por dimensão
-  const calculateDimensionScore = (dimensionId: string) => {
-    if (!result?.responses) return 0;
-    const questionIds = DIMENSIONS.find(
-      (d) => d.id === dimensionId
-    )?.questions.map((q) => q.id) || [];
-
-    const scores = questionIds
-      .map((qId) => result.responses[qId])
-      .filter((s) => s !== undefined);
-
-    if (scores.length === 0) return 0;
-    return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
-  };
-
   // Determinar nível baseado no score
   const getLevel = (score: number | string) => {
     const numScore = typeof score === "string" ? parseFloat(score) : score;
-    if (numScore < 1.5) return "Inicial";
-    if (numScore < 2.5) return "Em Desenvolvimento";
+    if (numScore < 1.5) return "Inexistente";
+    if (numScore < 2.5) return "Inicial";
     if (numScore < 3.5) return "Intermediário";
     if (numScore < 4.5) return "Avançado";
     return "Otimizado";
@@ -124,8 +105,6 @@ export default function ResultadoPage() {
     );
   }
 
-  const overallScore = calculateOverallScore();
-
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-4xl mx-auto">
@@ -142,10 +121,10 @@ export default function ResultadoPage() {
           <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-sm">
             <p className="text-gray-600 text-sm font-medium mb-2">Score Geral</p>
             <div className="text-5xl font-bold text-brand-primary mb-2">
-              {overallScore}
+              {result.overall_score}
             </div>
-            <div className={`inline-block px-4 py-2 rounded-lg border ${getLevelColor(overallScore)} text-sm font-semibold`}>
-              {getLevel(overallScore)}
+            <div className={`inline-block px-4 py-2 rounded-lg border ${getLevelColor(result.overall_score)} text-sm font-semibold`}>
+              {result.level}
             </div>
           </div>
 
@@ -170,10 +149,10 @@ export default function ResultadoPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Resultados por Dimensão</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {DIMENSIONS.map((dimension) => {
-              const score = calculateDimensionScore(dimension.id);
+              const score = result.dimension_scores[dimension.name] || 0;
               return (
                 <div
-                  key={dimension.id}
+                  key={dimension.name}
                   className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-start justify-between mb-4">
@@ -200,7 +179,7 @@ export default function ResultadoPage() {
                     <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-brand-primary">
-                          {Math.round((parseFloat(score as string) / 5) * 100)}%
+                          {Math.round((score / 5) * 100)}%
                         </div>
                       </div>
                     </div>
