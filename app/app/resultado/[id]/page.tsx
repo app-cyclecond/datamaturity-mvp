@@ -1,10 +1,8 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { DIMENSIONS } from "@/lib/assessment/questions";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
 type AssessmentResult = {
   id: string;
@@ -15,95 +13,46 @@ type AssessmentResult = {
   created_at: string;
 };
 
-export default function ResultadoPage() {
-  const params = useParams();
-  const router = useRouter();
-  const [result, setResult] = useState<AssessmentResult | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+// Determinar nível baseado no score
+function getLevel(score: number | string) {
+  const numScore = typeof score === "string" ? parseFloat(score) : score;
+  if (numScore < 1.5) return "Inexistente";
+  if (numScore < 2.5) return "Inicial";
+  if (numScore < 3.5) return "Intermediário";
+  if (numScore < 4.5) return "Avançado";
+  return "Otimizado";
+}
 
-  const id = params.id as string;
+// Cores por nível
+function getLevelColor(score: number | string) {
+  const numScore = typeof score === "string" ? parseFloat(score) : score;
+  if (numScore < 1.5) return "bg-red-50 text-red-900 border-red-200";
+  if (numScore < 2.5) return "bg-orange-50 text-orange-900 border-orange-200";
+  if (numScore < 3.5) return "bg-yellow-50 text-yellow-900 border-yellow-200";
+  if (numScore < 4.5) return "bg-blue-50 text-blue-900 border-blue-200";
+  return "bg-green-50 text-green-900 border-green-200";
+}
 
-  useEffect(() => {
-    const loadResult = async () => {
-      try {
-        const supabase = createClient();
+export default async function ResultadoPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const supabase = await createClient();
+  const id = params.id;
 
-        const { data, error: fetchError } = await supabase
-          .from("assessment_results")
-          .select("*")
-          .eq("id", id)
-          .single();
-
-        if (fetchError) {
-          console.error("Fetch error:", fetchError);
-          setError("Resultado não encontrado");
-          setIsLoading(false);
-          return;
-        }
-
-        setResult(data as AssessmentResult);
-      } catch (err) {
-        console.error("Error:", err);
-        setError("Erro ao carregar resultado");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (id) {
-      loadResult();
-    }
-  }, [id]);
-
-  // Determinar nível baseado no score
-  const getLevel = (score: number | string) => {
-    const numScore = typeof score === "string" ? parseFloat(score) : score;
-    if (numScore < 1.5) return "Inexistente";
-    if (numScore < 2.5) return "Inicial";
-    if (numScore < 3.5) return "Intermediário";
-    if (numScore < 4.5) return "Avançado";
-    return "Otimizado";
-  };
-
-  // Cores por nível
-  const getLevelColor = (score: number | string) => {
-    const numScore = typeof score === "string" ? parseFloat(score) : score;
-    if (numScore < 1.5) return "bg-red-50 text-red-900 border-red-200";
-    if (numScore < 2.5) return "bg-orange-50 text-orange-900 border-orange-200";
-    if (numScore < 3.5) return "bg-yellow-50 text-yellow-900 border-yellow-200";
-    if (numScore < 4.5) return "bg-blue-50 text-blue-900 border-blue-200";
-    return "bg-green-50 text-green-900 border-green-200";
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary" />
-          <p className="mt-4 text-gray-600">Carregando resultado...</p>
-        </div>
-      </div>
-    );
-  }
+  // Buscar resultado no Supabase
+  const { data: result, error } = await supabase
+    .from("assessment_results")
+    .select("*")
+    .eq("id", id)
+    .single();
 
   if (error || !result) {
-    return (
-      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            {error || "Resultado não encontrado"}
-          </h1>
-          <Button
-            onClick={() => router.push("/dashboard")}
-            className="mt-6 bg-brand-primary text-white hover:opacity-90"
-          >
-            Voltar ao Dashboard
-          </Button>
-        </div>
-      </div>
-    );
+    notFound();
   }
+
+  const typedResult = result as AssessmentResult;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -112,7 +61,8 @@ export default function ResultadoPage() {
         <div className="bg-gradient-to-r from-brand-primary to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
           <h1 className="text-3xl font-bold mb-2">Seu Diagnóstico</h1>
           <p className="text-purple-100">
-            Resultado de {new Date(result.created_at).toLocaleDateString("pt-BR")}
+            Resultado de{" "}
+            {new Date(typedResult.created_at).toLocaleDateString("pt-BR")}
           </p>
         </div>
 
@@ -121,15 +71,19 @@ export default function ResultadoPage() {
           <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-sm">
             <p className="text-gray-600 text-sm font-medium mb-2">Score Geral</p>
             <div className="text-5xl font-bold text-brand-primary mb-2">
-              {result.overall_score}
+              {typedResult.overall_score}
             </div>
-            <div className={`inline-block px-4 py-2 rounded-lg border ${getLevelColor(result.overall_score)} text-sm font-semibold`}>
-              {result.level}
+            <div
+              className={`inline-block px-4 py-2 rounded-lg border ${getLevelColor(typedResult.overall_score)} text-sm font-semibold`}
+            >
+              {typedResult.level}
             </div>
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-sm">
-            <p className="text-gray-600 text-sm font-medium mb-2">Dimensões Avaliadas</p>
+            <p className="text-gray-600 text-sm font-medium mb-2">
+              Dimensões Avaliadas
+            </p>
             <div className="text-5xl font-bold text-gray-900 mb-2">
               {DIMENSIONS.length}
             </div>
@@ -137,19 +91,23 @@ export default function ResultadoPage() {
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-sm">
-            <p className="text-gray-600 text-sm font-medium mb-2">Data do Diagnóstico</p>
+            <p className="text-gray-600 text-sm font-medium mb-2">
+              Data do Diagnóstico
+            </p>
             <div className="text-lg font-semibold text-gray-900 mt-4">
-              {new Date(result.created_at).toLocaleDateString("pt-BR")}
+              {new Date(typedResult.created_at).toLocaleDateString("pt-BR")}
             </div>
           </div>
         </div>
 
         {/* DIMENSÕES */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Resultados por Dimensão</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            Resultados por Dimensão
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {DIMENSIONS.map((dimension) => {
-              const score = result.dimension_scores[dimension.name] || 0;
+              const score = typedResult.dimension_scores[dimension.name] || 0;
               return (
                 <div
                   key={dimension.name}
@@ -171,7 +129,9 @@ export default function ResultadoPage() {
                       <div className="text-3xl font-bold text-gray-900">
                         {score}
                       </div>
-                      <div className={`inline-block px-3 py-1 rounded-lg border text-xs font-semibold mt-2 ${getLevelColor(score)}`}>
+                      <div
+                        className={`inline-block px-3 py-1 rounded-lg border text-xs font-semibold mt-2 ${getLevelColor(score)}`}
+                      >
                         {getLevel(score)}
                       </div>
                     </div>
@@ -192,18 +152,16 @@ export default function ResultadoPage() {
 
         {/* AÇÕES */}
         <div className="flex gap-4 justify-center">
-          <Button
-            onClick={() => router.push("/assessment")}
-            className="px-8 py-3 bg-brand-primary text-white hover:opacity-90"
-          >
-            Fazer Novo Diagnóstico
-          </Button>
-          <Button
-            onClick={() => router.push("/dashboard")}
-            className="px-8 py-3 bg-gray-200 text-gray-900 hover:bg-gray-300"
-          >
-            Voltar ao Dashboard
-          </Button>
+          <Link href="/assessment">
+            <Button className="px-8 py-3 bg-brand-primary text-white hover:opacity-90">
+              Fazer Novo Diagnóstico
+            </Button>
+          </Link>
+          <Link href="/dashboard">
+            <Button className="px-8 py-3 bg-gray-200 text-gray-900 hover:bg-gray-300">
+              Voltar ao Dashboard
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
