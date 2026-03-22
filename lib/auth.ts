@@ -5,6 +5,10 @@ import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { z } from "zod";
 
+// ============================================
+// SCHEMAS DE VALIDAÇÃO
+// ============================================
+
 const signUpSchema = z.object({
   name: z.string().trim().min(2, "Nome precisa ter pelo menos 2 caracteres"),
   company: z.string().trim().min(2, "Empresa precisa ter pelo menos 2 caracteres"),
@@ -13,15 +17,18 @@ const signUpSchema = z.object({
   password: z.string().min(6, "Senha precisa ter pelo menos 6 caracteres"),
 });
 
+// ============================================
+// FUNÇÕES AUXILIARES
+// ============================================
+
 function getBaseUrl() {
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }
 
-function getField(formData: any, field: string) {
+function getField(formData: any, field: string ) {
   if (typeof formData?.get === "function") {
     return String(formData.get(field) ?? "").trim();
   }
-
   return String(formData?.[field] ?? "").trim();
 }
 
@@ -29,9 +36,33 @@ function getPassword(formData: any, field: string) {
   if (typeof formData?.get === "function") {
     return String(formData.get(field) ?? "");
   }
-
   return String(formData?.[field] ?? "");
 }
+
+// ============================================
+// AUTENTICAÇÃO - PEGAR USUÁRIO
+// ============================================
+
+/**
+ * Pega o usuário autenticado atual
+ * Retorna null se não estiver autenticado
+ */
+export async function getAuthenticatedUser() {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user;
+  } catch (error) {
+    console.error("Erro ao pegar usuário autenticado:", error);
+    return null;
+  }
+}
+
+// ============================================
+// AUTENTICAÇÃO - SIGN UP
+// ============================================
 
 export async function signUpAction(formData: any) {
   const values = {
@@ -46,7 +77,6 @@ export async function signUpAction(formData: any) {
 
   if (!parsed.success) {
     const fieldErrors = parsed.error.flatten().fieldErrors;
-
     const firstError =
       fieldErrors.name?.[0] ||
       fieldErrors.company?.[0] ||
@@ -54,7 +84,6 @@ export async function signUpAction(formData: any) {
       fieldErrors.email?.[0] ||
       fieldErrors.password?.[0] ||
       "Preencha os campos corretamente.";
-
     return { error: firstError };
   }
 
@@ -97,6 +126,10 @@ export async function signUpAction(formData: any) {
   redirect("/login");
 }
 
+// ============================================
+// AUTENTICAÇÃO - SIGN IN
+// ============================================
+
 export async function signInAction(formData: any) {
   const email = getField(formData, "email");
   const password = getPassword(formData, "password");
@@ -118,6 +151,10 @@ export async function signInAction(formData: any) {
 
   redirect("/dashboard");
 }
+
+// ============================================
+// AUTENTICAÇÃO - MAGIC LINK
+// ============================================
 
 export async function magicLinkAction(formData: any) {
   const email = getField(formData, "email");
@@ -141,6 +178,10 @@ export async function magicLinkAction(formData: any) {
 
   return { success: "Magic link enviada para seu email." };
 }
+
+// ============================================
+// AUTENTICAÇÃO - SIGN OUT
+// ============================================
 
 export async function signOutAction() {
   const supabase = await createClient();

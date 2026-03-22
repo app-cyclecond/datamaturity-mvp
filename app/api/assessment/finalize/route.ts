@@ -1,111 +1,106 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { DIMENSIONS } from "@/lib/assessment/questions";
-import {
-  calculateDimensionResults,
-  calculateOverallScore,
-} from "@/lib/assessment/utils";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export async function POST(request: NextRequest) {
   try {
-    const { answers } = await request.json();
+    // Pegar o usuário autenticado
+    const user = await getAuthenticatedUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Usuário não autenticado" },
+        { status: 401 }
+      );
+    }
+
+    // Parse do body
+    const body = await request.json();
+    const { answers } = body;
 
     if (!answers || typeof answers !== "object") {
       return NextResponse.json(
-        { message: "Respostas inválidas" },
+        { error: "Respostas inválidas" },
         { status: 400 }
       );
     }
 
-    // Obter todas as perguntas
-    const allQuestions = DIMENSIONS.flatMap((dim) => dim.questions);
-
     // Calcular scores por dimensão
-    const dimensionResults = calculateDimensionResults(allQuestions, answers);
+    const dimensionScores: Record<string, number> = {};
+    let totalScore = 0;
+    let totalQuestions = 0;
+
+    DIMENSIONS.forEach((dimension) => {
+      const dimensionAnswers = dimension.questions
+        .map((q) => answers[q.id])
+        .filter((a) => a !== undefined);
+
+      if (dimensionAnswers.length > 0) {
+        const avg =
+          dimensionAnswers.reduce((a, b) => a + b, 0) /
+          dimensionAnswers.length;
+        dimensionScores[dimension.name] = Math.round(avg * 10) / 10;
+        totalScore += avg;
+        totalQuestions += dimensionAnswers.length;
+      }
+    });
 
     // Calcular score geral
-    const overallScore = calculateOverallScore(answers);
+    const overallScore =
+      totalQuestions > 0
+        ? Math.round((totalScore / totalQuestions) * 10) / 10
+        : 0;
 
-    // Determinar nível geral
-    const getLevelFromScore = (score: number): string => {
-      if (score < 2) return "Inexistente";
-      if (score < 3) return "Inicial";
-      if (score < 4) return "Estruturado";
-      if (score < 4.5) return "Gerenciado";
-      return "Otimizado";
-    };
+    // Determinar nível
+    const levels = [
+      { min: 0, max: 1.5, label: "Inexistente" },
+      { min: 1.5, max: 2.5, label: "Inicial" },
+      { min: 2.5, max: 3.5, label: "Intermediário" },
+      { min: 3.5, max: 4.5, label: "Avançado" },
+      { min: 4.5, max: 5, label: "Otimizado" },
+    ];
 
-    const overallLevel = getLevelFromScore(overallScore);
+    const level =
+      levels.find((l) => overallScore >= l.min && overallScore <= l.max)
+        ?.label || "Inexistente";
 
-    // Preparar dados para salvar
-    const dimensionScores = dimensionResults.reduce(
-      (acc, result) => {
-        acc[result.dimension] = {
-          score: result.score,
-          level: result.level,
-        };
-        return acc;
-      },
-      {} as Record<string, { score: number; level: string }>
-    );
-
-    // Obter user_id da sessão
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { message: "Usuário não autenticado" },
-        { status: 401 }
-      );
-    }
+    // Criar cliente Supabase
+    const supabase = await createClient();
 
     // Salvar no Supabase
     const { data, error } = await supabase
       .from("assessment_results")
       .insert([
         {
+          user_id: user.id,
           overall_score: overallScore,
-          level: overallLevel,
+          level: level,
           dimension_scores: dimensionScores,
-          user_id: session.user.id,
-          created_at: new Date().toISOString(),
         },
       ])
-      .select("id")
+      .select()
       .single();
 
     if (error) {
-      console.error("Supabase error:", error);
+      console.error("Erro ao salvar resultado:", error);
       return NextResponse.json(
-        { message: "Erro ao salvar resultado: " + error.message },
-        { status: 500 }
-      );
-    }
-
-    if (!data?.id) {
-      return NextResponse.json(
-        { message: "Erro: ID não retornado do banco de dados" },
+        { error: "Erro ao salvar resultado" },
         { status: 500 }
       );
     }
 
     return NextResponse.json({
-      id: data.id,
+      success: true,
+      resultId: data.id,
       overallScore,
-      level: overallLevel,
+      level,
       dimensionScores,
     });
   } catch (error) {
-    console.error("Finalize error:", error);
+    console.error("Erro na API de finalização:", error);
     return NextResponse.json(
-      { message: "Erro ao processar requisição: " + String(error) },
+      { error: "Erro interno do servidor" },
       { status: 500 }
     );
   }
