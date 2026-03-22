@@ -102,8 +102,8 @@ export default function AssessmentPage() {
 
       const data = await response.json();
       
-      // Verificar se a resposta tem um ID
-      if (!data.id) {
+      // Verificar se a resposta tem um ID (CORRIGIDO: resultId)
+      if (!data.resultId) {
         setSaveStatus("error");
         setSaveMessage("Erro: ID de resultado não recebido");
         console.error("No ID in response:", data);
@@ -113,8 +113,8 @@ export default function AssessmentPage() {
       // Limpar sessionStorage
       sessionStorage.removeItem("assessmentAnswers");
       
-      // Redirecionar para resultados
-      router.push(`/resultado/${data.id}`);
+      // Redirecionar para resultados (CORRIGIDO: data.resultId)
+      router.push(`/resultado/${data.resultId}`);
     } catch (error) {
       setSaveStatus("error");
       setSaveMessage("Erro ao finalizar assessment");
