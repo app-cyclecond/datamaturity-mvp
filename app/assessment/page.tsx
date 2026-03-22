@@ -1,159 +1,126 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import {
-  assessmentQuestions,
-  assessmentDimensions,
-  AssessmentDimension,
-} from "@/lib/assessment/questions";
-import {
-  calculateDimensionResults,
-  calculateOverallScore,
-  getMaturityLevel,
-} from "@/lib/assessment/utils";
+import { createClient } from "@/lib/supabase/client";
+import { DIMENSIONS } from "@/lib/assessment/questions";
+import { Button } from "@/components/ui/button";
 import { AssessmentHeader } from "@/components/assessment/assessment-header";
 import { QuestionCard } from "@/components/assessment/question-card";
 import { ScaleResponse } from "@/components/assessment/scale-response";
+import { TernaryResponse } from "@/components/assessment/ternary-response";
 import { SaveIndicator } from "@/components/assessment/save-indicator";
-import { maturityLevels } from "@/lib/assessment/questions";
+
+type Responses = Record<string, number>;
 
 export default function AssessmentPage() {
   const router = useRouter();
   const [currentDimensionIndex, setCurrentDimensionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [saveStatus, setStatus] = useState<"idle" | "saving" | "saved" | "error">(
-    "idle"
-  );
+  const [responses, setResponses] = useState<Responses>({});
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [isLoading, setIsLoading] = useState(true);
-  const hasSavedRef = useRef(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  const currentDimension = assessmentDimensions[currentDimensionIndex];
-  const dimensionQuestions = assessmentQuestions.filter(
-    (q) => q.dimension === currentDimension
-  );
+  const currentDimension = DIMENSIONS[currentDimensionIndex];
 
-  const totalAnswered = Object.keys(answers).length;
-  const totalQuestions = assessmentQuestions.length;
-  const progress = Math.round((totalAnswered / totalQuestions) * 100);
-
-  // Load saved answers from session storage
+  // Scroll ao topo quando muda de dimensão
   useEffect(() => {
-    const saved = sessionStorage.getItem("assessmentAnswers");
+    if (contentRef.current) {
+      contentRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [currentDimensionIndex]);
+
+  // Carregar respostas salvas
+  useEffect(() => {
+    const saved = sessionStorage.getItem("assessment_responses");
     if (saved) {
-      setAnswers(JSON.parse(saved));
+      setResponses(JSON.parse(saved));
     }
     setIsLoading(false);
   }, []);
 
-  // Save answers to session storage
-  useEffect(() => {
-    sessionStorage.setItem("assessmentAnswers", JSON.stringify(answers));
-  }, [answers]);
+  // Salvar respostas no sessionStorage
+  const handleResponseChange = (questionId: string, value: number) => {
+    const newResponses = { ...responses, [questionId]: value };
+    setResponses(newResponses);
+    sessionStorage.setItem("assessment_responses", JSON.stringify(newResponses));
+  };
 
-  // Auto-save to database when all questions are answered
-  useEffect(() => {
-    const allAnswered = assessmentQuestions.every((q) => answers[q.id] !== undefined);
+  // Verificar se todas as perguntas foram respondidas
+  const isCurrentDimensionComplete = () => {
+    return currentDimension.questions.every((q) => responses[q.id] !== undefined);
+  };
 
-    if (allAnswered && !hasSavedRef.current) {
-      hasSavedRef.current = true;
-      saveResults();
+  // Ir para próxima dimensão
+  const handleNextDimension = () => {
+    if (currentDimensionIndex < DIMENSIONS.length - 1) {
+      setCurrentDimensionIndex(currentDimensionIndex + 1);
     }
-  }, [answers]);
+  };
 
-  async function saveResults() {
-    setStatus("saving");
+  // Ir para dimensão anterior
+  const handlePreviousDimension = () => {
+    if (currentDimensionIndex > 0) {
+      setCurrentDimensionIndex(currentDimensionIndex - 1);
+    }
+  };
+
+  // Finalizar assessment
+  const handleFinish = async () => {
     try {
-      const dimensionResults = calculateDimensionResults(
-        assessmentQuestions,
-        answers
-      );
-      const score = calculateOverallScore(answers);
-      const level = getMaturityLevel(score);
+      setSaveStatus("saving");
+      const supabase = createClient();
 
-      const response = await fetch("/api/assessment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          score,
-          level,
-          dimensionScores: dimensionResults,
-        }),
-      });
+      const { data: user } = await supabase.auth.getUser();
 
-      if (!response.ok) {
-        throw new Error("Failed to save");
+      if (!user.user) {
+        setSaveStatus("error");
+        return;
       }
 
-      const data = await response.json();
-      setStatus("saved");
+      const { data, error } = await supabase
+        .from("assessment_results")
+        .insert({
+          user_id: user.user.id,
+          responses,
+        })
+        .select()
+        .single();
 
-      // Redirect to results page after a short delay
+      if (error) {
+        setSaveStatus("error");
+        return;
+      }
+
+      setSaveStatus("saved");
+      sessionStorage.removeItem("assessment_responses");
+
+      // Redirecionar para resultado
       setTimeout(() => {
-        router.push(`/resultado/${data.inserted?.[0]?.id}`);
+        router.push(`/resultado/${data.id}`);
       }, 1000);
-    } catch (error) {
-      console.error("Error saving results:", error);
-      setStatus("error");
+    } catch (err) {
+      setSaveStatus("error");
     }
-  }
+  };
 
-  async function handleSaveAndExit() {
-    setStatus("saving");
+  // Salvar e sair
+  const handleSaveAndExit = async () => {
     try {
-      const dimensionResults = calculateDimensionResults(
-        assessmentQuestions,
-        answers
-      );
-      const score = calculateOverallScore(answers);
-      const level = getMaturityLevel(score);
-
-      await fetch("/api/assessment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          score,
-          level,
-          dimensionScores: dimensionResults,
-        }),
-      });
-
-      setStatus("saved");
+      setSaveStatus("saving");
+      sessionStorage.removeItem("assessment_responses");
+      setSaveStatus("saved");
       setTimeout(() => {
         router.push("/dashboard");
       }, 1000);
-    } catch (error) {
-      console.error("Error saving:", error);
-      setStatus("error");
+    } catch (err) {
+      setSaveStatus("error");
     }
-  }
-
-  function handleAnswer(questionId: string, value: number) {
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: value,
-    }));
-  }
-
-  function isCurrentDimensionComplete(): boolean {
-    return dimensionQuestions.every((q) => answers[q.id] !== undefined);
-  }
-
-  function goToPreviousDimension() {
-    if (currentDimensionIndex > 0) {
-      setCurrentDimensionIndex((prev) => prev - 1);
-    }
-  }
-
-  function goToNextDimension() {
-    if (currentDimensionIndex < assessmentDimensions.length - 1) {
-      setCurrentDimensionIndex((prev) => prev + 1);
-    }
-  }
+  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary" />
           <p className="mt-4 text-gray-600">Carregando assessment...</p>
@@ -162,70 +129,86 @@ export default function AssessmentPage() {
     );
   }
 
+  const progress = Math.round(
+    ((currentDimensionIndex + 1) / DIMENSIONS.length) * 100
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       <AssessmentHeader
         currentDimension={currentDimensionIndex + 1}
-        totalDimensions={assessmentDimensions.length}
-        dimensionName={currentDimension}
+        totalDimensions={DIMENSIONS.length}
+        dimensionName={currentDimension.name}
         progress={progress}
         onSaveAndExit={handleSaveAndExit}
       />
 
-      <main className="max-w-4xl mx-auto px-6 py-8">
-        <div className="space-y-6">
-          {dimensionQuestions.map((question) => (
+      <div ref={contentRef} className="max-w-4xl mx-auto px-6 py-12">
+        {/* DESCRIÇÃO DA DIMENSÃO */}
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">
+            {currentDimension.name}
+          </h2>
+          <p className="text-lg text-gray-600">
+            {currentDimension.description}
+          </p>
+        </div>
+
+        {/* PERGUNTAS */}
+        <div className="space-y-8 mb-12">
+          {currentDimension.questions.map((question) => (
             <QuestionCard key={question.id} question={question}>
-              <ScaleResponse
-                levels={maturityLevels}
-                value={answers[question.id]}
-                onChange={(value) => handleAnswer(question.id, value)}
-              />
+              {question.type === "scale" ? (
+                <ScaleResponse
+                  levels={[
+                    { level: 1, label: "Inexistente", description: "" },
+                    { level: 2, label: "Inicial", description: "" },
+                    { level: 3, label: "Estruturado", description: "" },
+                    { level: 4, label: "Gerenciado", description: "" },
+                    { level: 5, label: "Otimizado", description: "" },
+                  ]}
+                  value={responses[question.id]}
+                  onChange={(value) => handleResponseChange(question.id, value)}
+                />
+              ) : (
+                <TernaryResponse
+                  value={responses[question.id]}
+                  onChange={(value) => handleResponseChange(question.id, value)}
+                />
+              )}
             </QuestionCard>
           ))}
         </div>
 
-        {/* Navigation Footer */}
-        <div className="sticky bottom-0 mt-12 pt-6 pb-6 bg-gradient-to-t from-gray-50 to-transparent">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={goToPreviousDimension}
-              disabled={currentDimensionIndex === 0}
-              className={`
-                px-6 py-3 rounded-lg font-medium transition-all
-                ${
-                  currentDimensionIndex === 0
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-white border border-gray-300 text-gray-900 hover:bg-gray-50"
-                }
-              `}
-            >
-              Dimensão anterior
-            </button>
+        {/* NAVEGAÇÃO */}
+        <div className="flex gap-4 justify-between">
+          <Button
+            onClick={handlePreviousDimension}
+            disabled={currentDimensionIndex === 0}
+            className="px-6 py-3 bg-gray-200 text-gray-900 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ← Dimensão Anterior
+          </Button>
 
-            <div className="text-sm text-gray-600">
-              {totalAnswered} de {totalQuestions} perguntas respondidas
-            </div>
-
-            <button
-              onClick={goToNextDimension}
+          {currentDimensionIndex === DIMENSIONS.length - 1 ? (
+            <Button
+              onClick={handleFinish}
               disabled={!isCurrentDimensionComplete()}
-              className={`
-                px-6 py-3 rounded-lg font-medium transition-all
-                ${
-                  isCurrentDimensionComplete()
-                    ? "bg-brand-primary text-white hover:opacity-90"
-                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                }
-              `}
+              className="px-8 py-3 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {currentDimensionIndex === assessmentDimensions.length - 1
-                ? "Finalizar"
-                : "Próxima dimensão"}
-            </button>
-          </div>
+              ✓ Finalizar Assessment
+            </Button>
+          ) : (
+            <Button
+              onClick={handleNextDimension}
+              disabled={!isCurrentDimensionComplete()}
+              className="px-6 py-3 bg-brand-primary text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Próxima Dimensão →
+            </Button>
+          )}
         </div>
-      </main>
+      </div>
 
       <SaveIndicator status={saveStatus} />
     </div>

@@ -3,16 +3,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { getLevelDescription, getStrongestDimensionMessage, getWeakestDimensionMessage, getNextStepMessage, DimensionResult } from "@/lib/assessment/utils";
-import { Download, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DIMENSIONS } from "@/lib/assessment/questions";
 
-interface AssessmentResult {
+type AssessmentResult = {
   id: string;
-  overall_score: number;
-  level: string;
-  dimension_scores: DimensionResult[];
+  user_id: string;
+  responses: Record<string, number>;
   created_at: string;
-}
+  updated_at: string;
+};
 
 export default function ResultadoPage() {
   const params = useParams();
@@ -21,39 +21,83 @@ export default function ResultadoPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const resultId = params.id as string;
+  const id = params.id as string;
 
   useEffect(() => {
-    async function loadResult() {
+    const loadResult = async () => {
       try {
         const supabase = createClient();
 
         const { data, error: fetchError } = await supabase
           .from("assessment_results")
           .select("*")
-          .eq("id", resultId)
+          .eq("id", id)
           .single();
 
-        if (fetchError || !data) {
+        if (fetchError) {
           setError("Resultado não encontrado");
+          setIsLoading(false);
           return;
         }
 
         setResult(data as AssessmentResult);
       } catch (err) {
-        console.error("Error loading result:", err);
         setError("Erro ao carregar resultado");
       } finally {
         setIsLoading(false);
       }
-    }
+    };
 
-    loadResult();
-  }, [resultId]);
+    if (id) {
+      loadResult();
+    }
+  }, [id]);
+
+  // Calcular score geral
+  const calculateOverallScore = () => {
+    if (!result?.responses) return 0;
+    const scores = Object.values(result.responses);
+    return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+  };
+
+  // Calcular score por dimensão
+  const calculateDimensionScore = (dimensionId: string) => {
+    if (!result?.responses) return 0;
+    const questionIds = DIMENSIONS.find(
+      (d) => d.id === dimensionId
+    )?.questions.map((q) => q.id) || [];
+
+    const scores = questionIds
+      .map((qId) => result.responses[qId])
+      .filter((s) => s !== undefined);
+
+    if (scores.length === 0) return 0;
+    return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+  };
+
+  // Determinar nível baseado no score
+  const getLevel = (score: number | string) => {
+    const numScore = typeof score === "string" ? parseFloat(score) : score;
+    if (numScore < 1.5) return "Inicial";
+    if (numScore < 2.5) return "Em Desenvolvimento";
+    if (numScore < 3.5) return "Intermediário";
+    if (numScore < 4.5) return "Avançado";
+    return "Otimizado";
+  };
+
+  // Cores por nível
+  const getLevelColor = (score: number | string) => {
+    const numScore = typeof score === "string" ? parseFloat(score) : score;
+    if (numScore < 1.5) return "bg-red-50 text-red-900 border-red-200";
+    if (numScore < 2.5) return "bg-orange-50 text-orange-900 border-orange-200";
+    if (numScore < 3.5) return "bg-yellow-50 text-yellow-900 border-yellow-200";
+    if (numScore < 4.5) return "bg-blue-50 text-blue-900 border-blue-200";
+    return "bg-green-50 text-green-900 border-green-200";
+  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary" />
           <p className="mt-4 text-gray-600">Carregando resultado...</p>
@@ -64,176 +108,125 @@ export default function ResultadoPage() {
 
   if (error || !result) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-        <div className="max-w-md w-full bg-white rounded-2xl border border-gray-200 p-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-3">
-            Erro ao carregar resultado
+      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            {error || "Resultado não encontrado"}
           </h1>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <button
+          <Button
             onClick={() => router.push("/dashboard")}
-            className="px-6 py-3 bg-brand-primary text-white rounded-lg font-medium hover:opacity-90 transition-all"
+            className="mt-6 bg-brand-primary text-white hover:opacity-90"
           >
-            Voltar ao dashboard
-          </button>
+            Voltar ao Dashboard
+          </Button>
         </div>
       </div>
     );
   }
 
-  const sorted = [...(result.dimension_scores || [])].sort(
-    (a, b) => b.score - a.score
-  );
-  const strongest = sorted[0] || null;
-  const weakest = sorted[sorted.length - 1] || null;
-
-  const levelColor: Record<string, string> = {
-    "Inexistente": "text-red-600",
-    "Inicial": "text-orange-600",
-    "Estruturado": "text-amber-600",
-    "Gerenciado": "text-blue-600",
-    "Otimizado": "text-green-600",
-  };
-
-  const levelBg: Record<string, string> = {
-    "Inexistente": "bg-red-50",
-    "Inicial": "bg-orange-50",
-    "Estruturado": "bg-amber-50",
-    "Gerenciado": "bg-blue-50",
-    "Otimizado": "bg-green-50",
-  };
+  const overallScore = calculateOverallScore();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-medium">Voltar</span>
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">Resultado do Diagnóstico</h1>
-          <button className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg hover:opacity-90 transition-all">
-            <Download className="w-5 h-5" />
-            <span>Exportar</span>
-          </button>
-        </div>
-      </div>
-
-      <main className="max-w-5xl mx-auto px-6 py-12">
-        {/* Overall Score Card */}
-        <div className={`rounded-2xl border border-gray-200 p-12 mb-12 text-center ${levelBg[result.level]}`}>
-          <p className="text-sm font-medium text-gray-600 mb-2">Score Geral</p>
-          <div className={`text-7xl font-bold ${levelColor[result.level]} mb-4`}>
-            {result.overall_score.toFixed(1)}
-          </div>
-          <p className={`text-2xl font-semibold ${levelColor[result.level]} mb-6`}>
-            {result.level}
-          </p>
-          <p className="text-gray-700 leading-relaxed max-w-2xl mx-auto">
-            {getLevelDescription(result.level)}
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* HEADER */}
+        <div className="bg-gradient-to-r from-brand-primary to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
+          <h1 className="text-3xl font-bold mb-2">Seu Diagnóstico</h1>
+          <p className="text-purple-100">
+            Resultado de {new Date(result.created_at).toLocaleDateString("pt-BR")}
           </p>
         </div>
 
-        {/* Insights Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {/* Strongest */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <span className="text-lg">💪</span>
-              Ponto Forte
-            </h3>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {getStrongestDimensionMessage(strongest)}
-            </p>
+        {/* SCORE GERAL */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-sm">
+            <p className="text-gray-600 text-sm font-medium mb-2">Score Geral</p>
+            <div className="text-5xl font-bold text-brand-primary mb-2">
+              {overallScore}
+            </div>
+            <div className={`inline-block px-4 py-2 rounded-lg border ${getLevelColor(overallScore)} text-sm font-semibold`}>
+              {getLevel(overallScore)}
+            </div>
           </div>
 
-          {/* Weakest */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <span className="text-lg">🎯</span>
-              Principal Gap
-            </h3>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {getWeakestDimensionMessage(weakest)}
-            </p>
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-sm">
+            <p className="text-gray-600 text-sm font-medium mb-2">Dimensões Avaliadas</p>
+            <div className="text-5xl font-bold text-gray-900 mb-2">
+              {DIMENSIONS.length}
+            </div>
+            <p className="text-gray-500 text-sm">áreas de maturidade</p>
           </div>
 
-          {/* Next Step */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <span className="text-lg">🚀</span>
-              Próximo Passo
-            </h3>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {getNextStepMessage(strongest, weakest)}
-            </p>
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-sm">
+            <p className="text-gray-600 text-sm font-medium mb-2">Data do Diagnóstico</p>
+            <div className="text-lg font-semibold text-gray-900 mt-4">
+              {new Date(result.created_at).toLocaleDateString("pt-BR")}
+            </div>
           </div>
         </div>
 
-        {/* Dimension Results */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Resultado por Dimensão
-          </h2>
-          <p className="text-gray-600 mb-8">
-            Veja onde sua maturidade está mais forte ou mais fraca
-          </p>
-
+        {/* DIMENSÕES */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Resultados por Dimensão</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {(result.dimension_scores || []).map((dimension) => (
-              <div
-                key={dimension.dimension}
-                className={`rounded-xl border border-gray-200 p-6 ${levelBg[dimension.level]}`}
-              >
-                <p className="text-sm text-gray-600 mb-2">{dimension.dimension}</p>
-                <div className="flex items-end justify-between">
-                  <div>
-                    <p className={`text-4xl font-bold ${levelColor[dimension.level]}`}>
-                      {dimension.score.toFixed(1)}
-                    </p>
-                    <p className={`text-sm font-semibold ${levelColor[dimension.level]} mt-2`}>
-                      {dimension.level}
-                    </p>
-                  </div>
-                  <div className="w-20 h-20 rounded-full bg-white/50 flex items-center justify-center">
-                    <div className="text-center">
-                      <p className="text-xs text-gray-600">Score</p>
-                      <p className="text-lg font-bold text-gray-900">
-                        {Math.round((dimension.score / 5) * 100)}%
+            {DIMENSIONS.map((dimension) => {
+              const score = calculateDimensionScore(dimension.id);
+              return (
+                <div
+                  key={dimension.id}
+                  className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {dimension.name}
+                      </h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {dimension.description}
                       </p>
                     </div>
                   </div>
+
+                  <div className="flex items-center justify-between mt-6">
+                    <div>
+                      <div className="text-3xl font-bold text-gray-900">
+                        {score}
+                      </div>
+                      <div className={`inline-block px-3 py-1 rounded-lg border text-xs font-semibold mt-2 ${getLevelColor(score)}`}>
+                        {getLevel(score)}
+                      </div>
+                    </div>
+
+                    <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-brand-primary">
+                          {Math.round((parseFloat(score as string) / 5) * 100)}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* CTA Section */}
-        <div className="mt-12 bg-gradient-to-r from-brand-primary to-brand-primary rounded-2xl p-8 text-white text-center">
-          <h3 className="text-2xl font-bold mb-3">
-            Pronto para evoluir sua maturidade em dados?
-          </h3>
-          <p className="text-white/90 mb-6 max-w-2xl mx-auto">
-            Compartilhe este resultado com seu time e comece a implementar as recomendações para acelerar a transformação.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="px-6 py-3 bg-white text-brand-primary rounded-lg font-medium hover:bg-gray-100 transition-all"
-            >
-              Voltar ao Dashboard
-            </button>
-            <button className="px-6 py-3 border border-white text-white rounded-lg font-medium hover:bg-white/10 transition-all">
-              Compartilhar Resultado
-            </button>
-          </div>
+        {/* AÇÕES */}
+        <div className="flex gap-4 justify-center">
+          <Button
+            onClick={() => router.push("/assessment")}
+            className="px-8 py-3 bg-brand-primary text-white hover:opacity-90"
+          >
+            Fazer Novo Diagnóstico
+          </Button>
+          <Button
+            onClick={() => router.push("/dashboard")}
+            className="px-8 py-3 bg-gray-200 text-gray-900 hover:bg-gray-300"
+          >
+            Voltar ao Dashboard
+          </Button>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
