@@ -20,7 +20,6 @@ export default function AssessmentPage() {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [saveMessage, setSaveMessage] = useState<string>("");
-  const questionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const mainRef = useRef<HTMLDivElement>(null);
 
   const currentDimension = DIMENSIONS[currentDimensionIndex];
@@ -33,80 +32,36 @@ export default function AssessmentPage() {
   const answeredQuestions = Object.keys(answers).length;
   const overallProgress = Math.round((answeredQuestions / totalQuestions) * 100);
 
-  // Auto-scroll para a próxima pergunta após responder
-  const handleAnswer = async (questionId: string, value: number) => {
+  // Simples: apenas atualiza o estado local
+  const handleAnswer = (questionId: string, value: number) => {
     const newAnswers = { ...answers, [questionId]: value };
     setAnswers(newAnswers);
 
-    // Salvar no sessionStorage
+    // Salvar no sessionStorage para persistência
     sessionStorage.setItem("assessmentAnswers", JSON.stringify(newAnswers));
-
-    // Scroll automático para a próxima pergunta
-    const currentQuestionIndex = currentDimension.questions.findIndex(
-      (q) => q.id === questionId
-    );
-    if (currentQuestionIndex < currentDimension.questions.length - 1) {
-      const nextQuestionId = currentDimension.questions[currentQuestionIndex + 1].id;
-      setTimeout(() => {
-        questionRefs.current[nextQuestionId]?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }, 100);
-    }
-
-    // Tentar salvar no banco de dados
-    try {
-      setSaveStatus("saving");
-      setSaveMessage("");
-
-      const response = await fetch("/api/assessment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          answers: newAnswers,
-          dimension: currentDimension.name,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        setSaveStatus("error");
-        setSaveMessage(error.message || "Erro ao salvar");
-      } else {
-        setSaveStatus("saved");
-        setSaveMessage("Resposta salva com sucesso");
-      }
-    } catch (error) {
-      setSaveStatus("error");
-      setSaveMessage("Erro ao conectar com o servidor");
-      console.error("Save error:", error);
-    }
   };
 
   const handleNextDimension = () => {
     if (currentDimensionIndex < DIMENSIONS.length - 1) {
-      // Scroll para o topo ANTES de mudar a dimensão
-      if (mainRef.current) {
-        mainRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+      // Scroll para o topo ANTES de mudar
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      
       // Pequeno delay para garantir que o scroll aconteça
       setTimeout(() => {
         setCurrentDimensionIndex(currentDimensionIndex + 1);
-      }, 100);
+      }, 300);
     }
   };
 
   const handlePreviousDimension = () => {
     if (currentDimensionIndex > 0) {
-      // Scroll para o topo ANTES de mudar a dimensão
-      if (mainRef.current) {
-        mainRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+      // Scroll para o topo ANTES de mudar
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      
       // Pequeno delay para garantir que o scroll aconteça
       setTimeout(() => {
         setCurrentDimensionIndex(currentDimensionIndex - 1);
-      }, 100);
+      }, 300);
     }
   };
 
@@ -206,12 +161,7 @@ export default function AssessmentPage() {
         {/* Perguntas */}
         <div className="space-y-6">
           {currentDimension.questions.map((question) => (
-            <div
-              key={question.id}
-              ref={(el) => {
-                if (el) questionRefs.current[question.id] = el;
-              }}
-            >
+            <div key={question.id}>
               <QuestionCard question={question}>
                 {question.type === "scale" ? (
                   <ScaleResponse
