@@ -12,18 +12,25 @@ import {
 } from "@/components/assessment";
 import { Button } from "@/components/ui/button";
 
+type SaveStatus = "idle" | "saving" | "saved" | "error";
+
 export default function AssessmentPage() {
   const router = useRouter();
   const [currentDimensionIndex, setCurrentDimensionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [saveMessage, setSaveMessage] = useState<string>("");
   const questionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const currentDimension = DIMENSIONS[currentDimensionIndex];
   const allQuestionsAnswered = currentDimension.questions.every(
     (q) => answers[q.id] !== undefined
   );
+
+  // Calcular progresso geral
+  const totalQuestions = DIMENSIONS.reduce((sum, dim) => sum + dim.questions.length, 0);
+  const answeredQuestions = Object.keys(answers).length;
+  const overallProgress = Math.round((answeredQuestions / totalQuestions) * 100);
 
   // Auto-scroll para a próxima pergunta após responder
   const handleAnswer = async (questionId: string, value: number) => {
@@ -49,8 +56,8 @@ export default function AssessmentPage() {
 
     // Tentar salvar no banco de dados
     try {
-      setSaving(true);
-      setSaveError(null);
+      setSaveStatus("saving");
+      setSaveMessage("");
 
       const response = await fetch("/api/assessment", {
         method: "POST",
@@ -63,13 +70,16 @@ export default function AssessmentPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        setSaveError(error.message || "Erro ao salvar");
+        setSaveStatus("error");
+        setSaveMessage(error.message || "Erro ao salvar");
+      } else {
+        setSaveStatus("saved");
+        setSaveMessage("Resposta salva com sucesso");
       }
     } catch (error) {
-      setSaveError("Erro ao conectar com o servidor");
+      setSaveStatus("error");
+      setSaveMessage("Erro ao conectar com o servidor");
       console.error("Save error:", error);
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -89,10 +99,15 @@ export default function AssessmentPage() {
     }
   };
 
+  const handleSaveAndExit = () => {
+    sessionStorage.removeItem("assessmentAnswers");
+    router.push("/dashboard");
+  };
+
   const handleFinalize = async () => {
     try {
-      setSaving(true);
-      setSaveError(null);
+      setSaveStatus("saving");
+      setSaveMessage("");
 
       const response = await fetch("/api/assessment/finalize", {
         method: "POST",
@@ -102,7 +117,8 @@ export default function AssessmentPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        setSaveError(error.message || "Erro ao finalizar");
+        setSaveStatus("error");
+        setSaveMessage(error.message || "Erro ao finalizar");
         return;
       }
 
@@ -112,16 +128,10 @@ export default function AssessmentPage() {
       // Redirecionar para resultados
       router.push(`/resultado/${data.id}`);
     } catch (error) {
-      setSaveError("Erro ao finalizar assessment");
+      setSaveStatus("error");
+      setSaveMessage("Erro ao finalizar assessment");
       console.error("Finalize error:", error);
-    } finally {
-      setSaving(false);
     }
-  };
-
-  const handleClose = () => {
-    sessionStorage.removeItem("assessmentAnswers");
-    router.push("/dashboard");
   };
 
   // Restaurar respostas do sessionStorage ao carregar
@@ -137,6 +147,7 @@ export default function AssessmentPage() {
   }, []);
 
   const isLastDimension = currentDimensionIndex === DIMENSIONS.length - 1;
+  const isSaving = saveStatus === "saving";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -144,17 +155,11 @@ export default function AssessmentPage() {
         currentDimension={currentDimensionIndex + 1}
         totalDimensions={DIMENSIONS.length}
         dimensionName={currentDimension.name}
-        onClose={handleClose}
+        progress={overallProgress}
+        onSaveAndExit={handleSaveAndExit}
       />
 
       <main className="max-w-3xl mx-auto px-4 py-8 pb-20">
-        {/* Mensagem de erro */}
-        {saveError && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-            ⚠️ {saveError}
-          </div>
-        )}
-
         {/* Descrição da dimensão */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -167,7 +172,7 @@ export default function AssessmentPage() {
 
         {/* Perguntas */}
         <div className="space-y-6">
-          {currentDimension.questions.map((question, index) => (
+          {currentDimension.questions.map((question) => (
             <div
               key={question.id}
               ref={(el) => {
@@ -180,13 +185,13 @@ export default function AssessmentPage() {
                     levels={question.levels || []}
                     value={answers[question.id]}
                     onChange={(value) => handleAnswer(question.id, value)}
-                    disabled={saving}
+                    disabled={isSaving}
                   />
                 ) : (
                   <TernaryResponse
                     value={answers[question.id]}
                     onChange={(value) => handleAnswer(question.id, value)}
-                    disabled={saving}
+                    disabled={isSaving}
                   />
                 )}
               </QuestionCard>
@@ -198,7 +203,7 @@ export default function AssessmentPage() {
         <div className="mt-12 flex gap-4 justify-between">
           <Button
             onClick={handlePreviousDimension}
-            disabled={currentDimensionIndex === 0 || saving}
+            disabled={currentDimensionIndex === 0 || isSaving}
             variant="outline"
             className="px-6 py-2"
           >
@@ -208,15 +213,15 @@ export default function AssessmentPage() {
           {isLastDimension ? (
             <Button
               onClick={handleFinalize}
-              disabled={!allQuestionsAnswered || saving}
+              disabled={!allQuestionsAnswered || isSaving}
               className="px-8 py-2 bg-green-600 hover:bg-green-700 text-white"
             >
-              {saving ? "Salvando..." : "✓ Finalizar Assessment"}
+              {isSaving ? "Salvando..." : "✓ Finalizar Assessment"}
             </Button>
           ) : (
             <Button
               onClick={handleNextDimension}
-              disabled={!allQuestionsAnswered || saving}
+              disabled={!allQuestionsAnswered || isSaving}
               className="px-6 py-2"
             >
               Próxima Dimensão →
@@ -226,7 +231,7 @@ export default function AssessmentPage() {
       </main>
 
       {/* Indicador de salvamento */}
-      <SaveIndicator saving={saving} error={!!saveError} />
+      <SaveIndicator status={saveStatus} message={saveMessage} />
     </div>
   );
 }
