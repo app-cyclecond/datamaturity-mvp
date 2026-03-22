@@ -21,6 +21,7 @@ export default function AssessmentPage() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [saveMessage, setSaveMessage] = useState<string>("");
   const questionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const mainRef = useRef<HTMLDivElement>(null);
 
   const currentDimension = DIMENSIONS[currentDimensionIndex];
   const allQuestionsAnswered = currentDimension.questions.every(
@@ -85,17 +86,27 @@ export default function AssessmentPage() {
 
   const handleNextDimension = () => {
     if (currentDimensionIndex < DIMENSIONS.length - 1) {
-      setCurrentDimensionIndex(currentDimensionIndex + 1);
-      // Scroll para o topo
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      // Scroll para o topo ANTES de mudar a dimensão
+      if (mainRef.current) {
+        mainRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      // Pequeno delay para garantir que o scroll aconteça
+      setTimeout(() => {
+        setCurrentDimensionIndex(currentDimensionIndex + 1);
+      }, 100);
     }
   };
 
   const handlePreviousDimension = () => {
     if (currentDimensionIndex > 0) {
-      setCurrentDimensionIndex(currentDimensionIndex - 1);
-      // Scroll para o topo
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      // Scroll para o topo ANTES de mudar a dimensão
+      if (mainRef.current) {
+        mainRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      // Pequeno delay para garantir que o scroll aconteça
+      setTimeout(() => {
+        setCurrentDimensionIndex(currentDimensionIndex - 1);
+      }, 100);
     }
   };
 
@@ -109,6 +120,17 @@ export default function AssessmentPage() {
       setSaveStatus("saving");
       setSaveMessage("");
 
+      // Verificar se todas as perguntas foram respondidas
+      const allAnswered = DIMENSIONS.every((dim) =>
+        dim.questions.every((q) => answers[q.id] !== undefined)
+      );
+
+      if (!allAnswered) {
+        setSaveStatus("error");
+        setSaveMessage("Por favor, responda todas as perguntas antes de finalizar");
+        return;
+      }
+
       const response = await fetch("/api/assessment/finalize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -118,13 +140,24 @@ export default function AssessmentPage() {
       if (!response.ok) {
         const error = await response.json();
         setSaveStatus("error");
-        setSaveMessage(error.message || "Erro ao finalizar");
+        setSaveMessage(error.message || "Erro ao finalizar assessment");
+        console.error("Finalize error:", error);
         return;
       }
 
       const data = await response.json();
+      
+      // Verificar se a resposta tem um ID
+      if (!data.id) {
+        setSaveStatus("error");
+        setSaveMessage("Erro: ID de resultado não recebido");
+        console.error("No ID in response:", data);
+        return;
+      }
+
       // Limpar sessionStorage
       sessionStorage.removeItem("assessmentAnswers");
+      
       // Redirecionar para resultados
       router.push(`/resultado/${data.id}`);
     } catch (error) {
@@ -159,7 +192,7 @@ export default function AssessmentPage() {
         onSaveAndExit={handleSaveAndExit}
       />
 
-      <main className="max-w-3xl mx-auto px-4 py-8 pb-20">
+      <main ref={mainRef} className="max-w-3xl mx-auto px-4 py-8 pb-20">
         {/* Descrição da dimensão */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
