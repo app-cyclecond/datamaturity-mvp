@@ -1,6 +1,6 @@
 import {
   AssessmentQuestion,
-  assessmentDimensions,
+  DIMENSIONS,
   maturityLevels,
 } from "./questions";
 
