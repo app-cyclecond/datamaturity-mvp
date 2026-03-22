@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     // 4. Calcular score geral
     const overallScore =
       totalQuestions > 0
-        ? Math.round((totalScore / DIMENSIONS.length) * 10) / 10
+        ? Math.round((totalScore / totalQuestions) * 10) / 10
         : 0;
     console.log("🎯 [FINALIZE] Score geral:", overallScore);
 
