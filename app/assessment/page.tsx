@@ -21,6 +21,7 @@ export default function AssessmentPage() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [saveMessage, setSaveMessage] = useState<string>("");
   const mainRef = useRef<HTMLDivElement>(null);
+  const questionRefsMap = useRef<Record<string, HTMLDivElement | null>>({});
 
   const currentDimension = DIMENSIONS[currentDimensionIndex];
   const allQuestionsAnswered = currentDimension.questions.every(
@@ -32,13 +33,30 @@ export default function AssessmentPage() {
   const answeredQuestions = Object.keys(answers).length;
   const overallProgress = Math.round((answeredQuestions / totalQuestions) * 100);
 
-  // Simples: apenas atualiza o estado local
+  // Atualizar resposta e fazer scroll automático
   const handleAnswer = (questionId: string, value: number) => {
     const newAnswers = { ...answers, [questionId]: value };
     setAnswers(newAnswers);
 
     // Salvar no sessionStorage para persistência
     sessionStorage.setItem("assessmentAnswers", JSON.stringify(newAnswers));
+
+    // Fazer scroll automático para a próxima pergunta
+    setTimeout(() => {
+      const currentQuestionIndex = currentDimension.questions.findIndex(
+        (q) => q.id === questionId
+      );
+
+      if (currentQuestionIndex < currentDimension.questions.length - 1) {
+        // Próxima pergunta na mesma dimensão
+        const nextQuestion = currentDimension.questions[currentQuestionIndex + 1];
+        const nextElement = questionRefsMap.current[nextQuestion.id];
+
+        if (nextElement) {
+          nextElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    }, 100);
   };
 
   const handleNextDimension = () => {
@@ -102,7 +120,7 @@ export default function AssessmentPage() {
 
       const data = await response.json();
       
-      // Verificar se a resposta tem um ID (CORRIGIDO: resultId)
+      // Verificar se a resposta tem um ID
       if (!data.resultId) {
         setSaveStatus("error");
         setSaveMessage("Erro: ID de resultado não recebido");
@@ -113,7 +131,7 @@ export default function AssessmentPage() {
       // Limpar sessionStorage
       sessionStorage.removeItem("assessmentAnswers");
       
-      // Redirecionar para resultados (CORRIGIDO: data.resultId)
+      // Redirecionar para resultados
       router.push(`/resultado/${data.resultId}`);
     } catch (error) {
       setSaveStatus("error");
@@ -161,7 +179,12 @@ export default function AssessmentPage() {
         {/* Perguntas */}
         <div className="space-y-6">
           {currentDimension.questions.map((question) => (
-            <div key={question.id}>
+            <div
+              key={question.id}
+              ref={(el) => {
+                if (el) questionRefsMap.current[question.id] = el;
+              }}
+            >
               <QuestionCard question={question}>
                 {question.type === "scale" ? (
                   <ScaleResponse
