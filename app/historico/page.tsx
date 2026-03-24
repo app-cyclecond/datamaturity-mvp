@@ -12,6 +12,7 @@ import {
   TrendingUp,
   BarChart3,
   ChevronRight,
+  ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -153,6 +154,15 @@ export default function HistoricoPage() {
       {/* CONTEÚDO */}
       <main className="flex-1 ml-64 p-10">
         <div className="space-y-8">
+          {/* BOTÃO VOLTAR */}
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
+          </button>
+
           {/* HEADER */}
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Histórico de Diagnósticos</h1>

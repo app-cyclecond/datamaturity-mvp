@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { DIMENSIONS } from "@/lib/assessment/questions";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 type AssessmentResult = {
   id: string;
@@ -57,6 +58,14 @@ export default async function ResultadoPage({
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-4xl mx-auto">
+        {/* BOTÃO VOLTAR */}
+        <Link href="/dashboard">
+          <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors">
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
+          </button>
+        </Link>
+
         {/* HEADER */}
         <div className="bg-gradient-to-r from-brand-primary to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
           <h1 className="text-3xl font-bold mb-2">Seu Diagnóstico</h1>

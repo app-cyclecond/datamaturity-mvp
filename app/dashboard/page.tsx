@@ -14,6 +14,7 @@ import {
   AlertCircle,
   TrendingUp,
   Lightbulb,
+  ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -200,25 +201,24 @@ export default function DashboardPage() {
             </div>
           </div>
         ) : (
-          <div className="space-y-8">
-            {/* HEADER COM BOTÃO */}
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  Dashboard Executivo
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Diagnóstico de {new Date(lastAssessment.created_at).toLocaleDateString("pt-BR")}
-                </p>
-              </div>
+          <div>
+            {/* BOTÃO VOLTAR */}
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </button>
 
-              <Button
-                onClick={() => router.push("/assessment")}
-                className="bg-brand-primary text-white hover:opacity-90 transition-all px-6 py-3 flex items-center gap-2"
-              >
-                <TrendingUp className="h-4 w-4" />
-                Novo diagnóstico
-              </Button>
+            {/* HEADER */}
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Dashboard Executivo
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Diagnóstico de {new Date(lastAssessment.created_at).toLocaleDateString("pt-BR")}
+              </p>
             </div>
 
             {/* SCORE GERAL */}
