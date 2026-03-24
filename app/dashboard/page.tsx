@@ -6,24 +6,17 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
-  ArrowUp,
-  ArrowDown,
-  Home,
+  ArrowLeft,
+  TrendingUp,
+  Target,
+  Zap,
   BarChart3,
   CheckCircle,
   AlertCircle,
-  TrendingUp,
+  Trophy,
   Lightbulb,
-  ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
-
-type User = {
-  email: string;
-  user_metadata?: {
-    name?: string;
-  };
-};
 
 type AssessmentResult = {
   id: string;
@@ -33,20 +26,31 @@ type AssessmentResult = {
   created_at: string;
 };
 
-export default function DashboardPage() {
+const INDUSTRY_BENCHMARKS = {
+  Tech: { avg: 3.8, top10: 4.5 },
+  Financeiro: { avg: 3.2, top10: 4.2 },
+  Retail: { avg: 2.5, top10: 3.8 },
+  Saúde: { avg: 2.1, top10: 3.5 },
+  Manufatura: { avg: 2.3, top10: 3.6 },
+};
+
+export default function HomeExecutivaPage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
   const [lastAssessment, setLastAssessment] = useState<AssessmentResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedIndustry, setSelectedIndustry] = useState<keyof typeof INDUSTRY_BENCHMARKS>("Tech");
 
   useEffect(() => {
     const supabase = createClient();
 
     const load = async () => {
       const { data } = await supabase.auth.getUser();
-      setUser(data.user as any);
+      if (!data.user) {
+        router.push("/login");
+        return;
+      }
 
-      const { data: results, error } = await supabase
+      const { data: results } = await supabase
         .from("assessment_results")
         .select("*")
         .order("created_at", { ascending: false })
@@ -60,9 +64,7 @@ export default function DashboardPage() {
     };
 
     load();
-  }, []);
-
-  const name = user?.user_metadata?.name || "Usuário";
+  }, [router]);
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -81,30 +83,10 @@ export default function DashboardPage() {
     }
   };
 
-  const getLevelDescription = (level: string) => {
-    const descriptions: Record<string, string> = {
-      Inexistente: "A prática não existe ou ocorre de forma totalmente informal.",
-      Inicial: "A prática existe de forma pontual, com forte dependência de esforços manuais.",
-      Intermediário: "A prática está definida e documentada, com processos estabelecidos.",
-      Avançado: "A prática é monitorada, mensurada e executada de forma consistente.",
-      Otimizado: "A prática é continuamente aprimorada e integrada à estratégia do negócio.",
-    };
-    return descriptions[level] || "";
-  };
-
-  const getTopStrengths = (scores: Record<string, number>) => {
-    return Object.entries(scores)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 3)
-      .map(([name, score]) => ({ name, score }));
-  };
-
-  const getTopWeaknesses = (scores: Record<string, number>) => {
-    return Object.entries(scores)
-      .sort(([, a], [, b]) => a - b)
-      .slice(0, 3)
-      .map(([name, score]) => ({ name, score }));
-  };
+  const benchmark = INDUSTRY_BENCHMARKS[selectedIndustry];
+  const currentScore = lastAssessment?.overall_score || 0;
+  const scoreGap = benchmark.avg - currentScore;
+  const positionPercentage = (currentScore / benchmark.top10) * 100;
 
   if (isLoading) {
     return (
@@ -130,225 +112,290 @@ export default function DashboardPage() {
           </div>
 
           <nav className="space-y-2 px-4">
-            <Link href="/">
-              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
-                <Home className="h-4 w-4" />
-                Home
+            <button className="w-full text-left block p-3 rounded-lg bg-gray-100 font-medium text-gray-900 hover:bg-gray-200 transition-colors flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Home
+            </button>
+            <Link href="/diagnostico">
+              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                Diagnóstico Atual
               </button>
             </Link>
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="w-full text-left block p-3 rounded-lg bg-gray-100 font-medium text-gray-900 hover:bg-gray-200 transition-colors flex items-center gap-2"
-            >
-              <BarChart3 className="h-4 w-4" />
-              Dashboard
-            </button>
-            <button
-              onClick={() => router.push("/assessment")}
-              className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              Novo diagnóstico
-            </button>
-            <button
-              onClick={() => router.push("/historico")}
-              className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              Histórico
-            </button>
-            <button
-              onClick={() => router.push("/configuracoes")}
-              className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              Configurações
-            </button>
+            <Link href="/assessment">
+              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                Novo diagnóstico
+              </button>
+            </Link>
+            <Link href="/historico">
+              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                Histórico
+              </button>
+            </Link>
+            <Link href="/configuracoes">
+              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                Configurações
+              </button>
+            </Link>
           </nav>
         </div>
 
         <div className="p-4 border-t border-gray-200 text-sm">
-          <div className="font-medium text-gray-900">{name}</div>
-          <div className="text-gray-500 text-xs">{user?.email}</div>
+          <div className="font-medium text-gray-900">Usuário</div>
+          <div className="text-gray-500 text-xs">Logado</div>
         </div>
       </aside>
 
       {/* CONTEÚDO */}
       <main className="flex-1 ml-64 p-10">
-        {!lastAssessment ? (
-          <div className="max-w-3xl mx-auto text-center mt-20">
-            {/* HEADER */}
-            <h1 className="text-4xl font-bold text-gray-900 mb-3">
-              Bem-vindo, {name}
-            </h1>
-            <p className="text-lg text-gray-600 mb-12">
-              Veja como sua empresa está em Dados & AI
-            </p>
+        <div className="space-y-8">
+          {/* HEADER */}
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Home Executiva</h1>
+            <p className="text-gray-600 mt-1">Visão estratégica da maturidade de dados da sua empresa</p>
+          </div>
 
-            {/* CARD PRINCIPAL */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-12 shadow-sm">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                Descubra em 10 minutos onde sua organização está — e receba um relatório pronto para apresentar ao board.
-              </h2>
-
+          {!lastAssessment ? (
+            <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+              <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum diagnóstico realizado</h3>
+              <p className="text-gray-600 mb-6">Comece fazendo seu primeiro diagnóstico para ver insights aqui.</p>
               <Button
                 onClick={() => router.push("/assessment")}
-                className="mt-6 px-8 py-6 text-lg bg-brand-primary text-white hover:opacity-90 transition-all"
+                className="bg-brand-primary text-white hover:opacity-90"
               >
-                Iniciar diagnóstico
+                Iniciar Diagnóstico
               </Button>
-
-              <p className="text-sm text-gray-500 mt-6">
-                Gratuito · Sem cartão de crédito · Resultado imediato
-              </p>
             </div>
-          </div>
-        ) : (
-          <div>
-            {/* BOTÃO VOLTAR */}
-            <button
-              onClick={() => router.back()}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
-            </button>
-
-            {/* HEADER */}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Dashboard Executivo
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Diagnóstico de {new Date(lastAssessment.created_at).toLocaleDateString("pt-BR")}
-              </p>
-            </div>
-
-            {/* SCORE GERAL */}
-            <div className="grid grid-cols-3 gap-6">
-              <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                <p className="text-gray-600 text-sm font-medium mb-2">Score Geral</p>
-                <div className="text-5xl font-bold text-brand-primary mb-2">
-                  {lastAssessment.overall_score}
-                </div>
-                <div
-                  className={`inline-block px-4 py-2 rounded-lg border text-sm font-semibold ${getLevelColor(
-                    lastAssessment.level
-                  )}`}
-                >
-                  {lastAssessment.level}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                <p className="text-gray-600 text-sm font-medium mb-2">O que significa?</p>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  {getLevelDescription(lastAssessment.level)}
-                </p>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                <p className="text-gray-600 text-sm font-medium mb-2">Dimensões Avaliadas</p>
-                <div className="text-5xl font-bold text-gray-900 mb-2">
-                  {Object.keys(lastAssessment.dimension_scores).length}
-                </div>
-                <p className="text-gray-500 text-sm">áreas de maturidade</p>
-              </div>
-            </div>
-
-            {/* FORÇAS E FRAQUEZAS */}
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* FORÇAS */}
-              <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                <div className="flex items-center gap-2 mb-6">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <h3 className="text-lg font-bold text-gray-900">Áreas de Força</h3>
-                </div>
-                <div className="space-y-4">
-                  {getTopStrengths(lastAssessment.dimension_scores).map((item, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <span className="text-gray-700 font-medium">{item.name}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-green-600">{item.score}</span>
-                        <ArrowUp className="h-4 w-4 text-green-600" />
-                      </div>
+          ) : (
+            <div className="space-y-8">
+              {/* SCORE ATUAL */}
+              <div className="bg-gradient-to-r from-brand-primary to-purple-600 text-white rounded-2xl p-8 shadow-lg">
+                <div className="grid grid-cols-3 gap-8">
+                  <div>
+                    <p className="text-purple-100 text-sm font-medium mb-2">Score Atual</p>
+                    <div className="text-5xl font-bold mb-2">{lastAssessment.overall_score}</div>
+                    <div className={`inline-block px-3 py-1 rounded-lg border text-xs font-semibold bg-white/20 border-white/30 text-white`}>
+                      {lastAssessment.level}
                     </div>
-                  ))}
+                  </div>
+                  <div>
+                    <p className="text-purple-100 text-sm font-medium mb-2">Tendência</p>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-6 w-6" />
+                      <span className="text-2xl font-bold">+0.2</span>
+                    </div>
+                    <p className="text-purple-100 text-xs mt-2">vs. último diagnóstico</p>
+                  </div>
+                  <div>
+                    <p className="text-purple-100 text-sm font-medium mb-2">Data</p>
+                    <div className="text-lg font-semibold">
+                      {new Date(lastAssessment.created_at).toLocaleDateString("pt-BR")}
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* FRAQUEZAS */}
+              {/* BENCHMARKING */}
               <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                <div className="flex items-center gap-2 mb-6">
-                  <AlertCircle className="h-5 w-5 text-orange-600" />
-                  <h3 className="text-lg font-bold text-gray-900">Áreas de Melhoria</h3>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Benchmarking de Mercado</h2>
+                
+                <div className="mb-6">
+                  <p className="text-gray-600 text-sm font-medium mb-3">Selecione sua indústria:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.keys(INDUSTRY_BENCHMARKS).map((industry) => (
+                      <button
+                        key={industry}
+                        onClick={() => setSelectedIndustry(industry as keyof typeof INDUSTRY_BENCHMARKS)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          selectedIndustry === industry
+                            ? "bg-brand-primary text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {industry}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-4">
-                  {getTopWeaknesses(lastAssessment.dimension_scores).map((item, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <span className="text-gray-700 font-medium">{item.name}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-orange-600">{item.score}</span>
-                        <ArrowDown className="h-4 w-4 text-orange-600" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
 
-            {/* RECOMENDAÇÕES */}
-            <div className="bg-gradient-to-r from-brand-primary/10 to-purple-500/10 rounded-2xl border border-brand-primary/20 p-8">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0">
-                  <Lightbulb className="h-6 w-6 text-brand-primary mt-1" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-3">Próximos Passos Recomendados</h3>
-                  <ul className="space-y-2 text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <span className="text-brand-primary font-bold mt-1">1.</span>
-                      <span>Focar nas áreas de melhoria identificadas acima para ganhar impacto rápido.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-brand-primary font-bold mt-1">2.</span>
-                      <span>Criar um roadmap de 12 meses alinhado com os objetivos de negócio.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-brand-primary font-bold mt-1">3.</span>
-                      <span>Reavaliar em 6 meses para medir progresso e ajustar estratégia.</span>
-                    </li>
-                  </ul>
-                  <Button
-                    onClick={() => router.push("/resultado/" + lastAssessment.id)}
-                    className="mt-6 bg-brand-primary text-white hover:opacity-90 flex items-center gap-2"
-                  >
-                    Ver Relatório Completo
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* TODOS OS SCORES */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900 mb-6">Scores por Dimensão</h3>
-              <div className="space-y-4">
-                {Object.entries(lastAssessment.dimension_scores).map(([name, score], i) => (
-                  <div key={i}>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="font-medium text-gray-700">{name}</span>
-                      <span className="font-bold text-gray-900">{score}/5</span>
+                {/* COMPARATIVO */}
+                <div className="space-y-6">
+                  {/* Sua Empresa */}
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="font-medium text-gray-900">Sua Empresa</span>
+                      <span className="font-bold text-brand-primary">{currentScore}</span>
                     </div>
-                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-3 w-full bg-gray-200 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-brand-primary rounded-full"
-                        style={{ width: `${(score / 5) * 100}%` }}
+                        style={{ width: `${Math.min(positionPercentage, 100)}%` }}
                       ></div>
                     </div>
                   </div>
-                ))}
+
+                  {/* Média da Indústria */}
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="font-medium text-gray-900">Média da Indústria ({selectedIndustry})</span>
+                      <span className="font-bold text-orange-600">{benchmark.avg}</span>
+                    </div>
+                    <div className="h-3 w-full bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-orange-500 rounded-full"
+                        style={{ width: `${(benchmark.avg / benchmark.top10) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Top 10% */}
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="font-medium text-gray-900">Top 10% da Indústria</span>
+                      <span className="font-bold text-green-600">{benchmark.top10}</span>
+                    </div>
+                    <div className="h-3 w-full bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-green-500 rounded-full" style={{ width: "100%" }}></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* INSIGHT */}
+                <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                  <p className="text-orange-900 text-sm">
+                    <strong>Gap identificado:</strong> Você está {scoreGap.toFixed(1)} pontos abaixo da média da indústria. 
+                    Fechar esse gap pode gerar impacto significativo em eficiência operacional.
+                  </p>
+                </div>
+              </div>
+
+              {/* QUICK WINS */}
+              <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                <div className="flex items-center gap-2 mb-6">
+                  <Zap className="h-6 w-6 text-brand-primary" />
+                  <h2 className="text-2xl font-bold text-gray-900">Quick Wins (30 dias)</h2>
+                </div>
+                
+                <div className="space-y-4">
+                  {[
+                    {
+                      title: "Implementar Catálogo de Dados",
+                      impact: "+0.3",
+                      effort: "Médio",
+                      description: "Documentar e catalogar todos os dados críticos da empresa"
+                    },
+                    {
+                      title: "Criar Governança Básica",
+                      impact: "+0.25",
+                      effort: "Médio",
+                      description: "Definir papéis, responsabilidades e políticas de dados"
+                    },
+                    {
+                      title: "Treinar Equipe em Data Literacy",
+                      impact: "+0.2",
+                      effort: "Baixo",
+                      description: "Workshop com equipe sobre importância e uso de dados"
+                    },
+                  ].map((win, i) => (
+                    <div key={i} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h4 className="font-bold text-gray-900">{win.title}</h4>
+                          <p className="text-gray-600 text-sm mt-1">{win.description}</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-green-600">{win.impact}</div>
+                          <div className="text-xs text-gray-500">{win.effort}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ROADMAP */}
+              <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                <div className="flex items-center gap-2 mb-6">
+                  <Target className="h-6 w-6 text-brand-primary" />
+                  <h2 className="text-2xl font-bold text-gray-900">Roadmap de Maturidade</h2>
+                </div>
+
+                <div className="space-y-6">
+                  {[
+                    { phase: "Hoje", score: currentScore, level: lastAssessment.level, timeline: "Atual" },
+                    { phase: "30 dias", score: currentScore + 0.75, level: "Inicial", timeline: "Quick Wins" },
+                    { phase: "6 meses", score: 2.5, level: "Intermediário", timeline: "Estruturação" },
+                    { phase: "12 meses", score: 3.5, level: "Avançado", timeline: "Otimização" },
+                  ].map((milestone, i) => (
+                    <div key={i} className="flex items-center gap-4">
+                      <div className="flex-shrink-0 w-12 h-12 bg-brand-primary/10 text-brand-primary rounded-lg flex items-center justify-center font-bold">
+                        {i + 1}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center mb-1">
+                          <h4 className="font-bold text-gray-900">{milestone.phase}</h4>
+                          <span className="text-sm text-gray-500">{milestone.timeline}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold text-brand-primary">{milestone.score}</span>
+                          <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded">{milestone.level}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* SEÇÃO DE VALOR - PLANOS */}
+              <div className="bg-gradient-to-r from-brand-primary/10 to-purple-500/10 rounded-2xl border border-brand-primary/20 p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Maximize o Valor com DataMaturity</h2>
+                <p className="text-gray-600 mb-6">Escolha o plano ideal para sua empresa e acelere sua jornada de maturidade</p>
+                
+                <div className="grid md:grid-cols-3 gap-4 mb-6">
+                  {[
+                    { name: "Bronze", price: "R$ 99", features: "1 diagnóstico/ano, Relatório básico" },
+                    { name: "Silver", price: "R$ 299", features: "4 diagnósticos/ano, Relatório detalhado, Suporte chat" },
+                    { name: "Gold", price: "R$ 999", features: "Ilimitado, Roadmap customizado, Dedicated manager" },
+                  ].map((plan, i) => (
+                    <div key={i} className="bg-white rounded-lg p-4 border border-gray-200">
+                      <h3 className="font-bold text-gray-900 mb-1">{plan.name}</h3>
+                      <div className="text-2xl font-bold text-brand-primary mb-2">{plan.price}</div>
+                      <p className="text-xs text-gray-600">{plan.features}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <Button asChild className="bg-brand-primary text-white hover:opacity-90">
+                  <Link href="/planos">
+                    Ver Todos os Planos
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+
+              {/* CTA FINAL */}
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => router.push("/assessment")}
+                  className="flex-1 bg-brand-primary text-white hover:opacity-90 py-6 text-lg"
+                >
+                  <TrendingUp className="mr-2 h-5 w-5" />
+                  Fazer Novo Diagnóstico
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="flex-1 py-6 text-lg"
+                >
+                  <Link href="/dashboard">
+                    Ver Dashboard Completo
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
     </div>
   );
