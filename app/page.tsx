@@ -1,5 +1,10 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
 import {
   ArrowRight,
   BarChart3,
@@ -13,29 +18,78 @@ import {
   TrendingUp,
   Users,
   Zap,
+  LogOut,
+  User,
 } from "lucide-react";
 
 export default function HomePage() {
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.auth.getUser();
+      if (data.user) {
+        setIsLoggedIn(true);
+        setUserEmail(data.user.email || "");
+      }
+      setIsLoading(false);
+    };
+    checkAuth();
+  }, []);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setIsLoggedIn(false);
+    router.push("/");
+  };
   return (
     <main className="min-h-screen bg-white">
       {/* HEADER / NAV */}
       <header className="fixed top-0 w-full border-b bg-white/80 backdrop-blur-md z-50">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 cursor-pointer">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-white font-bold">
               DM
             </div>
             <span className="text-xl font-bold tracking-tight text-gray-900">
               DataMaturity
             </span>
-          </div>
+          </Link>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">
-              Entrar
-            </Link>
-            <Button asChild className="bg-brand-primary text-white hover:bg-brand-primary/90">
-              <Link href="/signup">Começar Grátis</Link>
-            </Button>
+            {!isLoading && isLoggedIn ? (
+              <>
+                <Link href="/dashboard/home" className="text-sm font-medium text-gray-600 hover:text-gray-900">
+                  Dashboard
+                </Link>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100">
+                  <User className="h-4 w-4 text-gray-600" />
+                  <span className="text-sm text-gray-700">{userEmail.split("@")[0]}</span>
+                </div>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sair
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">
+                  Entrar
+                </Link>
+                <Button asChild className="bg-brand-primary text-white hover:bg-brand-primary/90">
+                  <Link href="/signup">Começar Grátis</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -58,8 +112,8 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button asChild size="lg" className="h-14 px-8 text-lg bg-brand-primary text-white hover:bg-brand-primary/90 w-full sm:w-auto">
-              <Link href="/signup">
-                Fazer Diagnóstico Gratuito
+              <Link href={isLoggedIn ? "/assessment" : "/signup"}>
+                {isLoggedIn ? "Fazer Novo Diagnóstico" : "Fazer Diagnóstico Gratuito"}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
