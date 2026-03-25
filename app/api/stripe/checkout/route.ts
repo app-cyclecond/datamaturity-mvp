@@ -4,11 +4,11 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req: Request) {
   try {
-    const { plan } = await req.json();
+    const { priceId } = await req.json();
 
-    // Validar plano
-    if (!["bronze", "silver", "gold"].includes(plan)) {
-      return new Response(JSON.stringify({ error: "Invalid plan" }), {
+    // Validar priceId
+    if (!priceId) {
+      return new Response(JSON.stringify({ error: "Price ID is required" }), {
         status: 400,
       });
     }
@@ -29,19 +29,17 @@ export async function POST(req: Request) {
       });
     }
 
-    // Mapear plano para Stripe price ID
-    const planToPriceId: Record<string, string> = {
-      bronze: process.env.STRIPE_PRICE_BRONZE || "",
-      silver: process.env.STRIPE_PRICE_SILVER || "",
-      gold: process.env.STRIPE_PRICE_GOLD || "",
-    };
+    // Validar que o priceId é um dos configurados
+    const validPriceIds = [
+      process.env.STRIPE_PRICE_BRONZE,
+      process.env.STRIPE_PRICE_SILVER,
+      process.env.STRIPE_PRICE_GOLD,
+    ];
 
-    const priceId = planToPriceId[plan];
-
-    if (!priceId) {
+    if (!validPriceIds.includes(priceId)) {
       return new Response(
-        JSON.stringify({ error: "Price ID not configured" }),
-        { status: 500 }
+        JSON.stringify({ error: "Invalid price ID" }),
+        { status: 400 }
       );
     }
 
@@ -81,7 +79,7 @@ export async function POST(req: Request) {
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/planos?checkout=cancelled`,
       metadata: {
         user_id: user.id,
-        plan,
+        price_id: priceId,
       },
     });
 

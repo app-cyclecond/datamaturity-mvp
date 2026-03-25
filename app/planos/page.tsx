@@ -10,6 +10,7 @@ import {
   Target,
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function PlanosPage() {
   const router = useRouter();
@@ -58,7 +59,7 @@ export default function PlanosPage() {
         { name: "Acesso Completo", included: false },
       ],
       cta: "Começar com Silver",
-      highlighted: true,
+      highlighted: false,
       planKey: "silver",
     },
     {
@@ -85,6 +86,38 @@ export default function PlanosPage() {
       planKey: "gold",
     },
   ];
+
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleCheckout = async (priceId: string) => {
+    try {
+      setLoading(priceId);
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ priceId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao criar sessão de checkout");
+      }
+
+      const { sessionId } = await response.json();
+
+      // Redirecionar para o Stripe Checkout
+      const stripe = (window as any).Stripe;
+      if (stripe) {
+        await stripe.redirectToCheckout({ sessionId });
+      }
+    } catch (error) {
+      console.error("Erro:", error);
+      alert("Erro ao processar pagamento. Tente novamente.");
+    } finally {
+      setLoading(null);
+    }
+  };
 
   const faqs = [
     {
@@ -159,26 +192,11 @@ export default function PlanosPage() {
               return (
                 <div
                   key={i}
-                  className={`rounded-2xl border transition-all flex flex-col ${
-                    plan.highlighted
-                      ? "border-brand-primary bg-white shadow-2xl scale-105"
-                      : "border-gray-200 bg-white shadow-sm hover:shadow-md"
-                  }`}
+                  className={`rounded-2xl border transition-all flex flex-col border-gray-200 bg-white shadow-sm hover:shadow-md`}
                 >
-                  {plan.highlighted && (
-                    <div className="bg-brand-primary text-white text-center py-2 text-sm font-bold rounded-t-2xl">
-                      MAIS POPULAR
-                    </div>
-                  )}
                   <div className="p-8 flex flex-col flex-1">
                     <div className="flex items-center gap-3 mb-4">
-                      <div
-                        className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                          plan.highlighted
-                            ? "bg-brand-primary text-white"
-                            : "bg-gray-100 text-gray-600"
-                        }`}
-                      >
+                      <div className="h-10 w-10 rounded-lg flex items-center justify-center bg-gray-100 text-gray-600">
                         <PlanIcon className="h-6 w-6" />
                       </div>
                       <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
@@ -191,14 +209,11 @@ export default function PlanosPage() {
                     </div>
 
                     <Button
-                      asChild
-                      className={`w-full mb-8 py-3 text-lg ${
-                        plan.highlighted
-                          ? "bg-brand-primary text-white hover:opacity-90"
-                          : "bg-gray-100 text-gray-900 hover:bg-gray-200"
-                      }`}
+                      onClick={() => handleCheckout(plan.planKey === 'bronze' ? process.env.NEXT_PUBLIC_STRIPE_PRICE_BRONZE! : plan.planKey === 'silver' ? process.env.NEXT_PUBLIC_STRIPE_PRICE_SILVER! : process.env.NEXT_PUBLIC_STRIPE_PRICE_GOLD!)}
+                      disabled={loading === plan.planKey}
+                      className={`w-full mb-8 py-3 text-lg bg-brand-primary text-white hover:bg-brand-primary/90 disabled:opacity-50`}
                     >
-                      <Link href="/signup">{plan.cta}</Link>
+                      {loading === plan.planKey ? "Processando..." : plan.cta}
                     </Button>
 
                     <div className="space-y-3 border-t border-gray-200 pt-6 flex-1">
