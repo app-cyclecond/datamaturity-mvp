@@ -10,7 +10,7 @@ import {
   Target,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function PlanosPage() {
   const router = useRouter();
@@ -88,9 +88,32 @@ export default function PlanosPage() {
   ];
 
   const [loading, setLoading] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Verificar autenticação ao carregar
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/me");
+        setIsAuthenticated(response.ok);
+      } catch {
+        setIsAuthenticated(false);
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   const handleCheckout = async (priceId: string) => {
     try {
+      // Se não autenticado, redirecionar para login
+      if (!isAuthenticated) {
+        router.push("/login?redirect=/planos");
+        return;
+      }
+
       setLoading(priceId);
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
