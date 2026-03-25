@@ -1,10 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-);
+// Verificar se as variáveis de ambiente estão disponíveis
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+const supabaseAdmin = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 const SAMPLE_CONTENT = [
   // TÉCNICO - BRONZE
@@ -117,6 +120,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verificar se supabaseAdmin está disponível
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: "Supabase not configured" },
+        { status: 500 }
+      );
+    }
+
     // Limpar dados existentes (opcional)
     const { error: deleteError } = await supabaseAdmin
       .from("content_library")
@@ -157,6 +168,13 @@ export async function POST(request: NextRequest) {
 // GET endpoint para verificar conteúdo
 export async function GET(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: "Supabase not configured" },
+        { status: 500 }
+      );
+    }
+
     const { data, error } = await supabaseAdmin
       .from("content_library")
       .select("*");

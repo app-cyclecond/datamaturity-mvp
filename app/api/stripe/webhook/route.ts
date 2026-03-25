@@ -141,19 +141,12 @@ export async function POST(req: Request) {
           return new Response("No user_id found", { status: 400 });
         }
 
-        // Obter subscription para pegar o plano
-        const { data: subscription } = await supabase
-          .from("subscriptions")
-          .select("plan")
-          .eq("user_id", userId)
-          .single();
-
         // Criar registro de invoice
         const { error: invoiceError } = await supabase
           .from("invoices")
           .insert({
             user_id: userId,
-            subscription_id: subscription?.id,
+            stripe_subscription_id: invoice.subscription,
             stripe_invoice_id: invoice.id,
             amount_paid: invoice.amount_paid,
             currency: invoice.currency,
