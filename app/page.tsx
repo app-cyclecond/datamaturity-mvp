@@ -86,7 +86,7 @@ export default function HomePage() {
                   Entrar
                 </Link>
                 <Button asChild className="bg-brand-primary text-white hover:bg-brand-primary/90">
-                  <Link href="/signup">Começar Grátis</Link>
+                  <Link href="/demo">Começar Grátis</Link>
                 </Button>
               </>
             )}
