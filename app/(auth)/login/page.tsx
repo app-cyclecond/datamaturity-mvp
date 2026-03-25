@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { signInAction } from "@/lib/auth";
 
 export default function LoginPage() {
@@ -9,6 +10,12 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-violet-50 px-6 py-16">
+      <div className="mx-auto max-w-md">
+        <Link href="/" className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6">
+          <ArrowLeft className="h-4 w-4" />
+          Voltar para Home
+        </Link>
+      </div>
       <div className="mx-auto max-w-md rounded-2xl border bg-white p-8 shadow-sm">
         <div className="mb-6">
           <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
