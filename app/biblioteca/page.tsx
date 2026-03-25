@@ -174,51 +174,9 @@ export default function BibliotecaPage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* SIDEBAR */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col justify-between fixed h-screen">
-        <div>
-          <div className="p-6 font-bold text-lg text-gray-900 flex items-center gap-2">
-            <div className="h-8 w-8 bg-brand-primary text-white rounded flex items-center justify-center font-bold">
-              DM
-            </div>
-            DataMaturity
-          </div>
+      <Sidebar user={user || undefined} activePage="biblioteca" />
 
-          <nav className="space-y-2 px-4">
-            <Link href="/dashboard">
-              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-                Home
-              </button>
-            </Link>
-            <Link href="/diagnostico">
-              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-                Diagnóstico Atual
-              </button>
-            </Link>
-            <Link href="/assessment">
-              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-                Novo diagnóstico
-              </button>
-            </Link>
-            <Link href="/historico">
-              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-                Histórico
-              </button>
-            </Link>
-            <Link href="/configuracoes">
-              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-                Configurações
-              </button>
-            </Link>
-          </nav>
-        </div>
-
-        <div className="p-4 border-t border-gray-200 text-sm">
-          <div className="font-medium text-gray-900">{user?.name || "Usuário"}</div>
-          <div className="text-gray-500 text-xs">{user?.email}</div>
-        </div>
-      </aside>
-
-      {/* CONTEÚDO */}
+      {/* MAIN CONTENT */}
       <main className="flex-1 ml-64 p-10">
         <div className="max-w-5xl">
           {/* HEADER */}

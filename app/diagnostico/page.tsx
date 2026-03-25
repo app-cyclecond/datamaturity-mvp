@@ -19,11 +19,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-type User = {
+type UserProfile = {
+  id: string;
+  name: string;
   email: string;
-  user_metadata?: {
-    name?: string;
-  };
+  company: string;
+  role: string;
+  industry: string;
+  plan: string;
 };
 
 type AssessmentResult = {
@@ -34,9 +37,9 @@ type AssessmentResult = {
   created_at: string;
 };
 
-export default function DashboardPage() {
+export default function DiagnosticoPage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [lastAssessment, setLastAssessment] = useState<AssessmentResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,18 +47,27 @@ export default function DashboardPage() {
     const supabase = createClient();
 
     const load = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user as any);
-
-      if (!data.user) {
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData.user) {
         router.push("/login");
         return;
       }
 
-      const { data: results, error } = await supabase
+      // Carregar dados do usuário
+      const { data: userData } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", authData.user.id)
+        .single();
+
+      if (userData) {
+        setUser(userData as UserProfile);
+      }
+
+      const { data: results } = await supabase
         .from("assessment_results")
         .select("*")
-        .eq("user_id", data.user.id)
+        .eq("user_id", authData.user.id)
         .order("created_at", { ascending: false })
         .limit(1);
 
@@ -67,9 +79,7 @@ export default function DashboardPage() {
     };
 
     load();
-  }, []);
-
-  const name = user?.user_metadata?.name || "Usuário";
+  }, [router]);
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -127,58 +137,9 @@ export default function DashboardPage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* SIDEBAR */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col justify-between fixed h-screen">
-        <div>
-          <div className="p-6 font-bold text-lg text-gray-900 flex items-center gap-2">
-            <div className="h-8 w-8 bg-brand-primary text-white rounded flex items-center justify-center font-bold">
-              DM
-            </div>
-            DataMaturity
-          </div>
+      <Sidebar user={user || undefined} activePage="diagnostico" />
 
-          <nav className="space-y-2 px-4">
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2"
-            >
-              <Home className="h-4 w-4" />
-              Home
-            </button>
-            <button
-              onClick={() => router.push("/diagnostico")}
-              className="w-full text-left block p-3 rounded-lg bg-gray-100 font-medium text-gray-900 hover:bg-gray-200 transition-colors flex items-center gap-2"
-            >
-              <BarChart3 className="h-4 w-4" />
-              Diagnóstico Atual
-            </button>
-            <button
-              onClick={() => router.push("/assessment")}
-              className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              Novo diagnóstico
-            </button>
-            <button
-              onClick={() => router.push("/historico")}
-              className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              Histórico
-            </button>
-            <button
-              onClick={() => router.push("/configuracoes")}
-              className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              Configurações
-            </button>
-          </nav>
-        </div>
-
-        <div className="p-4 border-t border-gray-200 text-sm">
-          <div className="font-medium text-gray-900">{name}</div>
-          <div className="text-gray-500 text-xs">{user?.email}</div>
-        </div>
-      </aside>
-
-      {/* CONTEÚDO */}
+      {/* MAIN CONTENT */}
       <main className="flex-1 ml-64 p-10">
         {!lastAssessment ? (
           <div className="max-w-3xl mx-auto text-center mt-20">
