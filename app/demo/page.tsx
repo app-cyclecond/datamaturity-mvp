@@ -17,6 +17,7 @@ import {
   BarChart3,
   Lightbulb,
   ChevronRight,
+  Users,
 } from "lucide-react";
 
 type DemoQuestion = {
