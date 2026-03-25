@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { answers } = body;
     console.log("📝 [FINALIZE] Respostas recebidas:", Object.keys(answers).length);
+    console.log("📝 [FINALIZE] Valores das respostas:", answers);
 
     if (!answers || typeof answers !== "object") {
       console.error("❌ [FINALIZE] Respostas inválidas");
@@ -50,12 +51,13 @@ export async function POST(request: NextRequest) {
       const dimensionAnswers = dimensionQuestions
         .map((q) => {
           const answer = answers[q.id];
+          const numAnswer = typeof answer === 'number' ? answer : (answer ? parseInt(String(answer)) : undefined);
           console.log(
-            `    ✓ ${q.id}: ${answer !== undefined ? answer : "não respondida"}`
+            `    ✓ ${q.id}: raw=${answer}, parsed=${numAnswer}, type=${typeof answer}`
           );
-          return answer;
+          return numAnswer;
         })
-        .filter((a) => a !== undefined);
+        .filter((a) => a !== undefined && !isNaN(a));
 
       console.log(
         `  ✅ ${dimension.name}: ${dimensionAnswers.length} respostas`
