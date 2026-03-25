@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Sidebar } from "@/components/layout/sidebar";
 import {
   ArrowRight,
   ArrowUp,
@@ -24,26 +25,48 @@ type AssessmentResult = {
   created_at: string;
 };
 
+type UserProfile = {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  role: string;
+  industry: string;
+  plan: string;
+};
+
 export default function HistoricoPage() {
   const router = useRouter();
   const [assessments, setAssessments] = useState<AssessmentResult[]>([]);
   const [selectedIds, setSelectedIds] = useState<[string, string] | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const supabase = createClient();
 
     const load = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData.user) {
         router.push("/login");
         return;
+      }
+
+      // Carregar dados do usuário
+      const { data: userData } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", authData.user.id)
+        .single();
+
+      if (userData) {
+        setUser(userData as UserProfile);
       }
 
       const { data: results } = await supabase
         .from("assessment_results")
         .select("*")
-        .eq("user_id", data.user.id)
+        .eq("user_id", authData.user.id)
         .order("created_at", { ascending: false });
 
       if (results) {
@@ -110,49 +133,9 @@ export default function HistoricoPage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* SIDEBAR */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col justify-between fixed h-screen">
-        <div>
-          <div className="p-6 font-bold text-lg text-gray-900 flex items-center gap-2">
-            <div className="h-8 w-8 bg-brand-primary text-white rounded flex items-center justify-center font-bold">
-              DM
-            </div>
-            DataMaturity
-          </div>
+      <Sidebar user={user || undefined} activePage="historico" />
 
-          <nav className="space-y-2 px-4">
-            <Link href="/">
-              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-                Home
-              </button>
-            </Link>
-            <Link href="/dashboard">
-              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-                Dashboard
-              </button>
-            </Link>
-            <Link href="/assessment">
-              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-                Novo diagnóstico
-              </button>
-            </Link>
-            <button className="w-full text-left block p-3 rounded-lg bg-gray-100 font-medium text-gray-900 hover:bg-gray-200 transition-colors">
-              Histórico
-            </button>
-            <Link href="/configuracoes">
-              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-                Configurações
-              </button>
-            </Link>
-          </nav>
-        </div>
-
-        <div className="p-4 border-t border-gray-200 text-sm">
-          <div className="font-medium text-gray-900">Usuário</div>
-          <div className="text-gray-500 text-xs">user@example.com</div>
-        </div>
-      </aside>
-
-      {/* CONTEÚDO */}
+      {/* MAIN CONTENT */}
       <main className="flex-1 ml-64 p-10">
         <div className="space-y-8">
           {/* BOTÃO VOLTAR */}
