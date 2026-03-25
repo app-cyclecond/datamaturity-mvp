@@ -1,9 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { DIMENSIONS } from "@/lib/assessment/questions";
+import { ExportActions } from "@/components/assessment/export-actions";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 type AssessmentResult = {
   id: string;
@@ -12,6 +16,12 @@ type AssessmentResult = {
   level: string;
   dimension_scores: Record<string, number>;
   created_at: string;
+};
+
+type UserProfile = {
+  name: string;
+  email: string;
+  company: string;
 };
 
 // Determinar nível baseado no score
@@ -34,26 +44,84 @@ function getLevelColor(score: number | string) {
   return "bg-green-50 text-green-900 border-green-200";
 }
 
-export default async function ResultadoPage({
+export default function ResultadoPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const supabase = await createClient();
-  const id = params.id;
+  const router = useRouter();
+  const [result, setResult] = useState<AssessmentResult | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Buscar resultado no Supabase
-  const { data: result, error } = await supabase
-    .from("assessment_results")
-    .select("*")
-    .eq("id", id)
-    .single();
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const supabase = createClient();
 
-  if (error || !result) {
-    notFound();
+        // Verificar autenticação
+        const { data: authData } = await supabase.auth.getUser();
+        if (!authData.user) {
+          router.push("/login");
+          return;
+        }
+
+        // Buscar resultado
+        const { data: resultData, error: resultError } = await supabase
+          .from("assessment_results")
+          .select("*")
+          .eq("id", params.id)
+          .eq("user_id", authData.user.id)
+          .single();
+
+        if (resultError || !resultData) {
+          router.push("/dashboard");
+          return;
+        }
+
+        // Buscar dados do usuário
+        const { data: userData } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", authData.user.id)
+          .single();
+
+        setResult(resultData as AssessmentResult);
+        setUser(userData as UserProfile);
+      } catch (error) {
+        console.error("Erro ao carregar resultado:", error);
+        router.push("/dashboard");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    load();
+  }, [params.id, router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary" />
+          <p className="mt-4 text-gray-600">Carregando resultado...</p>
+        </div>
+      </div>
+    );
   }
 
-  const typedResult = result as AssessmentResult;
+  if (!result) {
+    return (
+      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Resultado não encontrado</p>
+          <Link href="/dashboard">
+            <Button className="mt-4">Voltar ao Dashboard</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -71,7 +139,7 @@ export default async function ResultadoPage({
           <h1 className="text-3xl font-bold mb-2">Seu Diagnóstico</h1>
           <p className="text-purple-100">
             Resultado de{" "}
-            {new Date(typedResult.created_at).toLocaleDateString("pt-BR")}
+            {new Date(result.created_at).toLocaleDateString("pt-BR")}
           </p>
         </div>
 
@@ -80,12 +148,12 @@ export default async function ResultadoPage({
           <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-sm">
             <p className="text-gray-600 text-sm font-medium mb-2">Score Geral</p>
             <div className="text-5xl font-bold text-brand-primary mb-2">
-              {typedResult.overall_score}
+              {result.overall_score}
             </div>
             <div
-              className={`inline-block px-4 py-2 rounded-lg border ${getLevelColor(typedResult.overall_score)} text-sm font-semibold`}
+              className={`inline-block px-4 py-2 rounded-lg border ${getLevelColor(result.overall_score)} text-sm font-semibold`}
             >
-              {typedResult.level}
+              {result.level}
             </div>
           </div>
 
@@ -104,7 +172,7 @@ export default async function ResultadoPage({
               Data do Diagnóstico
             </p>
             <div className="text-lg font-semibold text-gray-900 mt-4">
-              {new Date(typedResult.created_at).toLocaleDateString("pt-BR")}
+              {new Date(result.created_at).toLocaleDateString("pt-BR")}
             </div>
           </div>
         </div>
@@ -116,7 +184,7 @@ export default async function ResultadoPage({
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {DIMENSIONS.map((dimension) => {
-              const score = typedResult.dimension_scores[dimension.name] || 0;
+              const score = result.dimension_scores[dimension.name] || 0;
               return (
                 <div
                   key={dimension.name}
@@ -157,6 +225,16 @@ export default async function ResultadoPage({
               );
             })}
           </div>
+        </div>
+
+        {/* EXPORT ACTIONS */}
+        <div className="mb-8 bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Compartilhar Resultado</h3>
+          <ExportActions
+            resultId={result.id}
+            assessmentData={result}
+            user={user || { name: "Usuário", email: "", company: "" }}
+          />
         </div>
 
         {/* AÇÕES */}
