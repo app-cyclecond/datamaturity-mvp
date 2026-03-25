@@ -81,6 +81,8 @@ export default function DiagnosticoPage() {
     load();
   }, [router]);
 
+  const name = user?.name || "Usuário";
+
   const getLevelColor = (level: string) => {
     switch (level) {
       case "Inexistente":
