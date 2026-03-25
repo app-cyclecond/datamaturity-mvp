@@ -3,17 +3,11 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowLeft,
   Check,
   X,
   Zap,
   Trophy,
   Target,
-  MessageSquare,
-  Users,
-  BarChart3,
-  FileText,
-  Headphones,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -24,85 +18,99 @@ export default function PlanosPage() {
     {
       name: "Bronze",
       price: 99,
-      description: "Para empresas começando sua jornada de dados",
+      description: "Perfeito para começar sua jornada de maturidade de dados",
       icon: Target,
+      color: "amber",
+      tagline: "Perfeito para começar",
       features: [
-        { name: "Diagnósticos por ano", value: 1, included: true },
-        { name: "Relatório Básico", value: true, included: true },
-        { name: "Benchmarking de Indústria", value: true, included: true },
-        { name: "Relatório Executivo", value: false, included: false },
-        { name: "Recomendações Priorizadas", value: false, included: false },
-        { name: "Roadmap Customizado", value: false, included: false },
-        { name: "Suporte por Email", value: true, included: true },
-        { name: "Chat Support", value: false, included: false },
-        { name: "Dedicated Manager", value: false, included: false },
-        { name: "API Access", value: false, included: false },
+        { name: "1 Diagnóstico por mês", included: true },
+        { name: "Relatórios Básicos em PDF", included: true },
+        { name: "Biblioteca Essencial", included: true },
+        { name: "Recomendações Padrão", included: true },
+        { name: "Exportação PDF", included: true },
+        { name: "Suporte por Email", included: true },
+        { name: "Recomendações Personalizadas", included: false },
+        { name: "Biblioteca Completa", included: false },
+        { name: "Benchmarking Setorial", included: false },
+        { name: "Suporte Prioritário", included: false },
       ],
       cta: "Começar com Bronze",
       highlighted: false,
+      planKey: "bronze",
     },
     {
       name: "Silver",
-      price: 299,
-      description: "Para empresas estruturando sua governança",
+      price: 199,
+      description: "Para empresas em crescimento que monitoram continuamente",
       icon: Zap,
+      color: "slate",
+      tagline: "Para empresas em crescimento",
       features: [
-        { name: "Diagnósticos por ano", value: 4, included: true },
-        { name: "Relatório Básico", value: true, included: true },
-        { name: "Benchmarking de Indústria", value: true, included: true },
-        { name: "Relatório Executivo", value: true, included: true },
-        { name: "Recomendações Priorizadas", value: true, included: true },
-        { name: "Roadmap Customizado", value: false, included: false },
-        { name: "Suporte por Email", value: true, included: true },
-        { name: "Chat Support", value: true, included: true },
-        { name: "Dedicated Manager", value: false, included: false },
-        { name: "API Access", value: false, included: false },
+        { name: "3 Diagnósticos por mês", included: true },
+        { name: "Relatórios Avançados em PDF", included: true },
+        { name: "Biblioteca Completa", included: true },
+        { name: "Recomendações Personalizadas", included: true },
+        { name: "Exportação PDF", included: true },
+        { name: "Suporte por Email", included: true },
+        { name: "Benchmarking Setorial", included: false },
+        { name: "Relatórios Executivos", included: false },
+        { name: "Suporte Prioritário", included: false },
+        { name: "Acesso Completo", included: false },
       ],
       cta: "Começar com Silver",
       highlighted: true,
+      planKey: "silver",
     },
     {
       name: "Gold",
-      price: 999,
-      description: "Para empresas otimizando maturidade completa",
+      price: 499,
+      description: "Solução completa para empresas que levam dados a sério",
       icon: Trophy,
+      color: "yellow",
+      tagline: "Solução completa para empresas",
       features: [
-        { name: "Diagnósticos por ano", value: "Ilimitado", included: true },
-        { name: "Relatório Básico", value: true, included: true },
-        { name: "Benchmarking de Indústria", value: true, included: true },
-        { name: "Relatório Executivo", value: true, included: true },
-        { name: "Recomendações Priorizadas", value: true, included: true },
-        { name: "Roadmap Customizado", value: true, included: true },
-        { name: "Suporte por Email", value: true, included: true },
-        { name: "Chat Support", value: true, included: true },
-        { name: "Dedicated Manager", value: true, included: true },
-        { name: "API Access", value: true, included: true },
+        { name: "Diagnósticos Ilimitados", included: true },
+        { name: "Acesso Completo", included: true },
+        { name: "Relatórios Executivos em PDF", included: true },
+        { name: "Biblioteca Premium", included: true },
+        { name: "Recomendações Personalizadas", included: true },
+        { name: "Exportação PDF", included: true },
+        { name: "Benchmarking Setorial", included: true },
+        { name: "Análise de Tendências", included: true },
+        { name: "Suporte Prioritário", included: true },
+        { name: "Consultoria Estratégica", included: true },
       ],
       cta: "Começar com Gold",
       highlighted: false,
+      planKey: "gold",
     },
   ];
 
   const faqs = [
     {
       question: "Posso mudar de plano a qualquer momento?",
-      answer: "Sim! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento. A mudança será refletida no próximo ciclo de cobrança.",
+      answer:
+        "Sim! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento. A mudança será refletida no próximo ciclo de cobrança.",
     },
     {
-      question: "Existe período de teste gratuito?",
-      answer: "Sim, oferecemos 7 dias de teste gratuito em qualquer plano. Sem necessidade de cartão de crédito.",
+      question: "O que acontece se eu atingir o limite de diagnósticos?",
+      answer:
+        "Ao atingir o limite do seu plano, você poderá fazer upgrade para um plano superior ou aguardar o próximo ciclo mensal para um novo diagnóstico.",
     },
     {
-      question: "O que está incluído no 'Roadmap Customizado'?",
-      answer: "Um plano detalhado de 12 meses com milestones, ações específicas, orçamento estimado e indicadores de sucesso, desenvolvido com base no seu diagnóstico.",
+      question: "O que está incluído na 'Biblioteca Essencial' vs 'Completa' vs 'Premium'?",
+      answer:
+        "A Biblioteca Essencial contém artigos e guias básicos. A Completa adiciona frameworks, templates e estudos de caso. A Premium inclui tudo isso mais conteúdos exclusivos, webinars e materiais de consultoria.",
     },
     {
-      question: "Como funciona o 'Dedicated Manager'?",
-      answer: "Um especialista em maturidade de dados fica disponível para sua empresa, ajudando na implementação das recomendações e acompanhando o progresso.",
+      question: "O que é Benchmarking Setorial?",
+      answer:
+        "Comparação do seu score de maturidade com empresas do mesmo setor, permitindo entender como você se posiciona no mercado.",
     },
     {
       question: "Qual plano vocês recomendam para começar?",
-      answer: "Recomendamos começar com Silver. Oferece um bom equilíbrio entre funcionalidades e custo, permitindo diagnósticos regulares e suporte adequado.",
+      answer:
+        "Para empresas que estão iniciando, o Bronze é ideal. Para quem já tem uma operação de dados estruturada e quer monitorar a evolução regularmente, recomendamos o Silver.",
     },
   ];
 
@@ -145,13 +153,13 @@ export default function PlanosPage() {
       {/* CARDS DE PLANOS */}
       <section className="py-20 px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
             {plans.map((plan, i) => {
               const PlanIcon = plan.icon;
               return (
                 <div
                   key={i}
-                  className={`rounded-2xl border transition-all ${
+                  className={`rounded-2xl border transition-all flex flex-col ${
                     plan.highlighted
                       ? "border-brand-primary bg-white shadow-2xl scale-105"
                       : "border-gray-200 bg-white shadow-sm hover:shadow-md"
@@ -162,13 +170,15 @@ export default function PlanosPage() {
                       MAIS POPULAR
                     </div>
                   )}
-                  <div className="p-8">
+                  <div className="p-8 flex flex-col flex-1">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                        plan.highlighted
-                          ? "bg-brand-primary text-white"
-                          : "bg-gray-100 text-gray-600"
-                      }`}>
+                      <div
+                        className={`h-10 w-10 rounded-lg flex items-center justify-center ${
+                          plan.highlighted
+                            ? "bg-brand-primary text-white"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
                         <PlanIcon className="h-6 w-6" />
                       </div>
                       <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
@@ -191,54 +201,64 @@ export default function PlanosPage() {
                       <Link href="/signup">{plan.cta}</Link>
                     </Button>
 
-                    <div className="space-y-3 border-t border-gray-200 pt-6">
-                      {plan.features.slice(0, 5).map((feature, j) => (
+                    <div className="space-y-3 border-t border-gray-200 pt-6 flex-1">
+                      {plan.features.map((feature, j) => (
                         <div key={j} className="flex items-center gap-3">
                           {feature.included ? (
                             <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
                           ) : (
                             <X className="h-5 w-5 text-gray-300 flex-shrink-0" />
                           )}
-                          <span className={feature.included ? "text-gray-900" : "text-gray-500"}>
+                          <span className={feature.included ? "text-gray-900 text-sm" : "text-gray-400 text-sm"}>
                             {feature.name}
-                            {typeof feature.value === "number" && feature.value > 1 && `: ${feature.value}`}
-                            {typeof feature.value === "string" && `: ${feature.value}`}
                           </span>
                         </div>
                       ))}
                     </div>
+
+                    <p className="mt-6 text-center text-xs italic text-gray-400">{plan.tagline}</p>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* TABELA COMPARATIVA COMPLETA */}
+          {/* TABELA COMPARATIVA */}
           <div className="bg-white rounded-2xl border border-gray-200 p-8 overflow-x-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Comparação Completa</h2>
-            <table className="w-full">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">Comparação Completa</h2>
+            <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-4 px-4 font-bold text-gray-900">Feature</th>
-                  {plans.map((plan, i) => (
-                    <th key={i} className="text-center py-4 px-4 font-bold text-gray-900">
-                      {plan.name}
-                    </th>
-                  ))}
+                <tr className="border-b-2 border-gray-200">
+                  <th className="text-left py-4 px-4 font-bold text-gray-700 w-1/2">Recurso</th>
+                  <th className="text-center py-4 px-4 font-bold text-gray-700">Bronze<br /><span className="font-normal text-gray-500">R$ 99/mês</span></th>
+                  <th className="text-center py-4 px-4 font-bold text-brand-primary">Silver<br /><span className="font-normal text-gray-500">R$ 199/mês</span></th>
+                  <th className="text-center py-4 px-4 font-bold text-gray-700">Gold<br /><span className="font-normal text-gray-500">R$ 499/mês</span></th>
                 </tr>
               </thead>
               <tbody>
-                {plans[0].features.map((_, featureIndex) => (
-                  <tr key={featureIndex} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-4 px-4 text-gray-900 font-medium">
-                      {plans[0].features[featureIndex].name}
-                    </td>
-                    {plans.map((plan, planIndex) => (
-                      <td key={planIndex} className="py-4 px-4 text-center">
-                        {plan.features[featureIndex].included ? (
-                          <Check className="h-5 w-5 text-green-600 mx-auto" />
+                {[
+                  { feature: "Diagnósticos por mês", bronze: "1", silver: "3", gold: "Ilimitados" },
+                  { feature: "Relatórios em PDF", bronze: true, silver: true, gold: true },
+                  { feature: "Nível dos Relatórios", bronze: "Básico", silver: "Avançado", gold: "Executivo" },
+                  { feature: "Biblioteca de Conteúdo", bronze: "Essencial", silver: "Completa", gold: "Premium" },
+                  { feature: "Recomendações", bronze: "Padrão", silver: "Personalizadas", gold: "Personalizadas" },
+                  { feature: "Benchmarking Setorial", bronze: false, silver: false, gold: true },
+                  { feature: "Análise de Tendências", bronze: false, silver: false, gold: true },
+                  { feature: "Suporte", bronze: "Email", silver: "Email", gold: "Prioritário" },
+                  { feature: "Consultoria Estratégica", bronze: false, silver: false, gold: true },
+                ].map((row, i) => (
+                  <tr key={i} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-4 px-4 text-gray-900 font-medium">{row.feature}</td>
+                    {[row.bronze, row.silver, row.gold].map((val, j) => (
+                      <td key={j} className={`py-4 px-4 text-center ${j === 1 ? "bg-brand-primary/5" : ""}`}>
+                        {typeof val === "boolean" ? (
+                          val ? (
+                            <Check className="h-5 w-5 text-green-600 mx-auto" />
+                          ) : (
+                            <X className="h-5 w-5 text-gray-300 mx-auto" />
+                          )
                         ) : (
-                          <X className="h-5 w-5 text-gray-300 mx-auto" />
+                          <span className="text-gray-700 font-medium">{val}</span>
                         )}
                       </td>
                     ))}
@@ -270,10 +290,14 @@ export default function PlanosPage() {
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-4xl font-bold text-gray-900 mb-6">Pronto para começar?</h2>
           <p className="text-xl text-gray-600 mb-10">
-            Escolha seu plano e comece sua jornada de maturidade em dados hoje mesmo
+            Crie sua conta gratuitamente e faça seu primeiro diagnóstico hoje mesmo
           </p>
-          <Button asChild size="lg" className="h-14 px-10 text-lg bg-brand-primary text-white hover:bg-brand-primary/90">
-            <Link href="/signup">Começar Teste Gratuito de 7 Dias</Link>
+          <Button
+            asChild
+            size="lg"
+            className="h-14 px-10 text-lg bg-brand-primary text-white hover:bg-brand-primary/90"
+          >
+            <Link href="/signup">Começar Grátis</Link>
           </Button>
           <p className="mt-6 text-sm text-gray-500">Sem necessidade de cartão de crédito</p>
         </div>

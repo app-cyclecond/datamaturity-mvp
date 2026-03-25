@@ -18,10 +18,10 @@ export interface AccessCheckResult {
 
 // Limites de tentativas por plano (por mês)
 const ATTEMPT_LIMITS: Record<UserPlan, number> = {
-  starter: 1, // Plano gratuito: 1 tentativa por mês
-  bronze: 3, // Bronze: 3 tentativas por mês
-  silver: 10, // Silver: 10 tentativas por mês
-  gold: 999, // Gold: ilimitado (praticamente)
+  starter: 1, // Plano gratuito: 1 diagnóstico total
+  bronze: 1, // Bronze: 1 diagnóstico total
+  silver: 3, // Silver: 3 diagnósticos por mês
+  gold: 999, // Gold: ilimitado (acesso completo)
 };
 
 /**

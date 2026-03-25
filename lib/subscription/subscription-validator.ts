@@ -143,10 +143,10 @@ export function formatPrice(cents: number): string {
  */
 export function getPlanDescription(plan: PlanType): string {
   const descriptions: Record<PlanType, string> = {
-    starter: "Perfeito para começar. 1 diagnóstico por mês.",
-    bronze: "Para empresas em crescimento. 3 diagnósticos por mês.",
-    silver: "Para empresas em expansão. 10 diagnósticos por mês.",
-    gold: "Para empresas que querem tudo. Diagnósticos ilimitados.",
+    starter: "Experimente gratuitamente. 1 diagnóstico para começar.",
+    bronze: "Perfeito para começar. 1 diagnóstico por mês.",
+    silver: "Para empresas em crescimento. 3 diagnósticos por mês.",
+    gold: "Acesso completo. Diagnósticos ilimitados.",
   };
 
   return descriptions[plan];
@@ -158,35 +158,31 @@ export function getPlanDescription(plan: PlanType): string {
 export function getPlanFeatures(plan: PlanType): string[] {
   const features: Record<PlanType, string[]> = {
     starter: [
-      "1 diagnóstico por mês",
-      "Acesso básico à biblioteca",
-      "Relatórios em PDF",
+      "1 diagnóstico gratuito",
+      "Relatório básico em PDF",
       "Suporte por email",
     ],
     bronze: [
-      "3 diagnósticos por mês",
-      "Acesso completo à biblioteca",
-      "Relatórios em PDF",
-      "Comparação com benchmarks",
-      "Suporte prioritário",
+      "1 diagnóstico por mês",
+      "Relatórios Básicos em PDF",
+      "Biblioteca Essencial",
+      "Recomendações Padrão",
+      "Suporte por Email",
     ],
     silver: [
-      "10 diagnósticos por mês",
-      "Acesso completo à biblioteca",
-      "Relatórios em PDF e Excel",
-      "Comparação com benchmarks",
-      "Suporte prioritário",
-      "Análise de tendências",
+      "3 diagnósticos por mês",
+      "Relatórios Avançados em PDF",
+      "Biblioteca Completa",
+      "Recomendações Personalizadas",
+      "Suporte por Email",
     ],
     gold: [
-      "Diagnósticos ilimitados",
-      "Acesso completo à biblioteca",
-      "Relatórios em PDF, Excel e PowerPoint",
-      "Comparação com benchmarks",
-      "Suporte VIP 24/7",
-      "Análise de tendências",
-      "Consultoria estratégica",
-      "API access",
+      "Acesso Completo",
+      "Diagnósticos Ilimitados",
+      "Relatórios Executivos em PDF",
+      "Biblioteca Premium",
+      "Benchmarking Setorial",
+      "Suporte Prioritário",
     ],
   };
 
