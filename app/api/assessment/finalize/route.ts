@@ -74,11 +74,15 @@ export async function POST(request: NextRequest) {
     });
 
     // 4. Calcular score geral
+    // Dividir pela quantidade de dimensões respondidas, não pelo total de respostas
+    const dimensionsWithAnswers = Object.keys(dimensionScores).length;
     const overallScore =
-      totalQuestions > 0
-        ? Math.round((totalScore / totalQuestions) * 10) / 10
+      dimensionsWithAnswers > 0
+        ? Math.round((Object.values(dimensionScores).reduce((a, b) => a + b, 0) / dimensionsWithAnswers) * 10) / 10
         : 0;
     console.log("🎯 [FINALIZE] Score geral:", overallScore);
+    console.log("📊 [FINALIZE] Dimensões respondidas:", dimensionsWithAnswers);
+    console.log("📊 [FINALIZE] Scores por dimensão:", dimensionScores);
 
     // 5. Determinar nível
     const levels = [
