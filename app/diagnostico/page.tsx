@@ -46,9 +46,15 @@ export default function DashboardPage() {
       const { data } = await supabase.auth.getUser();
       setUser(data.user as any);
 
+      if (!data.user) {
+        router.push("/login");
+        return;
+      }
+
       const { data: results, error } = await supabase
         .from("assessment_results")
         .select("*")
+        .eq("user_id", data.user.id)
         .order("created_at", { ascending: false })
         .limit(1);
 

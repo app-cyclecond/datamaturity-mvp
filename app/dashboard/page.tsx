@@ -76,6 +76,7 @@ export default function HomeExecutivaPage() {
       const { data: results } = await supabase
         .from("assessment_results")
         .select("*")
+        .eq("user_id", authData.user.id)
         .order("created_at", { ascending: false })
         .limit(1);
 

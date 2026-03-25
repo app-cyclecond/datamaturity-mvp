@@ -43,6 +43,7 @@ export default function HistoricoPage() {
       const { data: results } = await supabase
         .from("assessment_results")
         .select("*")
+        .eq("user_id", data.user.id)
         .order("created_at", { ascending: false });
 
       if (results) {
