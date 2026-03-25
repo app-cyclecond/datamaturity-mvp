@@ -136,6 +136,11 @@ export default function ConfiguracoesPage() {
                 Histórico
               </button>
             </Link>
+            <Link href="/biblioteca">
+              <button className="w-full text-left block p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                Biblioteca
+              </button>
+            </Link>
             <button className="w-full text-left block p-3 rounded-lg bg-gray-100 font-medium text-gray-900 hover:bg-gray-200 transition-colors">
               Configurações
             </button>
