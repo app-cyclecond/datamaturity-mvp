@@ -351,6 +351,54 @@ export default function DemoPage() {
               </div>
             </div>
 
+            {/* LIBRARY PREVIEW */}
+            <div className="mb-12">
+              <h3 className="text-2xl font-bold text-white mb-6">Materiais Exclusivos que Você Teria Acesso</h3>
+              <div className="grid sm:grid-cols-3 gap-4">
+                {/* TÉCNICO */}
+                <div className="bg-gradient-to-br from-blue-600/20 to-blue-900/20 border border-blue-500/30 rounded-xl p-6 hover:border-blue-500/60 transition group cursor-pointer">
+                  <div className="h-10 w-10 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-500/30 transition">
+                    <Database className="h-5 w-5" />
+                  </div>
+                  <h4 className="font-semibold text-white mb-2">Guia de Arquitetura de Dados Moderna</h4>
+                  <p className="text-sm text-slate-400 mb-4">Estrutura recomendada para implementar uma arquitetura de dados escalável e resiliente.</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full">Técnico</span>
+                    <ArrowRight className="h-4 w-4 text-blue-400 group-hover:translate-x-1 transition" />
+                  </div>
+                </div>
+
+                {/* REGULATÓRIO */}
+                <div className="bg-gradient-to-br from-red-600/20 to-red-900/20 border border-red-500/30 rounded-xl p-6 hover:border-red-500/60 transition group cursor-pointer">
+                  <div className="h-10 w-10 bg-red-500/20 text-red-400 rounded-lg flex items-center justify-center mb-4 group-hover:bg-red-500/30 transition">
+                    <Lock className="h-5 w-5" />
+                  </div>
+                  <h4 className="font-semibold text-white mb-2">Conformidade com LGPD</h4>
+                  <p className="text-sm text-slate-400 mb-4">Checklist completo de conformidade com a Lei Geral de Proteção de Dados Pessoais.</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs bg-red-500/20 text-red-300 px-3 py-1 rounded-full">Regulatório</span>
+                    <ArrowRight className="h-4 w-4 text-red-400 group-hover:translate-x-1 transition" />
+                  </div>
+                </div>
+
+                {/* CULTURA */}
+                <div className="bg-gradient-to-br from-green-600/20 to-green-900/20 border border-green-500/30 rounded-xl p-6 hover:border-green-500/60 transition group cursor-pointer">
+                  <div className="h-10 w-10 bg-green-500/20 text-green-400 rounded-lg flex items-center justify-center mb-4 group-hover:bg-green-500/30 transition">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <h4 className="font-semibold text-white mb-2">Transformação Data-Driven</h4>
+                  <p className="text-sm text-slate-400 mb-4">Como transformar a cultura da organização para ser verdadeiramente orientada por dados.</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs bg-green-500/20 text-green-300 px-3 py-1 rounded-full">Cultura</span>
+                    <ArrowRight className="h-4 w-4 text-green-400 group-hover:translate-x-1 transition" />
+                  </div>
+                </div>
+              </div>
+              <p className="text-center text-slate-400 mt-6 text-sm">
+                Estes são apenas 3 dos <span className="font-semibold text-white">40+ materiais</span> que você teria acesso completo
+              </p>
+            </div>
+
             {/* UPSELL CTA */}
             <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-2xl p-8 mb-8">
               <h3 className="text-2xl font-bold text-white mb-3">
