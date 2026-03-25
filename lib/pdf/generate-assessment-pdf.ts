@@ -1,5 +1,4 @@
 import { jsPDF } from "jspdf";
-import "jspdf-autotable";
 
 interface AssessmentData {
   id: string;
@@ -116,9 +115,9 @@ export async function generateAssessmentPDF(data: AssessmentData): Promise<Blob>
   const description = getLevelDescription(data.level);
   const descriptionLines = doc.splitTextToSize(description, pageWidth - 30);
   doc.text(descriptionLines, 15, yPosition);
-  yPosition += descriptionLines.length * 4 + 5;
+  yPosition += descriptionLines.length * 4 + 10;
 
-  // DIMENSION SCORES
+  // DIMENSION SCORES TABLE
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
@@ -126,68 +125,69 @@ export async function generateAssessmentPDF(data: AssessmentData): Promise<Blob>
 
   yPosition += 8;
 
+  // TABLE HEADER
+  doc.setFillColor(99, 102, 241);
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  
+  const tableTop = yPosition;
+  const colWidth = (pageWidth - 30) / 3;
+  
+  doc.rect(15, tableTop, colWidth, 7, "F");
+  doc.rect(15 + colWidth, tableTop, colWidth, 7, "F");
+  doc.rect(15 + colWidth * 2, tableTop, colWidth, 7, "F");
+  
+  doc.text("Dimensão", 17, tableTop + 5);
+  doc.text("Score", 15 + colWidth + 5, tableTop + 5);
+  doc.text("Progresso", 15 + colWidth * 2 + 5, tableTop + 5);
+
+  yPosition += 10;
+
+  // TABLE ROWS
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+
   const dimensionEntries = Object.entries(data.dimension_scores).sort((a, b) => b[1] - a[1]);
 
-  const tableData = dimensionEntries.map(([name, score]) => [
-    name,
-    score.toFixed(1),
-    `${Math.round((score / 5) * 100)}%`,
-  ]);
+  dimensionEntries.forEach((entry, index) => {
+    const [name, score] = entry;
+    const rowHeight = 6;
+    
+    // Alternating row colors
+    if (index % 2 === 0) {
+      doc.setFillColor(245, 245, 245);
+      doc.rect(15, yPosition - 4, pageWidth - 30, rowHeight, "F");
+    }
 
-  (doc as any).autoTable({
-    startY: yPosition,
-    head: [["Dimensão", "Score", "Progresso"]],
-    body: tableData,
-    theme: "grid",
-    headStyles: {
-      fillColor: [99, 102, 241],
-      textColor: [255, 255, 255],
-      fontStyle: "bold",
-      fontSize: 10,
-    },
-    bodyStyles: {
-      fontSize: 9,
-      textColor: [0, 0, 0],
-    },
-    columnStyles: {
-      0: { cellWidth: 100 },
-      1: { cellWidth: 30, halign: "center" },
-      2: { cellWidth: 40, halign: "center" },
-    },
-    margin: { left: 15, right: 15 },
-    didDrawPage: (data: any) => {
-      // Footer
-      const pageCount = (doc as any).internal.getNumberOfPages();
-      const pageSize = doc.internal.pageSize;
-      const pageHeight = pageSize.getHeight();
-      const pageWidth = pageSize.getWidth();
+    doc.setTextColor(0, 0, 0);
+    
+    // Truncate long dimension names
+    const truncatedName = name.length > 25 ? name.substring(0, 22) + "..." : name;
+    doc.text(truncatedName, 17, yPosition);
+    doc.text(score.toFixed(1), 15 + colWidth + 5, yPosition);
+    doc.text(`${Math.round((score / 5) * 100)}%`, 15 + colWidth * 2 + 5, yPosition);
 
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text(
-        `Página ${data.pageNumber} de ${pageCount}`,
-        pageWidth / 2,
-        pageHeight - 10,
-        { align: "center" }
-      );
+    yPosition += rowHeight;
 
-      doc.text(
-        "DataMaturity © 2026 - Todos os direitos reservados",
-        pageWidth / 2,
-        pageHeight - 5,
-        { align: "center" }
-      );
-    },
+    // Check if we need a new page
+    if (yPosition > pageHeight - 20) {
+      doc.addPage();
+      yPosition = 20;
+    }
   });
 
+  yPosition += 5;
+
   // FOOTER NOTE
-  const finalY = (doc as any).lastAutoTable.finalY || yPosition + 50;
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
   doc.text(
     "Este documento foi gerado automaticamente pelo sistema DataMaturity.",
-    15,
-    Math.min(finalY + 15, pageHeight - 20)
+    pageWidth / 2,
+    pageHeight - 10,
+    { align: "center" }
   );
 
   // Convert to Blob
