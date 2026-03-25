@@ -64,9 +64,8 @@ export async function POST(request: NextRequest) {
       );
 
       if (dimensionAnswers.length > 0) {
-        const avg =
-          dimensionAnswers.reduce((a: number, b: number) => a + b, 0) /
-          dimensionAnswers.length;
+        const sum = dimensionAnswers.reduce((a: number, b: number | undefined) => a + (b || 0), 0);
+        const avg = sum / dimensionAnswers.length;
         const rounded = Math.round(avg * 10) / 10;
         dimensionScores[dimension.name] = rounded;
         console.log(`  📈 ${dimension.name}: ${rounded}`);
