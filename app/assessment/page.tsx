@@ -4,6 +4,8 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DIMENSIONS } from "@/lib/assessment/questions";
+import { checkAssessmentAccess } from "@/lib/assessment/access-control";
+import { createClient } from "@supabase/supabase-js";
 import {
   AssessmentHeader,
   QuestionCard,
@@ -12,6 +14,7 @@ import {
   SaveIndicator,
 } from "@/components/assessment";
 import { Button } from "@/components/ui/button";
+import { AlertCircle, Lock } from "lucide-react";
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
@@ -21,8 +24,108 @@ export default function AssessmentPage() {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [saveMessage, setSaveMessage] = useState<string>("");
+  const [accessDenied, setAccessDenied] = useState(false);
+  const [accessMessage, setAccessMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const mainRef = useRef<HTMLDivElement>(null);
   const questionRefsMap = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Verificar acesso ao assessment
+  useEffect(() => {
+    const verifyAccess = async () => {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+        );
+
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          router.push("/login");
+          return;
+        }
+
+        const accessResult = await checkAssessmentAccess(user.id);
+
+        if (!accessResult.hasAccess) {
+          setAccessDenied(true);
+          setAccessMessage(accessResult.reason || "Acesso negado");
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Erro ao verificar acesso:", error);
+        setIsLoading(false);
+      }
+    };
+
+    verifyAccess();
+  }, [router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Verificando acesso...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (accessDenied) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <Sidebar />
+        <main className="ml-0 md:ml-64 p-6">
+          <div className="max-w-2xl mx-auto mt-20">
+            <div className="bg-white rounded-lg shadow-lg border-l-4 border-red-500 p-8">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <Lock className="h-6 w-6 text-red-500 mt-1" />
+                </div>
+                <div className="flex-1">
+                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                    Acesso Restrito
+                  </h1>
+                  <p className="text-gray-600 mb-6 text-lg">{accessMessage}</p>
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h3 className="font-semibold text-blue-900 mb-2">
+                      Como desbloquear o assessment completo?
+                    </h3>
+                    <ul className="text-sm text-blue-800 space-y-1">
+                      <li>✓ Faça upgrade para um plano pago (Bronze, Silver ou Gold)</li>
+                      <li>✓ Cada plano oferece um número diferente de diagnósticos por mês</li>
+                      <li>✓ Gold oferece acesso ilimitado</li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => router.push("/configuracoes")}
+                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
+                    >
+                      Gerenciar Plano
+                    </button>
+                    <button
+                      onClick={() => router.push("/dashboard")}
+                      className="w-full bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 transition font-semibold"
+                    >
+                      Voltar ao Dashboard
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const currentDimension = DIMENSIONS[currentDimensionIndex];
   const allQuestionsAnswered = currentDimension.questions.every(
@@ -64,7 +167,7 @@ export default function AssessmentPage() {
     if (currentDimensionIndex < DIMENSIONS.length - 1) {
       // Scroll para o topo ANTES de mudar
       window.scrollTo({ top: 0, behavior: "smooth" });
-      
+
       // Pequeno delay para garantir que o scroll aconteça
       setTimeout(() => {
         setCurrentDimensionIndex(currentDimensionIndex + 1);
@@ -76,7 +179,7 @@ export default function AssessmentPage() {
     if (currentDimensionIndex > 0) {
       // Scroll para o topo ANTES de mudar
       window.scrollTo({ top: 0, behavior: "smooth" });
-      
+
       // Pequeno delay para garantir que o scroll aconteça
       setTimeout(() => {
         setCurrentDimensionIndex(currentDimensionIndex - 1);
@@ -120,7 +223,7 @@ export default function AssessmentPage() {
       }
 
       const data = await response.json();
-      
+
       // Verificar se a resposta tem um ID
       if (!data.resultId) {
         setSaveStatus("error");
@@ -131,7 +234,7 @@ export default function AssessmentPage() {
 
       // Limpar sessionStorage
       sessionStorage.removeItem("assessmentAnswers");
-      
+
       // Redirecionar para resultados
       router.push(`/resultado/${data.resultId}`);
     } catch (error) {
@@ -172,9 +275,7 @@ export default function AssessmentPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             {currentDimension.name}
           </h2>
-          <p className="text-gray-600 text-lg">
-            {currentDimension.description}
-          </p>
+          <p className="text-gray-600 text-lg">{currentDimension.description}</p>
         </div>
 
         {/* Perguntas */}
