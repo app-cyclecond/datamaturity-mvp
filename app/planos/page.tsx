@@ -89,9 +89,22 @@ export default function PlanosPage() {
 
   const [loading, setLoading] = useState<string | null>(null);
 
-  const handleCheckout = async (priceId: string) => {
+  // Mapeamento de Price IDs
+  const priceIds: Record<string, string> = {
+    bronze: process.env.NEXT_PUBLIC_STRIPE_PRICE_BRONZE || "",
+    silver: process.env.NEXT_PUBLIC_STRIPE_PRICE_SILVER || "",
+    gold: process.env.NEXT_PUBLIC_STRIPE_PRICE_GOLD || "",
+  };
+
+  const handleCheckout = async (planKey: string) => {
     try {
-      setLoading(priceId);
+      const priceId = priceIds[planKey];
+      
+      if (!priceId) {
+        throw new Error("Price ID não configurado para este plano");
+      }
+
+      setLoading(planKey);
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: {
@@ -223,7 +236,7 @@ export default function PlanosPage() {
                     </div>
 
                     <Button
-                      onClick={() => handleCheckout(plan.planKey === 'bronze' ? process.env.NEXT_PUBLIC_STRIPE_PRICE_BRONZE! : plan.planKey === 'silver' ? process.env.NEXT_PUBLIC_STRIPE_PRICE_SILVER! : process.env.NEXT_PUBLIC_STRIPE_PRICE_GOLD!)}
+                      onClick={() => handleCheckout(plan.planKey)}
                       disabled={loading === plan.planKey}
                       className={`w-full mb-8 py-3 text-lg bg-brand-primary text-white hover:bg-brand-primary/90 disabled:opacity-50`}
                     >
