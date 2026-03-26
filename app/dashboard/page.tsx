@@ -337,63 +337,63 @@ export default function HomeExecutivaPage() {
           <div className="bg-white rounded-xl border border-gray-200 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Planos e Recursos</h2>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Bronze */}
-              <div className="border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Bronze</h3>
-                <p className="text-sm text-gray-600 mb-4">R$ 99/mês</p>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    1 diagnóstico/ano
+              <div className="border border-gray-200 rounded-lg p-8 min-h-fit">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Bronze</h3>
+                <p className="text-base font-semibold text-gray-900 mb-6">R$ 99/mês</p>
+                <ul className="space-y-3 text-base text-gray-700">
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span>1 diagnóstico/ano</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Relatório básico
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span>Relatório básico</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Benchmarking seu segmento
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span>Benchmarking seu segmento</span>
                   </li>
                 </ul>
               </div>
 
               {/* Silver */}
-              <div className="border-2 border-brand-primary rounded-lg p-6 bg-purple-50">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Silver</h3>
-                <p className="text-sm text-gray-600 mb-4">R$ 299/mês</p>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    4 diagnósticos/ano
+              <div className="border-2 border-brand-primary rounded-lg p-8 bg-purple-50 min-h-fit">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Silver</h3>
+                <p className="text-base font-semibold text-gray-900 mb-6">R$ 299/mês</p>
+                <ul className="space-y-3 text-base text-gray-700">
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span>4 diagnósticos/ano</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Relatório detalhado
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span>Relatório detalhado</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Recomendações priorizadas
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span>Recomendações priorizadas</span>
                   </li>
                 </ul>
               </div>
 
               {/* Gold */}
-              <div className="border border-yellow-400 rounded-lg p-6 bg-yellow-50">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Gold</h3>
-                <p className="text-sm text-gray-600 mb-4">R$ 999/mês</p>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Ilimitado
+              <div className="border border-yellow-400 rounded-lg p-8 bg-yellow-50 min-h-fit">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Gold</h3>
+                <p className="text-base font-semibold text-gray-900 mb-6">R$ 999/mês</p>
+                <ul className="space-y-3 text-base text-gray-700">
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span>Ilimitado</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Relatório executivo + técnico
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span>Relatório executivo + técnico</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    Comparativo completo
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span>Comparativo completo</span>
                   </li>
                 </ul>
               </div>
