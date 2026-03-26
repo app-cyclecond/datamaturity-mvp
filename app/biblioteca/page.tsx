@@ -1,11 +1,9 @@
 "use client";
 import { Sidebar } from "@/components/layout/sidebar";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Lock, Download, BookOpen, Shield, Users } from "lucide-react";
+import { ArrowLeft, Lock, Download, BookOpen, Shield, Users, BarChart2, Star, Wrench } from "lucide-react";
 import Link from "next/link";
 
 type UserProfile = {
@@ -19,44 +17,49 @@ type ContentItem = {
   id: string;
   title: string;
   description: string;
-  pillar: "técnico" | "regulatório" | "cultura";
+  category: "governanca" | "cultura" | "analytics" | "talentos" | "toolkit";
   required_plan: "bronze" | "silver" | "gold";
-  content_url?: string;
+  content_url: string;
+  nivel: "Estratégico" | "Operacional";
 };
 
-const SAMPLE_CONTENT: ContentItem[] = [
+const LIBRARY_CONTENT: ContentItem[] = [
   // GOVERNANÇA
   {
     id: "1",
     title: "Governança de Dados",
     description: "Estratégia, políticas e estrutura de governança para gerenciar dados como ativo corporativo.",
-    pillar: "técnico",
+    category: "governanca",
     required_plan: "bronze",
     content_url: "/biblioteca/DataMaturity-Governanca-Dados.pdf",
+    nivel: "Estratégico",
   },
   {
     id: "2",
     title: "Ciclo de Vida de Soluções de Dados & IA",
     description: "Do protótipo à produção: como escalar valor de forma estruturada.",
-    pillar: "técnico",
+    category: "governanca",
     required_plan: "bronze",
     content_url: "/biblioteca/DataMaturity-Ciclo-Vida-Solucoes.pdf",
+    nivel: "Operacional",
   },
   {
     id: "3",
     title: "Política de Inteligência Artificial",
     description: "Diretrizes éticas, seguras e responsáveis para o uso de IA na empresa.",
-    pillar: "regulatório",
+    category: "governanca",
     required_plan: "silver",
     content_url: "/biblioteca/DataMaturity-Politica-IA.pdf",
+    nivel: "Estratégico",
   },
   {
     id: "4",
     title: "Templates Práticos de Governança",
     description: "Dicionário de Dados, Matriz RACI, Avaliação de Qualidade.",
-    pillar: "técnico",
+    category: "governanca",
     required_plan: "bronze",
     content_url: "/biblioteca/DataMaturity-Templates-Governanca.pdf",
+    nivel: "Operacional",
   },
 
   // CULTURA
@@ -64,49 +67,55 @@ const SAMPLE_CONTENT: ContentItem[] = [
     id: "5",
     title: "Transformação e Cultura Data-Driven",
     description: "Como engajar a organização, implementar letramento e gerenciar mudanças organizacionais.",
-    pillar: "cultura",
+    category: "cultura",
     required_plan: "bronze",
     content_url: "/biblioteca/DataMaturity-Transformacao-Cultura.pdf",
+    nivel: "Estratégico",
   },
   {
     id: "6",
     title: "Playbook de Change Management",
     description: "Como garantir a adoção de produtos e soluções de dados.",
-    pillar: "cultura",
+    category: "cultura",
     required_plan: "silver",
     content_url: "/biblioteca/DataMaturity-Playbook-ChangeManagement.pdf",
+    nivel: "Operacional",
   },
   {
     id: "7",
     title: "Letramento Executivo em IA e Dados",
     description: "O que todo líder precisa saber para guiar a organização.",
-    pillar: "cultura",
+    category: "cultura",
     required_plan: "silver",
     content_url: "/biblioteca/DataMaturity-Letramento-Executivo.pdf",
+    nivel: "Estratégico",
   },
   {
     id: "8",
     title: "Workshop de Estratégia e Valor",
     description: "Como facilitar sessões de ideação e priorização de casos de uso.",
-    pillar: "cultura",
+    category: "cultura",
     required_plan: "silver",
     content_url: "/biblioteca/DataMaturity-Workshop-Estrategia-Valor.pdf",
+    nivel: "Operacional",
   },
   {
     id: "9",
     title: "Casos de Insucesso e Aprendizados",
     description: "Por que projetos de dados falham e como evitar armadilhas comuns.",
-    pillar: "cultura",
+    category: "cultura",
     required_plan: "gold",
     content_url: "/biblioteca/DataMaturity-Casos-Insucesso-Aprendizados.pdf",
+    nivel: "Estratégico",
   },
   {
     id: "10",
     title: "Como Estruturar um Hackathon de Dados",
     description: "Guia prático para acelerar inovação e engajar equipes.",
-    pillar: "cultura",
+    category: "cultura",
     required_plan: "silver",
     content_url: "/biblioteca/DataMaturity-Como-Estruturar-Hackathon.pdf",
+    nivel: "Operacional",
   },
 
   // ANALYTICS
@@ -114,41 +123,46 @@ const SAMPLE_CONTENT: ContentItem[] = [
     id: "11",
     title: "Analytics e Insights",
     description: "Da análise descritiva ao preditivo: como gerar valor real com dados.",
-    pillar: "técnico",
+    category: "analytics",
     required_plan: "bronze",
     content_url: "/biblioteca/DataMaturity-Analytics-Insights.pdf",
+    nivel: "Estratégico",
   },
   {
     id: "12",
     title: "Data Storytelling",
     description: "Como comunicar insights e influenciar decisões com dados.",
-    pillar: "técnico",
+    category: "analytics",
     required_plan: "bronze",
     content_url: "/biblioteca/DataMaturity-Data-Storytelling.pdf",
+    nivel: "Operacional",
   },
   {
     id: "13",
     title: "Métricas e KPIs",
     description: "Conceitos, fórmulas e como medir o que realmente importa.",
-    pillar: "técnico",
+    category: "analytics",
     required_plan: "bronze",
     content_url: "/biblioteca/DataMaturity-Metricas-KPIs.pdf",
+    nivel: "Operacional",
   },
   {
     id: "14",
     title: "Analytics Aumentada e GenAI",
     description: "O futuro da democratização de dados com IA Generativa.",
-    pillar: "técnico",
+    category: "analytics",
     required_plan: "gold",
     content_url: "/biblioteca/DataMaturity-Analytics-Aumentada.pdf",
+    nivel: "Estratégico",
   },
   {
     id: "15",
     title: "Guia Rápido de Métricas de Negócios",
     description: "Referência rápida de fórmulas e KPIs essenciais.",
-    pillar: "técnico",
+    category: "analytics",
     required_plan: "bronze",
     content_url: "/biblioteca/DataMaturity-Guia-Rapido-Metricas.pdf",
+    nivel: "Operacional",
   },
 
   // TALENTOS
@@ -156,17 +170,19 @@ const SAMPLE_CONTENT: ContentItem[] = [
     id: "16",
     title: "Talentos e Papéis em Dados",
     description: "Estruturação de equipes, papéis críticos e estratégia de retenção de talentos.",
-    pillar: "cultura",
+    category: "talentos",
     required_plan: "silver",
     content_url: "/biblioteca/DataMaturity-Talentos-Papeis.pdf",
+    nivel: "Estratégico",
   },
   {
     id: "17",
     title: "Guia de Papéis em Dados",
     description: "Job Descriptions detalhadas para CDO, Engenheiro, Cientista e Analista de Dados.",
-    pillar: "cultura",
+    category: "talentos",
     required_plan: "silver",
     content_url: "/biblioteca/DataMaturity-Guia-Papeis-Dados.pdf",
+    nivel: "Operacional",
   },
 
   // TOOLKIT
@@ -174,223 +190,318 @@ const SAMPLE_CONTENT: ContentItem[] = [
     id: "18",
     title: "Toolkit Prático",
     description: "Ferramentas, templates e guias para acelerar projetos de dados.",
-    pillar: "técnico",
+    category: "toolkit",
     required_plan: "bronze",
     content_url: "/biblioteca/DataMaturity-Toolkit-Pratico.pdf",
+    nivel: "Estratégico",
   },
   {
     id: "19",
     title: "Guia de Entrevista com Process Owners",
     description: "Como mapear fluxos de dados e identificar dores de negócio.",
-    pillar: "técnico",
+    category: "toolkit",
     required_plan: "bronze",
     content_url: "/biblioteca/DataMaturity-Guia-Entrevista-Processos.pdf",
+    nivel: "Operacional",
   },
   {
     id: "20",
     title: "Ficha de Hipótese (Template)",
     description: "Estruturando projetos de analytics antes da primeira linha de código.",
-    pillar: "técnico",
+    category: "toolkit",
     required_plan: "bronze",
     content_url: "/biblioteca/DataMaturity-Ficha-Hipotese-Template.pdf",
+    nivel: "Operacional",
   },
 ];
 
-const PILLAR_ICONS = {
-  técnico: BookOpen,
-  regulatório: Shield,
-  cultura: Users,
+const CATEGORY_CONFIG = {
+  governanca: {
+    label: "Governança",
+    icon: Shield,
+    color: "bg-blue-50 border-blue-200",
+    iconColor: "text-blue-600",
+    badgeColor: "bg-blue-100 text-blue-800",
+    activeColor: "bg-blue-600 text-white border-blue-600",
+  },
+  cultura: {
+    label: "Cultura",
+    icon: Users,
+    color: "bg-purple-50 border-purple-200",
+    iconColor: "text-purple-600",
+    badgeColor: "bg-purple-100 text-purple-800",
+    activeColor: "bg-purple-600 text-white border-purple-600",
+  },
+  analytics: {
+    label: "Analytics",
+    icon: BarChart2,
+    color: "bg-emerald-50 border-emerald-200",
+    iconColor: "text-emerald-600",
+    badgeColor: "bg-emerald-100 text-emerald-800",
+    activeColor: "bg-emerald-600 text-white border-emerald-600",
+  },
+  talentos: {
+    label: "Talentos",
+    icon: Star,
+    color: "bg-amber-50 border-amber-200",
+    iconColor: "text-amber-600",
+    badgeColor: "bg-amber-100 text-amber-800",
+    activeColor: "bg-amber-500 text-white border-amber-500",
+  },
+  toolkit: {
+    label: "Toolkit",
+    icon: Wrench,
+    color: "bg-orange-50 border-orange-200",
+    iconColor: "text-orange-600",
+    badgeColor: "bg-orange-100 text-orange-800",
+    activeColor: "bg-orange-500 text-white border-orange-500",
+  },
 };
 
-const PILLAR_COLORS = {
-  técnico: "bg-blue-50 border-blue-200 text-blue-900",
-  regulatório: "bg-red-50 border-red-200 text-red-900",
-  cultura: "bg-green-50 border-green-200 text-green-900",
-};
+const PLAN_ORDER = { bronze: 1, silver: 2, gold: 3 };
 
 export default function BibliotecaPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedPillar, setSelectedPillar] = useState<"técnico" | "regulatório" | "cultura" | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<keyof typeof CATEGORY_CONFIG | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
-
     const load = async () => {
       const { data: authData } = await supabase.auth.getUser();
       if (!authData.user) {
         router.push("/login");
         return;
       }
-
       const { data: userData } = await supabase
         .from("users")
         .select("*")
         .eq("id", authData.user.id)
         .single();
-
-      if (userData) {
-        setUser(userData as UserProfile);
-      }
-
+      if (userData) setUser(userData as UserProfile);
       setIsLoading(false);
     };
-
     load();
   }, [router]);
 
-  const canAccessContent = (requiredPlan: string) => {
+  const canAccess = (requiredPlan: "bronze" | "silver" | "gold") => {
     if (!user) return false;
-    if (user.plan === "gold") return true;
-    if (user.plan === "silver" && requiredPlan !== "gold") return true;
-    if (user.plan === "bronze" && requiredPlan === "bronze") return true;
-    return false;
+    const userLevel = PLAN_ORDER[user.plan as keyof typeof PLAN_ORDER] ?? 0;
+    const required = PLAN_ORDER[requiredPlan];
+    return userLevel >= required;
   };
 
-  const filteredContent = selectedPillar
-    ? SAMPLE_CONTENT.filter((item) => item.pillar === selectedPillar)
-    : SAMPLE_CONTENT;
+  const filteredContent = selectedCategory
+    ? LIBRARY_CONTENT.filter((item) => item.category === selectedCategory)
+    : LIBRARY_CONTENT;
 
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary" />
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600" />
           <p className="mt-4 text-gray-600">Carregando...</p>
         </div>
       </div>
     );
   }
 
+  const userPlanLevel = PLAN_ORDER[user?.plan as keyof typeof PLAN_ORDER] ?? 0;
+
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* SIDEBAR */}
       <Sidebar user={user || undefined} activePage="biblioteca" />
 
-      {/* MAIN CONTENT */}
       <main className="flex-1 ml-64 p-10">
         <div className="max-w-5xl">
+
           {/* HEADER */}
           <div className="mb-8">
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+              className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-4 text-sm transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
               Voltar
             </button>
-            <h1 className="text-4xl font-bold text-gray-900">Biblioteca de Conteúdo</h1>
-            <p className="text-gray-600 mt-2">
-              Acesse documentos e guias para acelerar sua transformação em dados
-            </p>
+            <div className="flex items-start justify-between">
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900">Biblioteca de Conteúdo</h1>
+                <p className="text-gray-500 mt-2">
+                  Acesse documentos e guias para acelerar sua transformação em dados
+                </p>
+              </div>
+              <div className="text-right">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  {LIBRARY_CONTENT.length} documentos
+                </span>
+              </div>
+            </div>
           </div>
 
-          {/* FILTROS POR PILAR */}
-          <div className="mb-8 flex gap-3">
+          {/* PLANO ATUAL */}
+          {user && (
+            <div className={`mb-6 p-4 rounded-xl border-2 flex items-center justify-between ${
+              user.plan === "gold"
+                ? "bg-amber-50 border-amber-300"
+                : user.plan === "silver"
+                ? "bg-gray-50 border-gray-300"
+                : "bg-orange-50 border-orange-300"
+            }`}>
+              <div>
+                <span className="text-sm font-medium text-gray-600">Seu plano atual:</span>
+                <span className={`ml-2 font-bold text-lg capitalize ${
+                  user.plan === "gold" ? "text-amber-600" :
+                  user.plan === "silver" ? "text-gray-600" : "text-orange-600"
+                }`}>
+                  {user.plan === "gold" ? "🥇 Gold" : user.plan === "silver" ? "🥈 Silver" : "🥉 Bronze"}
+                </span>
+              </div>
+              <span className="text-sm text-gray-500">
+                {user.plan === "gold"
+                  ? "✅ Acesso completo a todos os documentos"
+                  : user.plan === "silver"
+                  ? "Acesso a documentos Bronze e Silver"
+                  : "Acesso apenas a documentos Bronze"}
+              </span>
+            </div>
+          )}
+
+          {/* FILTROS POR CATEGORIA */}
+          <div className="mb-8 flex flex-wrap gap-2">
             <button
-              onClick={() => setSelectedPillar(null)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                selectedPillar === null
-                  ? "bg-brand-primary text-white"
-                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+              onClick={() => setSelectedCategory(null)}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all border ${
+                selectedCategory === null
+                  ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
+                  : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
               }`}
             >
-              Todos
+              Todos ({LIBRARY_CONTENT.length})
             </button>
-            {(["técnico", "regulatório", "cultura"] as const).map((pillar) => {
-              const Icon = PILLAR_ICONS[pillar];
+            {(Object.keys(CATEGORY_CONFIG) as Array<keyof typeof CATEGORY_CONFIG>).map((cat) => {
+              const cfg = CATEGORY_CONFIG[cat];
+              const Icon = cfg.icon;
+              const count = LIBRARY_CONTENT.filter((i) => i.category === cat).length;
               return (
                 <button
-                  key={pillar}
-                  onClick={() => setSelectedPillar(pillar)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
-                    selectedPillar === pillar
-                      ? "bg-brand-primary text-white"
-                      : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-all border flex items-center gap-2 ${
+                    selectedCategory === cat
+                      ? cfg.activeColor + " shadow-md"
+                      : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                  {pillar.charAt(0).toUpperCase() + pillar.slice(1)}
+                  {cfg.label} ({count})
                 </button>
               );
             })}
           </div>
 
-          {/* CONTEÚDO */}
-          <div className="space-y-4">
-            {filteredContent.map((content) => {
-              const Icon = PILLAR_ICONS[content.pillar];
-              const hasAccess = canAccessContent(content.required_plan);
-              const colorClass = PILLAR_COLORS[content.pillar];
+          {/* GRID DE DOCUMENTOS */}
+          <div className="space-y-3">
+            {filteredContent.map((item) => {
+              const cfg = CATEGORY_CONFIG[item.category];
+              const Icon = cfg.icon;
+              const accessible = canAccess(item.required_plan);
 
               return (
                 <div
-                  key={content.id}
-                  className={`border rounded-lg p-6 transition-all ${
-                    hasAccess
-                      ? "bg-white border-gray-200 hover:shadow-md"
-                      : "bg-gray-50 border-gray-200 opacity-75"
+                  key={item.id}
+                  className={`rounded-xl border-2 p-5 transition-all ${
+                    accessible
+                      ? "bg-white border-gray-100 hover:border-indigo-200 hover:shadow-md"
+                      : "bg-gray-50 border-gray-100 opacity-75"
                   }`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className={`p-2 rounded-lg border ${colorClass}`}>
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <h3 className="text-lg font-bold text-gray-900">{content.title}</h3>
+                  <div className="flex items-center justify-between gap-4">
+                    {/* ÍCONE + INFO */}
+                    <div className="flex items-start gap-4 flex-1 min-w-0">
+                      <div className={`p-2.5 rounded-xl border-2 flex-shrink-0 ${cfg.color}`}>
+                        <Icon className={`h-5 w-5 ${cfg.iconColor}`} />
                       </div>
-                      <p className="text-gray-600 mb-4">{content.description}</p>
-
-                      <div className="flex items-center gap-4">
-                        <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
-                          Plano {content.required_plan.charAt(0).toUpperCase() + content.required_plan.slice(1)}+
-                        </span>
-
-                        {!hasAccess && (
-                          <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full flex items-center gap-1">
-                            <Lock className="h-3 w-3" />
-                            Bloqueado
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <h3 className={`text-base font-bold ${accessible ? "text-gray-900" : "text-gray-500"}`}>
+                            {item.title}
+                          </h3>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${cfg.badgeColor}`}>
+                            {cfg.label}
                           </span>
-                        )}
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            item.nivel === "Estratégico"
+                              ? "bg-indigo-100 text-indigo-700"
+                              : "bg-gray-100 text-gray-600"
+                          }`}>
+                            {item.nivel}
+                          </span>
+                        </div>
+                        <p className={`text-sm ${accessible ? "text-gray-600" : "text-gray-400"}`}>
+                          {item.description}
+                        </p>
+                        <div className="mt-2">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                            item.required_plan === "gold"
+                              ? "bg-amber-100 text-amber-700"
+                              : item.required_plan === "silver"
+                              ? "bg-gray-200 text-gray-600"
+                              : "bg-orange-100 text-orange-700"
+                          }`}>
+                            {item.required_plan === "gold" ? "🥇" : item.required_plan === "silver" ? "🥈" : "🥉"}
+                            Plano {item.required_plan.charAt(0).toUpperCase() + item.required_plan.slice(1)}+
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    {hasAccess ? (
-                      <a href={content.content_url} download className="ml-4 px-4 py-2 bg-brand-primary text-white rounded-lg hover:opacity-90 transition-all flex items-center gap-2">
-                        <Download className="h-4 w-4" />
-                        Baixar
-                      </a>
-                    ) : (
-                      <Link href="/planos">
-                        <button className="ml-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all flex items-center gap-2">
-                          <Lock className="h-4 w-4" />
-                          Upgrade
-                        </button>
-                      </Link>
-                    )}
+                    {/* BOTÃO DE AÇÃO */}
+                    <div className="flex-shrink-0">
+                      {accessible ? (
+                        <a
+                          href={item.content_url}
+                          download
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 active:scale-95 transition-all shadow-sm"
+                        >
+                          <Download className="h-4 w-4" />
+                          Baixar PDF
+                        </a>
+                      ) : (
+                        <Link href="/planos">
+                          <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-200 text-gray-500 text-sm font-semibold rounded-xl hover:bg-gray-300 transition-all cursor-pointer">
+                            <Lock className="h-4 w-4" />
+                            Upgrade
+                          </button>
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* CTA PARA UPGRADE */}
-          {user?.plan !== "gold" && (
-            <div className="mt-12 bg-gradient-to-r from-brand-primary to-purple-600 rounded-xl p-8 text-white">
-              <h2 className="text-2xl font-bold mb-3">Desbloqueie todo o conteúdo</h2>
-              <p className="mb-6 text-purple-100">
-                Com o plano Gold, você tem acesso a toda a biblioteca de conteúdo, incluindo
-                documentos avançados de técnico, regulatório e cultura.
+          {/* CTA UPGRADE */}
+          {userPlanLevel < 3 && (
+            <div className="mt-12 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-white shadow-xl">
+              <h2 className="text-2xl font-bold mb-2">🚀 Desbloqueie todo o conteúdo</h2>
+              <p className="mb-6 text-indigo-100 text-sm">
+                Com o plano Gold, você tem acesso irrestrito a todos os 20 documentos da biblioteca,
+                incluindo guias avançados de Analytics, IA Generativa e Casos de Insucesso.
               </p>
               <Link href="/planos">
-                <button className="bg-white text-brand-primary font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-all">
-                  Upgrade para Gold →
+                <button className="bg-white text-indigo-600 font-bold px-6 py-3 rounded-xl hover:bg-indigo-50 transition-all shadow-md">
+                  Fazer Upgrade para Gold →
                 </button>
               </Link>
             </div>
           )}
+
         </div>
       </main>
     </div>
