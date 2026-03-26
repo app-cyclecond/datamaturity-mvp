@@ -190,55 +190,61 @@ export default function DiagnosticoPage() {
               <p className="text-gray-600 mt-1">
                 Diagnóstico de {new Date(lastAssessment.created_at).toLocaleDateString("pt-BR")}
               </p>
-            </div>
-
-            {/* SCORE GERAL */}
-            <div className="grid grid-cols-3 gap-6">
-              <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                <p className="text-gray-600 text-sm font-medium mb-2">Score Geral</p>
-                <div className="text-5xl font-bold text-brand-primary mb-2">
+              {/* SCORE GERAL */}
+            <div className="grid grid-cols-3 gap-6 mb-8">
+              <div className="bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-700 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-indigo-400">
+                <p className="text-indigo-100 text-sm font-medium mb-2">Score Geral</p>
+                <div className="text-6xl font-black text-white mb-3">
                   {lastAssessment.overall_score}
                 </div>
                 <div
-                  className={`inline-block px-4 py-2 rounded-lg border text-sm font-semibold ${getLevelColor(
-                    lastAssessment.level
-                  )}`}
+                  className={`inline-block px-4 py-2 rounded-lg border text-sm font-bold bg-white/20 backdrop-blur-sm ${
+                    getLevelColor(
+                      lastAssessment.level
+                    )
+                  }`}
                 >
                   {lastAssessment.level}
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                <p className="text-gray-600 text-sm font-medium mb-2">O que significa?</p>
-                <p className="text-gray-700 text-sm leading-relaxed">
+              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-2 border-emerald-200">
+                <p className="text-emerald-700 text-sm font-bold mb-3 flex items-center gap-2">
+                  <span className="text-lg">💡</span> O que significa?
+                </p>
+                <p className="text-emerald-900 text-sm leading-relaxed font-medium">
                   {getLevelDescription(lastAssessment.level)}
                 </p>
               </div>
 
-              <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                <p className="text-gray-600 text-sm font-medium mb-2">Dimensões Avaliadas</p>
-                <div className="text-5xl font-bold text-gray-900 mb-2">
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-2 border-amber-200">
+                <p className="text-amber-700 text-sm font-bold mb-3 flex items-center gap-2">
+                  <span className="text-lg">📊</span> Dimensões Avaliadas
+                </p>
+                <div className="text-5xl font-black text-amber-600 mb-2">
                   {Object.keys(lastAssessment.dimension_scores).length}
                 </div>
-                <p className="text-gray-500 text-sm">áreas de maturidade</p>
+                <p className="text-amber-700 text-sm font-semibold">áreas de maturidade</p>
               </div>
             </div>
 
             {/* FORÇAS E FRAQUEZAS */}
-            <div className="grid lg:grid-cols-2 gap-6">
+            <div className="grid lg:grid-cols-2 gap-6 mb-8">
               {/* FORÇAS */}
-              <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                <div className="flex items-center gap-2 mb-6">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <h3 className="text-lg font-bold text-gray-900">Áreas de Força</h3>
+              <div className="bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 rounded-2xl border-2 border-emerald-300 p-8 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="bg-emerald-500 p-3 rounded-xl">
+                    <CheckCircle className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-emerald-900">Áreas de Força</h3>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {getTopStrengths(lastAssessment.dimension_scores).map((item, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <span className="text-gray-700 font-medium">{item.name}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-green-600">{item.score}</span>
-                        <ArrowUp className="h-4 w-4 text-green-600" />
+                    <div key={i} className="flex items-center justify-between p-3 bg-white/60 rounded-lg hover:bg-white transition-colors">
+                      <span className="text-emerald-900 font-semibold">{item.name}</span>
+                      <div className="flex items-center gap-2 bg-emerald-100 px-3 py-1 rounded-lg">
+                        <span className="font-black text-emerald-600 text-lg">{item.score}</span>
+                        <ArrowUp className="h-5 w-5 text-emerald-600" />
                       </div>
                     </div>
                   ))}
@@ -246,18 +252,20 @@ export default function DiagnosticoPage() {
               </div>
 
               {/* FRAQUEZAS */}
-              <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                <div className="flex items-center gap-2 mb-6">
-                  <AlertCircle className="h-5 w-5 text-orange-600" />
-                  <h3 className="text-lg font-bold text-gray-900">Áreas de Melhoria</h3>
+              <div className="bg-gradient-to-br from-orange-50 via-amber-50 to-red-50 rounded-2xl border-2 border-orange-300 p-8 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="bg-orange-500 p-3 rounded-xl">
+                    <AlertCircle className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black text-orange-900">Áreas de Melhoria</h3>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {getTopWeaknesses(lastAssessment.dimension_scores).map((item, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <span className="text-gray-700 font-medium">{item.name}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-orange-600">{item.score}</span>
-                        <ArrowDown className="h-4 w-4 text-orange-600" />
+                    <div key={i} className="flex items-center justify-between p-3 bg-white/60 rounded-lg hover:bg-white transition-colors">
+                      <span className="text-orange-900 font-semibold">{item.name}</span>
+                      <div className="flex items-center gap-2 bg-orange-100 px-3 py-1 rounded-lg">
+                        <span className="font-black text-orange-600 text-lg">{item.score}</span>
+                        <ArrowDown className="h-5 w-5 text-orange-600" />
                       </div>
                     </div>
                   ))}
