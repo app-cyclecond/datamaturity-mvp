@@ -143,24 +143,24 @@ export default function HomeExecutivaPage() {
 
           {/* SCORE ATUAL */}
           {lastAssessment && (
-            <div className="bg-gradient-to-r from-brand-primary to-purple-600 rounded-2xl p-8 text-white">
+            <div className="bg-gradient-to-r from-brand-primary to-purple-600 rounded-2xl p-8 text-white shadow-lg">
               <div className="grid grid-cols-3 gap-8">
                 <div>
-                  <p className="text-purple-100 text-sm mb-2">Score Atual</p>
-                  <p className="text-5xl font-bold">{lastAssessment.overall_score}</p>
-                  <p className="text-purple-100 text-sm mt-2">{lastAssessment.level}</p>
+                  <p className="text-white text-base font-semibold mb-3 opacity-90">Score Atual</p>
+                  <p className="text-6xl font-bold text-white">{lastAssessment.overall_score}</p>
+                  <p className="text-white text-lg font-medium mt-3">{lastAssessment.level}</p>
                 </div>
                 <div>
-                  <p className="text-purple-100 text-sm mb-2">Tendência</p>
+                  <p className="text-white text-base font-semibold mb-3 opacity-90">Tendência</p>
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="h-6 w-6" />
-                    <p className="text-3xl font-bold">+0.2</p>
+                    <TrendingUp className="h-8 w-8 text-white" />
+                    <p className="text-4xl font-bold text-white">+0.2</p>
                   </div>
-                  <p className="text-purple-100 text-sm mt-2">vs. último diagnóstico</p>
+                  <p className="text-white text-base font-medium mt-3 opacity-90">vs. último diagnóstico</p>
                 </div>
                 <div>
-                  <p className="text-purple-100 text-sm mb-2">Data</p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-white text-base font-semibold mb-3 opacity-90">Data</p>
+                  <p className="text-3xl font-bold text-white">
                     {new Date(lastAssessment.created_at).toLocaleDateString("pt-BR")}
                   </p>
                 </div>
@@ -339,61 +339,61 @@ export default function HomeExecutivaPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Bronze */}
-              <div className="border border-gray-200 rounded-lg p-8 min-h-fit">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Bronze</h3>
-                <p className="text-base font-semibold text-gray-900 mb-6">R$ 99/mês</p>
-                <ul className="space-y-3 text-base text-gray-700">
+              <div className="border-2 border-gray-300 rounded-lg p-8 min-h-fit bg-white shadow-sm hover:shadow-md transition-shadow">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Bronze</h3>
+                <p className="text-2xl font-bold text-gray-900 mb-8">R$ 99/mês</p>
+                <ul className="space-y-4 text-lg text-gray-800">
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>1 diagnóstico/ano</span>
+                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
+                    <span className="font-medium">1 diagnóstico/ano</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>Relatório básico</span>
+                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
+                    <span className="font-medium">Relatório básico</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>Benchmarking seu segmento</span>
+                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
+                    <span className="font-medium">Benchmarking seu segmento</span>
                   </li>
                 </ul>
               </div>
 
               {/* Silver */}
-              <div className="border-2 border-brand-primary rounded-lg p-8 bg-purple-50 min-h-fit">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Silver</h3>
-                <p className="text-base font-semibold text-gray-900 mb-6">R$ 299/mês</p>
-                <ul className="space-y-3 text-base text-gray-700">
+              <div className="border-3 border-brand-primary rounded-lg p-8 bg-purple-50 min-h-fit shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Silver</h3>
+                <p className="text-2xl font-bold text-gray-900 mb-8">R$ 299/mês</p>
+                <ul className="space-y-4 text-lg text-gray-800">
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>4 diagnósticos/ano</span>
+                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
+                    <span className="font-medium">4 diagnósticos/ano</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>Relatório detalhado</span>
+                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
+                    <span className="font-medium">Relatório detalhado</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>Recomendações priorizadas</span>
+                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
+                    <span className="font-medium">Recomendações priorizadas</span>
                   </li>
                 </ul>
               </div>
 
               {/* Gold */}
-              <div className="border border-yellow-400 rounded-lg p-8 bg-yellow-50 min-h-fit">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Gold</h3>
-                <p className="text-base font-semibold text-gray-900 mb-6">R$ 999/mês</p>
-                <ul className="space-y-3 text-base text-gray-700">
+              <div className="border-2 border-yellow-500 rounded-lg p-8 bg-yellow-50 min-h-fit shadow-sm hover:shadow-md transition-shadow">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Gold</h3>
+                <p className="text-2xl font-bold text-gray-900 mb-8">R$ 999/mês</p>
+                <ul className="space-y-4 text-lg text-gray-800">
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>Ilimitado</span>
+                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
+                    <span className="font-medium">Ilimitado</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>Relatório executivo + técnico</span>
+                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
+                    <span className="font-medium">Relatório executivo + técnico</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>Comparativo completo</span>
+                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
+                    <span className="font-medium">Comparativo completo</span>
                   </li>
                 </ul>
               </div>
