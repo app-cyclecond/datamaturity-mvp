@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { ScrollAnimation } from '@/components/ui/scroll-animation'
 import { ArrowRight, CheckCircle2, TrendingUp, BarChart3, Lock, Users, Zap, LogOut, User } from 'lucide-react'
 
 export default function Home() {
@@ -129,14 +130,14 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link 
               href={isLoggedIn ? "/assessment" : "/signup"}
-              className="inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-lg font-semibold transition transform hover:scale-105 shadow-lg hover:shadow-xl"
+              className="inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:-translate-y-1"
             >
               {isLoggedIn ? "Fazer Novo Diagnóstico" : "Descobrir Seu Score"}
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5 transition-transform" />
             </Link>
-            <button className="inline-flex items-center justify-center gap-2 border-2 border-primary-600 text-primary-600 hover:bg-primary-50 px-8 py-4 rounded-lg font-semibold transition">
+            <button className="inline-flex items-center justify-center gap-2 border-2 border-primary-600 text-primary-600 hover:bg-primary-50 px-8 py-4 rounded-lg font-semibold transition-all duration-300 hover:border-primary-700 hover:text-primary-700 hover:shadow-md hover:-translate-y-1">
               Entender a Metodologia
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5 transition-transform" />
             </button>
           </div>
 
@@ -172,8 +173,9 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Problem 1 */}
-            <div className="p-8 bg-neutral-50 rounded-xl border border-neutral-200 hover:border-primary-300 hover:shadow-card transition">
-              <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center mb-4">
+            <ScrollAnimation animation="fade-in-up" delay={0}>
+            <div className="p-8 bg-neutral-50 rounded-xl border border-neutral-200 hover:border-primary-300 hover:shadow-lg hover:bg-white transition-all duration-300 hover:-translate-y-2 cursor-pointer">
+              <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center mb-4 transition-transform duration-300 hover:scale-110">
                 <TrendingUp className="w-6 h-6 text-accent-600" />
               </div>
               <h3 className="text-xl font-bold text-neutral-900 mb-3">Decisões no "Achismo"</h3>
@@ -181,10 +183,12 @@ export default function Home() {
                 Sem dados confiáveis, líderes dependem da intuição. Isso gera estratégias desalinhadas e investimentos com baixo ROI.
               </p>
             </div>
+            </ScrollAnimation>
 
             {/* Problem 2 */}
-            <div className="p-8 bg-neutral-50 rounded-xl border border-neutral-200 hover:border-primary-300 hover:shadow-card transition">
-              <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center mb-4">
+            <ScrollAnimation animation="fade-in-up" delay={100}>
+            <div className="p-8 bg-neutral-50 rounded-xl border border-neutral-200 hover:border-primary-300 hover:shadow-lg hover:bg-white transition-all duration-300 hover:-translate-y-2 cursor-pointer">
+              <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center mb-4 transition-transform duration-300 hover:scale-110">
                 <Users className="w-6 h-6 text-accent-600" />
               </div>
               <h3 className="text-xl font-bold text-neutral-900 mb-3">Silos de Informação</h3>
@@ -192,10 +196,12 @@ export default function Home() {
                 Cada departamento tem "sua própria verdade". O tempo gasto reconciliando planilhas destrói a produtividade.
               </p>
             </div>
+            </ScrollAnimation>
 
             {/* Problem 3 */}
-            <div className="p-8 bg-neutral-50 rounded-xl border border-neutral-200 hover:border-primary-300 hover:shadow-card transition">
-              <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center mb-4">
+            <ScrollAnimation animation="fade-in-up" delay={200}>
+            <div className="p-8 bg-neutral-50 rounded-xl border border-neutral-200 hover:border-primary-300 hover:shadow-lg hover:bg-white transition-all duration-300 hover:-translate-y-2 cursor-pointer">
+              <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center mb-4 transition-transform duration-300 hover:scale-110">
                 <Zap className="w-6 h-6 text-accent-600" />
               </div>
               <h3 className="text-xl font-bold text-neutral-900 mb-3">Frustração com IA</h3>
@@ -203,6 +209,7 @@ export default function Home() {
                 Projetos de IA falham porque a base de dados é ruim. "Garbage in, garbage out" nunca foi tão real.
               </p>
             </div>
+            </ScrollAnimation>
           </div>
         </div>
       </section>
@@ -228,8 +235,8 @@ export default function Home() {
                 { icon: CheckCircle2, title: 'Gestão & Qualidade', desc: 'Catálogo e confiabilidade' },
                 { icon: TrendingUp, title: 'Analytics & IA', desc: 'Geração de valor' },
               ].map((item, i) => (
-                <div key={i} className="flex gap-4 p-4 bg-white rounded-lg border border-neutral-200 hover:border-primary-300 transition">
-                  <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div key={i} className="flex gap-4 p-4 bg-white rounded-lg border border-neutral-200 hover:border-primary-300 hover:shadow-md transition-all duration-300 hover:-translate-x-1 cursor-pointer">
+                  <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110">
                     <item.icon className="w-5 h-5 text-primary-600" />
                   </div>
                   <div>
@@ -237,7 +244,7 @@ export default function Home() {
                     <p className="text-sm text-neutral-600">{item.desc}</p>
                   </div>
                 </div>
-              ))}
+              ))
             </div>
 
             {/* Score Card */}
