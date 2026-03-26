@@ -9,6 +9,14 @@ interface ScrollAnimationProps {
   className?: string;
 }
 
+const animationClasses = {
+  'fade-in': 'animate-fade-in',
+  'fade-in-up': 'animate-fade-in-up',
+  'slide-in-left': 'animate-slide-in-left',
+  'slide-in-right': 'animate-slide-in-right',
+  'scale-in': 'animate-scale-in',
+};
+
 export function ScrollAnimation({
   children,
   animation = 'fade-in-up',
@@ -44,10 +52,12 @@ export function ScrollAnimation({
     };
   }, [delay]);
 
+  const animationClass = animationClasses[animation];
+
   return (
     <div
       ref={ref}
-      className={`${isVisible ? `animate-${animation}` : 'opacity-0'} ${className}`}
+      className={`${isVisible ? animationClass : 'opacity-0'} ${className}`}
     >
       {children}
     </div>
