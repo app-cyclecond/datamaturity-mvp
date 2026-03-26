@@ -87,9 +87,12 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  <button className="text-neutral-600 hover:text-primary-600 transition font-medium">
+                  <Link
+                    href="/auth/login"
+                    className="text-neutral-600 hover:text-primary-600 transition font-medium"
+                  >
                     Entrar
-                  </button>
+                  </Link>
                   <Link 
                     href="/assessment"
                     className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium transition transform hover:scale-105"
