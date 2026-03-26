@@ -143,7 +143,7 @@ export default function HomeExecutivaPage() {
 
           {/* SCORE ATUAL */}
           {lastAssessment && (
-            <div className="bg-gradient-to-r from-brand-primary to-purple-600 rounded-2xl p-8 text-white shadow-lg">
+            <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 rounded-2xl p-8 text-white shadow-lg">
               <div className="grid grid-cols-3 gap-8">
                 <div>
                   <p className="text-white text-base font-semibold mb-3 opacity-90">Score Atual</p>
