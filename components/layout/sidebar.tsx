@@ -40,7 +40,7 @@ export function Sidebar({ user, activePage }: SidebarProps) {
   ];
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col justify-between fixed h-screen">
+    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col justify-between fixed h-screen overflow-y-auto">
       {/* TOP SECTION */}
       <div>
         {/* LOGO */}

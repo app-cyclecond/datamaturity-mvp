@@ -169,53 +169,56 @@ export default function HomeExecutivaPage() {
           )}
 
           {/* BENCHMARKING */}
-          <div className="bg-white rounded-xl border border-gray-200 p-8">
+          <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Benchmarking de Mercado</h2>
 
-            <div className="space-y-6">
+            <div className="space-y-8">
               {/* Sua Empresa */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-900">
-                    Sua Empresa ({userIndustry})
-                  </span>
-                  <span className="text-sm font-bold text-brand-primary">{currentScore}</span>
+              <div className="p-4 bg-white rounded-lg border border-blue-200">
+                <div className="flex justify-between items-center mb-3">
+                  <div>
+                    <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Sua Empresa</span>
+                    <p className="text-sm font-medium text-gray-900 mt-1">{userIndustry}</p>
+                  </div>
+                  <span className="text-3xl font-bold text-blue-600">{currentScore}</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-blue-100 rounded-full h-3">
                   <div
-                    className="bg-brand-primary h-2 rounded-full"
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full shadow-md"
                     style={{ width: `${(currentScore / benchmark.top10) * 100}%` }}
                   />
                 </div>
               </div>
 
               {/* Média da Indústria */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-900">
-                    Média da Indústria ({userIndustry})
-                  </span>
-                  <span className="text-sm font-bold text-orange-600">{benchmark.avg}</span>
+              <div className="p-4 bg-white rounded-lg border border-orange-200">
+                <div className="flex justify-between items-center mb-3">
+                  <div>
+                    <span className="text-xs font-semibold text-orange-600 uppercase tracking-wide">Média da Indústria</span>
+                    <p className="text-sm font-medium text-gray-900 mt-1">{userIndustry}</p>
+                  </div>
+                  <span className="text-3xl font-bold text-orange-600">{benchmark.avg}</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-orange-100 rounded-full h-3">
                   <div
-                    className="bg-orange-500 h-2 rounded-full"
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 h-3 rounded-full shadow-md"
                     style={{ width: `${(benchmark.avg / benchmark.top10) * 100}%` }}
                   />
                 </div>
               </div>
 
               {/* Top 10% */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-900">
-                    Top 10% da Indústria ({userIndustry})
-                  </span>
-                  <span className="text-sm font-bold text-green-600">{benchmark.top10}</span>
+              <div className="p-4 bg-white rounded-lg border border-green-200">
+                <div className="flex justify-between items-center mb-3">
+                  <div>
+                    <span className="text-xs font-semibold text-green-600 uppercase tracking-wide">Top 10% da Indústria</span>
+                    <p className="text-sm font-medium text-gray-900 mt-1">{userIndustry}</p>
+                  </div>
+                  <span className="text-3xl font-bold text-green-600">{benchmark.top10}</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-green-100 rounded-full h-3">
                   <div
-                    className="bg-green-500 h-2 rounded-full"
+                    className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-md"
                     style={{ width: `${(benchmark.top10 / benchmark.top10) * 100}%` }}
                   />
                 </div>
