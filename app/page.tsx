@@ -117,7 +117,7 @@ export default function Home() {
 
           {/* Headline */}
           <h1 className="text-5xl sm:text-6xl font-display font-bold text-neutral-900 mb-6 leading-tight">
-            Descubra por que seus <span className="text-amber-500 font-black uppercase tracking-wide">DADOS</span> não geram <span className="text-primary-600">valor</span>
+            Descubra por que seus <span className="text-amber-500 font-black uppercase tracking-wide">DADOS</span> não geram valor
           </h1>
 
           {/* Subheadline */}
