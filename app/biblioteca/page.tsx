@@ -25,82 +25,174 @@ type ContentItem = {
 };
 
 const SAMPLE_CONTENT: ContentItem[] = [
-  // TÉCNICO
+  // GOVERNANÇA
   {
     id: "1",
-    title: "Guia de Arquitetura de Dados Moderna",
-    description: "Estrutura recomendada para implementar uma arquitetura de dados escalável",
+    title: "Governança de Dados",
+    description: "Estratégia, políticas e estrutura de governança para gerenciar dados como ativo corporativo.",
     pillar: "técnico",
     required_plan: "bronze",
-    content_url: "#",
+    content_url: "/biblioteca/DataMaturity-Governanca-Dados.pdf",
   },
   {
     id: "2",
-    title: "Pipeline de ETL - Melhores Práticas",
-    description: "Como construir pipelines robustos e eficientes",
+    title: "Ciclo de Vida de Soluções de Dados & IA",
+    description: "Do protótipo à produção: como escalar valor de forma estruturada.",
     pillar: "técnico",
     required_plan: "bronze",
-    content_url: "#",
+    content_url: "/biblioteca/DataMaturity-Ciclo-Vida-Solucoes.pdf",
   },
   {
     id: "3",
-    title: "Implementação de Data Warehouse",
-    description: "Passo a passo para implementar um data warehouse empresarial",
-    pillar: "técnico",
+    title: "Política de Inteligência Artificial",
+    description: "Diretrizes éticas, seguras e responsáveis para o uso de IA na empresa.",
+    pillar: "regulatório",
     required_plan: "silver",
-    content_url: "#",
+    content_url: "/biblioteca/DataMaturity-Politica-IA.pdf",
   },
   {
     id: "4",
-    title: "Machine Learning em Produção",
-    description: "Guia completo para colocar modelos de ML em produção",
+    title: "Templates Práticos de Governança",
+    description: "Dicionário de Dados, Matriz RACI, Avaliação de Qualidade.",
     pillar: "técnico",
-    required_plan: "gold",
-    content_url: "#",
-  },
-
-  // REGULATÓRIO
-  {
-    id: "5",
-    title: "Conformidade com LGPD",
-    description: "Checklist de conformidade com a Lei Geral de Proteção de Dados",
-    pillar: "regulatório",
-    required_plan: "silver",
-    content_url: "#",
-  },
-  {
-    id: "6",
-    title: "Governança de Dados - Regulamentações",
-    description: "Frameworks regulatórios para governança de dados",
-    pillar: "regulatório",
-    required_plan: "silver",
-    content_url: "#",
-  },
-  {
-    id: "7",
-    title: "Segurança e Compliance Avançado",
-    description: "Implementação de segurança em nível enterprise",
-    pillar: "regulatório",
-    required_plan: "gold",
-    content_url: "#",
+    required_plan: "bronze",
+    content_url: "/biblioteca/DataMaturity-Templates-Governanca.pdf",
   },
 
   // CULTURA
   {
-    id: "8",
-    title: "Mudança Organizacional para Data-Driven",
-    description: "Como transformar a cultura da organização para ser data-driven",
+    id: "5",
+    title: "Transformação e Cultura Data-Driven",
+    description: "Como engajar a organização, implementar letramento e gerenciar mudanças organizacionais.",
     pillar: "cultura",
-    required_plan: "gold",
-    content_url: "#",
+    required_plan: "bronze",
+    content_url: "/biblioteca/DataMaturity-Transformacao-Cultura.pdf",
+  },
+  {
+    id: "6",
+    title: "Playbook de Change Management",
+    description: "Como garantir a adoção de produtos e soluções de dados.",
+    pillar: "cultura",
+    required_plan: "silver",
+    content_url: "/biblioteca/DataMaturity-Playbook-ChangeManagement.pdf",
+  },
+  {
+    id: "7",
+    title: "Letramento Executivo em IA e Dados",
+    description: "O que todo líder precisa saber para guiar a organização.",
+    pillar: "cultura",
+    required_plan: "silver",
+    content_url: "/biblioteca/DataMaturity-Letramento-Executivo.pdf",
+  },
+  {
+    id: "8",
+    title: "Workshop de Estratégia e Valor",
+    description: "Como facilitar sessões de ideação e priorização de casos de uso.",
+    pillar: "cultura",
+    required_plan: "silver",
+    content_url: "/biblioteca/DataMaturity-Workshop-Estrategia-Valor.pdf",
   },
   {
     id: "9",
-    title: "Treinamento de Times em Analytics",
-    description: "Programa de capacitação para times de dados",
+    title: "Casos de Insucesso e Aprendizados",
+    description: "Por que projetos de dados falham e como evitar armadilhas comuns.",
     pillar: "cultura",
     required_plan: "gold",
-    content_url: "#",
+    content_url: "/biblioteca/DataMaturity-Casos-Insucesso-Aprendizados.pdf",
+  },
+  {
+    id: "10",
+    title: "Como Estruturar um Hackathon de Dados",
+    description: "Guia prático para acelerar inovação e engajar equipes.",
+    pillar: "cultura",
+    required_plan: "silver",
+    content_url: "/biblioteca/DataMaturity-Como-Estruturar-Hackathon.pdf",
+  },
+
+  // ANALYTICS
+  {
+    id: "11",
+    title: "Analytics e Insights",
+    description: "Da análise descritiva ao preditivo: como gerar valor real com dados.",
+    pillar: "técnico",
+    required_plan: "bronze",
+    content_url: "/biblioteca/DataMaturity-Analytics-Insights.pdf",
+  },
+  {
+    id: "12",
+    title: "Data Storytelling",
+    description: "Como comunicar insights e influenciar decisões com dados.",
+    pillar: "técnico",
+    required_plan: "bronze",
+    content_url: "/biblioteca/DataMaturity-Data-Storytelling.pdf",
+  },
+  {
+    id: "13",
+    title: "Métricas e KPIs",
+    description: "Conceitos, fórmulas e como medir o que realmente importa.",
+    pillar: "técnico",
+    required_plan: "bronze",
+    content_url: "/biblioteca/DataMaturity-Metricas-KPIs.pdf",
+  },
+  {
+    id: "14",
+    title: "Analytics Aumentada e GenAI",
+    description: "O futuro da democratização de dados com IA Generativa.",
+    pillar: "técnico",
+    required_plan: "gold",
+    content_url: "/biblioteca/DataMaturity-Analytics-Aumentada.pdf",
+  },
+  {
+    id: "15",
+    title: "Guia Rápido de Métricas de Negócios",
+    description: "Referência rápida de fórmulas e KPIs essenciais.",
+    pillar: "técnico",
+    required_plan: "bronze",
+    content_url: "/biblioteca/DataMaturity-Guia-Rapido-Metricas.pdf",
+  },
+
+  // TALENTOS
+  {
+    id: "16",
+    title: "Talentos e Papéis em Dados",
+    description: "Estruturação de equipes, papéis críticos e estratégia de retenção de talentos.",
+    pillar: "cultura",
+    required_plan: "silver",
+    content_url: "/biblioteca/DataMaturity-Talentos-Papeis.pdf",
+  },
+  {
+    id: "17",
+    title: "Guia de Papéis em Dados",
+    description: "Job Descriptions detalhadas para CDO, Engenheiro, Cientista e Analista de Dados.",
+    pillar: "cultura",
+    required_plan: "silver",
+    content_url: "/biblioteca/DataMaturity-Guia-Papeis-Dados.pdf",
+  },
+
+  // TOOLKIT
+  {
+    id: "18",
+    title: "Toolkit Prático",
+    description: "Ferramentas, templates e guias para acelerar projetos de dados.",
+    pillar: "técnico",
+    required_plan: "bronze",
+    content_url: "/biblioteca/DataMaturity-Toolkit-Pratico.pdf",
+  },
+  {
+    id: "19",
+    title: "Guia de Entrevista com Process Owners",
+    description: "Como mapear fluxos de dados e identificar dores de negócio.",
+    pillar: "técnico",
+    required_plan: "bronze",
+    content_url: "/biblioteca/DataMaturity-Guia-Entrevista-Processos.pdf",
+  },
+  {
+    id: "20",
+    title: "Ficha de Hipótese (Template)",
+    description: "Estruturando projetos de analytics antes da primeira linha de código.",
+    pillar: "técnico",
+    required_plan: "bronze",
+    content_url: "/biblioteca/DataMaturity-Ficha-Hipotese-Template.pdf",
   },
 ];
 
@@ -266,10 +358,10 @@ export default function BibliotecaPage() {
                     </div>
 
                     {hasAccess ? (
-                      <button className="ml-4 px-4 py-2 bg-brand-primary text-white rounded-lg hover:opacity-90 transition-all flex items-center gap-2">
+                      <a href={content.content_url} download className="ml-4 px-4 py-2 bg-brand-primary text-white rounded-lg hover:opacity-90 transition-all flex items-center gap-2">
                         <Download className="h-4 w-4" />
-                        Acessar
-                      </button>
+                        Baixar
+                      </a>
                     ) : (
                       <Link href="/planos">
                         <button className="ml-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all flex items-center gap-2">
