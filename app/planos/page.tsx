@@ -127,12 +127,24 @@ export default function PlanosPage() {
         throw new Error("Erro ao criar sessão de checkout");
       }
 
-      const { sessionId } = await response.json();
+      const data = await response.json();
+      
+      if (!data.sessionId) {
+        throw new Error("Session ID nao retornado");
+      }
 
       // Redirecionar para o Stripe Checkout
-      const stripe = (window as any).Stripe;
-      if (stripe) {
-        await stripe.redirectToCheckout({ sessionId });
+      if (typeof window !== "undefined" && (window as any).Stripe) {
+        const stripe = (window as any).Stripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
+        const result = await stripe.redirectToCheckout({
+          sessionId: data.sessionId,
+        });
+        
+        if (result.error) {
+          throw new Error(result.error.message);
+        }
+      } else {
+        throw new Error("Stripe nao carregado");
       }
     } catch (error) {
       console.error("Erro:", error);
