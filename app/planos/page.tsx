@@ -88,32 +88,9 @@ export default function PlanosPage() {
   ];
 
   const [loading, setLoading] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
-
-  // Verificar autenticação ao carregar
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch("/api/auth/me");
-        setIsAuthenticated(response.ok);
-      } catch {
-        setIsAuthenticated(false);
-      } finally {
-        setCheckingAuth(false);
-      }
-    };
-    checkAuth();
-  }, []);
 
   const handleCheckout = async (priceId: string) => {
     try {
-      // Se não autenticado, redirecionar para login
-      if (!isAuthenticated) {
-        router.push("/login?redirect=/planos");
-        return;
-      }
-
       setLoading(priceId);
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -124,10 +101,12 @@ export default function PlanosPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Erro ao criar sessão de checkout");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Erro ao criar sessão de checkout");
       }
 
       const data = await response.json();
+      console.log("Checkout response:", data);
       
       if (!data.sessionId) {
         throw new Error("Session ID nao retornado");
@@ -146,9 +125,9 @@ export default function PlanosPage() {
       } else {
         throw new Error("Stripe nao carregado");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro:", error);
-      alert("Erro ao processar pagamento. Tente novamente.");
+      alert(`Erro: ${error.message || "Erro ao processar pagamento"}`);
     } finally {
       setLoading(null);
     }
