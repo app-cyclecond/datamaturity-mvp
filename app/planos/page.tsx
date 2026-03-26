@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
 
 export default function PlanosPage() {
   const router = useRouter();
@@ -88,6 +89,28 @@ export default function PlanosPage() {
   ];
 
   const [loading, setLoading] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Verificar autenticacao ao carregar
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+        );
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        setUser(currentUser);
+      } catch (error) {
+        console.error("Erro ao verificar autenticacao:", error);
+        setUser(null);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   // Mapeamento de Price IDs
   const priceIds: Record<string, string> = {
@@ -98,6 +121,12 @@ export default function PlanosPage() {
 
   const handleCheckout = async (planKey: string) => {
     try {
+      // Se nao autenticado, redirecionar para login
+      if (!user) {
+        router.push("/login?redirect=/planos");
+        return;
+      }
+
       const priceId = priceIds[planKey];
       
       if (!priceId) {
