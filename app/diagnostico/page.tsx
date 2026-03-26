@@ -183,14 +183,16 @@ export default function DiagnosticoPage() {
             </button>
 
             {/* HEADER */}
-            <div>
+            <div className="mb-8">
               <h1 className="text-3xl font-bold text-gray-900">
                 Dashboard Executivo
               </h1>
               <p className="text-gray-600 mt-1">
                 Diagnóstico de {new Date(lastAssessment.created_at).toLocaleDateString("pt-BR")}
               </p>
-              {/* SCORE GERAL */}
+            </div>
+
+            {/* SCORE GERAL */}
             <div className="grid grid-cols-3 gap-6 mb-8">
               <div className="bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-700 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-indigo-400">
                 <p className="text-indigo-100 text-sm font-medium mb-2">Score Geral</p>
