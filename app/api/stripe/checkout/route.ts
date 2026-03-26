@@ -31,9 +31,9 @@ export async function POST(req: Request) {
 
     // Validar que o priceId é um dos configurados
     const validPriceIds = [
-      process.env.STRIPE_PRICE_BRONZE,
-      process.env.STRIPE_PRICE_SILVER,
-      process.env.STRIPE_PRICE_GOLD,
+      process.env.NEXT_PUBLIC_STRIPE_PRICE_BRONZE,
+      process.env.NEXT_PUBLIC_STRIPE_PRICE_SILVER,
+      process.env.NEXT_PUBLIC_STRIPE_PRICE_GOLD,
     ];
 
     if (!validPriceIds.includes(priceId)) {

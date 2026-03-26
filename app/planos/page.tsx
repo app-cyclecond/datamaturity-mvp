@@ -39,6 +39,7 @@ export default function PlanosPage() {
       cta: "Começar com Bronze",
       highlighted: false,
       planKey: "bronze",
+      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_BRONZE,
     },
     {
       name: "Silver",
@@ -62,6 +63,7 @@ export default function PlanosPage() {
       cta: "Começar com Silver",
       highlighted: false,
       planKey: "silver",
+      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_SILVER,
     },
     {
       name: "Gold",
@@ -85,6 +87,7 @@ export default function PlanosPage() {
       cta: "Começar com Gold",
       highlighted: false,
       planKey: "gold",
+      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_GOLD,
     },
   ];
 
@@ -112,14 +115,7 @@ export default function PlanosPage() {
     checkAuth();
   }, []);
 
-  // Mapeamento de Price IDs
-  const priceIds: Record<string, string> = {
-    bronze: process.env.NEXT_PUBLIC_STRIPE_PRICE_BRONZE || "",
-    silver: process.env.NEXT_PUBLIC_STRIPE_PRICE_SILVER || "",
-    gold: process.env.NEXT_PUBLIC_STRIPE_PRICE_GOLD || "",
-  };
-
-  const handleCheckout = async (planKey: string) => {
+  const handleCheckout = async (plan: any) => {
     try {
       // Se nao autenticado, redirecionar para login
       if (!user) {
@@ -127,19 +123,19 @@ export default function PlanosPage() {
         return;
       }
 
-      const priceId = priceIds[planKey];
-      
-      if (!priceId) {
+      if (!plan.priceId) {
         throw new Error("Price ID não configurado para este plano");
       }
 
-      setLoading(planKey);
+      setLoading(plan.planKey);
+
+      // Chamar endpoint de checkout
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ priceId: plan.priceId }),
       });
 
       if (!response.ok) {
@@ -148,25 +144,14 @@ export default function PlanosPage() {
       }
 
       const data = await response.json();
-      console.log("Checkout response:", data);
-      
+
       if (!data.sessionId) {
-        throw new Error("Session ID nao retornado");
+        throw new Error("Session ID não retornado");
       }
 
-      // Redirecionar para o Stripe Checkout
-      if (typeof window !== "undefined" && (window as any).Stripe) {
-        const stripe = (window as any).Stripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
-        const result = await stripe.redirectToCheckout({
-          sessionId: data.sessionId,
-        });
-        
-        if (result.error) {
-          throw new Error(result.error.message);
-        }
-      } else {
-        throw new Error("Stripe nao carregado");
-      }
+      // Redirecionar para Stripe Checkout
+      // Usar a URL direta em vez de redirectToCheckout
+      window.location.href = `https://checkout.stripe.com/pay/${data.sessionId}`;
     } catch (error: any) {
       console.error("Erro:", error);
       alert(`Erro: ${error.message || "Erro ao processar pagamento"}`);
@@ -265,8 +250,8 @@ export default function PlanosPage() {
                     </div>
 
                     <Button
-                      onClick={() => handleCheckout(plan.planKey)}
-                      disabled={loading === plan.planKey}
+                      onClick={() => handleCheckout(plan)}
+                      disabled={loading === plan.planKey || isCheckingAuth}
                       className={`w-full mb-8 py-3 text-lg bg-brand-primary text-white hover:bg-brand-primary/90 disabled:opacity-50`}
                     >
                       {loading === plan.planKey ? "Processando..." : plan.cta}
@@ -286,69 +271,22 @@ export default function PlanosPage() {
                         </div>
                       ))}
                     </div>
-
-                    <p className="mt-6 text-center text-xs italic text-gray-400">{plan.tagline}</p>
                   </div>
                 </div>
               );
             })}
           </div>
-
-          {/* TABELA COMPARATIVA */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-8 overflow-x-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">Comparação Completa</h2>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b-2 border-gray-200">
-                  <th className="text-left py-4 px-4 font-bold text-gray-700 w-1/2">Recurso</th>
-                  <th className="text-center py-4 px-4 font-bold text-gray-700">Bronze<br /><span className="font-normal text-gray-500">R$ 99/mês</span></th>
-                  <th className="text-center py-4 px-4 font-bold text-brand-primary">Silver<br /><span className="font-normal text-gray-500">R$ 199/mês</span></th>
-                  <th className="text-center py-4 px-4 font-bold text-gray-700">Gold<br /><span className="font-normal text-gray-500">R$ 499/mês</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { feature: "Diagnósticos por mês", bronze: "1", silver: "3", gold: "Ilimitados" },
-                  { feature: "Relatórios em PDF", bronze: true, silver: true, gold: true },
-                  { feature: "Nível dos Relatórios", bronze: "Básico", silver: "Avançado", gold: "Executivo" },
-                  { feature: "Biblioteca de Conteúdo", bronze: "Essencial", silver: "Completa", gold: "Premium" },
-                  { feature: "Recomendações", bronze: "Padrão", silver: "Personalizadas", gold: "Personalizadas" },
-                  { feature: "Benchmarking Setorial", bronze: false, silver: false, gold: true },
-                  { feature: "Análise de Tendências", bronze: false, silver: false, gold: true },
-                  { feature: "Suporte", bronze: "Email", silver: "Email", gold: "Prioritário" },
-                  { feature: "Consultoria Estratégica", bronze: false, silver: false, gold: true },
-                ].map((row, i) => (
-                  <tr key={i} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-4 px-4 text-gray-900 font-medium">{row.feature}</td>
-                    {[row.bronze, row.silver, row.gold].map((val, j) => (
-                      <td key={j} className={`py-4 px-4 text-center ${j === 1 ? "bg-brand-primary/5" : ""}`}>
-                        {typeof val === "boolean" ? (
-                          val ? (
-                            <Check className="h-5 w-5 text-green-600 mx-auto" />
-                          ) : (
-                            <X className="h-5 w-5 text-gray-300 mx-auto" />
-                          )
-                        ) : (
-                          <span className="text-gray-700 font-medium">{val}</span>
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="py-20 px-6 bg-gray-50">
-        <div className="mx-auto max-w-3xl">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Perguntas Frequentes</h2>
+      {/* FAQs */}
+      <section className="py-20 px-6 bg-white">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-4xl font-bold text-center mb-12 text-gray-900">Perguntas Frequentes</h2>
           <div className="space-y-6">
             {faqs.map((faq, i) => (
-              <div key={i} className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="font-bold text-gray-900 mb-2">{faq.question}</h3>
+              <div key={i} className="border-b border-gray-200 pb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{faq.question}</h3>
                 <p className="text-gray-600">{faq.answer}</p>
               </div>
             ))}
@@ -356,36 +294,10 @@ export default function PlanosPage() {
         </div>
       </section>
 
-      {/* CTA FINAL */}
-      <section className="py-20 px-6">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">Pronto para começar?</h2>
-          <p className="text-xl text-gray-600 mb-10">
-            Crie sua conta gratuitamente e faça seu primeiro diagnóstico hoje mesmo
-          </p>
-          <Button
-            asChild
-            size="lg"
-            className="h-14 px-10 text-lg bg-brand-primary text-white hover:bg-brand-primary/90"
-          >
-            <Link href="/signup">Começar Grátis</Link>
-          </Button>
-          <p className="mt-6 text-sm text-gray-500">Sem necessidade de cartão de crédito</p>
-        </div>
-      </section>
-
       {/* FOOTER */}
       <footer className="bg-gray-900 text-white py-12 px-6">
-        <div className="mx-auto max-w-7xl flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-brand-primary font-bold text-xs">
-              DM
-            </div>
-            <span className="font-bold">DataMaturity</span>
-          </div>
-          <div className="text-sm text-gray-400">
-            © {new Date().getFullYear()} DataMaturity. Todos os direitos reservados.
-          </div>
+        <div className="mx-auto max-w-7xl text-center">
+          <p className="text-gray-400">© 2024 DataMaturity. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>
