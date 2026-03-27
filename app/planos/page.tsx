@@ -1,273 +1,219 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import {
-  Check,
-  X,
-  Zap,
-  Trophy,
-  Target,
+  Check, X, Zap, Trophy, Target, ArrowRight, Star,
+  ChevronDown, ChevronUp,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
 
 export default function PlanosPage() {
   const router = useRouter();
-
-  const plans = [
-    {
-      name: "Bronze",
-      price: 99,
-      description: "Perfeito para começar sua jornada de maturidade de dados",
-      icon: Target,
-      color: "amber",
-      tagline: "Perfeito para começar",
-      features: [
-        { name: "1 Diagnóstico por mês", included: true },
-        { name: "Relatórios Básicos em PDF", included: true },
-        { name: "Biblioteca Essencial", included: true },
-        { name: "Recomendações Padrão", included: true },
-        { name: "Exportação PDF", included: true },
-        { name: "Suporte por Email", included: true },
-        { name: "Recomendações Personalizadas", included: false },
-        { name: "Biblioteca Completa", included: false },
-        { name: "Benchmarking Setorial", included: false },
-        { name: "Suporte Prioritário", included: false },
-      ],
-      cta: "Começar com Bronze",
-      highlighted: false,
-      planKey: "bronze",
-      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_BRONZE,
-    },
-    {
-      name: "Silver",
-      price: 199,
-      description: "Para empresas em crescimento que monitoram continuamente",
-      icon: Zap,
-      color: "slate",
-      tagline: "Para empresas em crescimento",
-      features: [
-        { name: "3 Diagnósticos por mês", included: true },
-        { name: "Relatórios Avançados em PDF", included: true },
-        { name: "Biblioteca Completa", included: true },
-        { name: "Recomendações Personalizadas", included: true },
-        { name: "Exportação PDF", included: true },
-        { name: "Suporte por Email", included: true },
-        { name: "Benchmarking Setorial", included: false },
-        { name: "Relatórios Executivos", included: false },
-        { name: "Suporte Prioritário", included: false },
-        { name: "Acesso Completo", included: false },
-      ],
-      cta: "Começar com Silver",
-      highlighted: false,
-      planKey: "silver",
-      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_SILVER,
-    },
-    {
-      name: "Gold",
-      price: 499,
-      description: "Solução completa para empresas que levam dados a sério",
-      icon: Trophy,
-      color: "yellow",
-      tagline: "Solução completa para empresas",
-      features: [
-        { name: "Diagnósticos Ilimitados", included: true },
-        { name: "Acesso Completo", included: true },
-        { name: "Relatórios Executivos em PDF", included: true },
-        { name: "Biblioteca Premium", included: true },
-        { name: "Recomendações Personalizadas", included: true },
-        { name: "Exportação PDF", included: true },
-        { name: "Benchmarking Setorial", included: true },
-        { name: "Análise de Tendências", included: true },
-        { name: "Suporte Prioritário", included: true },
-        { name: "Consultoria Estratégica", included: true },
-      ],
-      cta: "Começar com Gold",
-      highlighted: false,
-      planKey: "gold",
-      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_GOLD,
-    },
-  ];
-
   const [loading, setLoading] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  // Verificar autenticacao ao carregar
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-        );
+        const supabase = createClient();
         const { data: { user: currentUser } } = await supabase.auth.getUser();
         setUser(currentUser);
-      } catch (error) {
-        console.error("Erro ao verificar autenticacao:", error);
-        setUser(null);
-      } finally {
-        setIsCheckingAuth(false);
-      }
+      } catch { setUser(null); } finally { setIsCheckingAuth(false); }
     };
     checkAuth();
   }, []);
 
   const handleCheckout = async (plan: any) => {
+    if (!user) { router.push("/signup"); return; }
+    setLoading(plan.planKey);
     try {
-      // Se nao autenticado, redirecionar para login
-      if (!user) {
-        router.push("/login?redirect=/planos");
-        return;
-      }
-
-      if (!plan.priceId) {
-        throw new Error("Price ID não configurado para este plano");
-      }
-
-      setLoading(plan.planKey);
-
-      // Chamar endpoint de checkout
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ priceId: plan.priceId }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Erro ao criar sessão de checkout");
-      }
-
+      if (!response.ok) throw new Error("Erro ao criar sessão");
       const data = await response.json();
-
-      if (!data.sessionId) {
-        throw new Error("Session ID não retornado");
-      }
-
-      // Redirecionar para Stripe Checkout
-      // Usar a URL direta em vez de redirectToCheckout
-      window.location.href = `https://checkout.stripe.com/pay/${data.sessionId}`;
+      if (data.sessionId) window.location.href = `https://checkout.stripe.com/pay/${data.sessionId}`;
     } catch (error: any) {
-      console.error("Erro:", error);
-      alert(`Erro: ${error.message || "Erro ao processar pagamento"}`);
-    } finally {
-      setLoading(null);
-    }
+      alert(`Erro: ${error.message}`);
+    } finally { setLoading(null); }
   };
 
-  const faqs = [
+  const plans = [
     {
-      question: "Posso mudar de plano a qualquer momento?",
-      answer:
-        "Sim! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento. A mudança será refletida no próximo ciclo de cobrança.",
+      name: "Bronze", price: 99, tagline: "Para começar com clareza",
+      description: "Ideal para empresas que querem entender onde estão e dar o primeiro passo na jornada de dados.",
+      icon: Target, badge: null, planKey: "bronze",
+      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_BRONZE,
+      features: [
+        { name: "1 diagnóstico por mês", included: true },
+        { name: "Score em 7 dimensões", included: true },
+        { name: "Relatório básico em PDF", included: true },
+        { name: "Benchmarking do seu setor", included: true },
+        { name: "Biblioteca Essencial (5 docs)", included: true },
+        { name: "Suporte por email", included: true },
+        { name: "Roadmap personalizado", included: false },
+        { name: "Biblioteca Completa (20 docs)", included: false },
+        { name: "Benchmarking multi-setorial", included: false },
+        { name: "Diagnósticos ilimitados", included: false },
+      ],
+      cta: "Começar com Bronze", isPopular: false, isGold: false,
     },
     {
-      question: "O que acontece se eu atingir o limite de diagnósticos?",
-      answer:
-        "Ao atingir o limite do seu plano, você poderá fazer upgrade para um plano superior ou aguardar o próximo ciclo mensal para um novo diagnóstico.",
+      name: "Silver", price: 299, tagline: "Para quem quer evoluir rápido",
+      description: "Para empresas em crescimento que monitoram continuamente e precisam de recomendações personalizadas.",
+      icon: Zap, badge: "Mais Popular", planKey: "silver",
+      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_SILVER,
+      features: [
+        { name: "4 diagnósticos por mês", included: true },
+        { name: "Score em 7 dimensões", included: true },
+        { name: "Relatório avançado em PDF", included: true },
+        { name: "Benchmarking do seu setor", included: true },
+        { name: "Biblioteca Completa (20 docs)", included: true },
+        { name: "Roadmap personalizado", included: true },
+        { name: "Suporte prioritário", included: true },
+        { name: "Benchmarking multi-setorial", included: false },
+        { name: "Diagnósticos ilimitados", included: false },
+        { name: "Consultoria estratégica", included: false },
+      ],
+      cta: "Começar com Silver", isPopular: true, isGold: false,
     },
     {
-      question: "O que está incluído na 'Biblioteca Essencial' vs 'Completa' vs 'Premium'?",
-      answer:
-        "A Biblioteca Essencial contém artigos e guias básicos. A Completa adiciona frameworks, templates e estudos de caso. A Premium inclui tudo isso mais conteúdos exclusivos, webinars e materiais de consultoria.",
-    },
-    {
-      question: "O que é Benchmarking Setorial?",
-      answer:
-        "Comparação do seu score de maturidade com empresas do mesmo setor, permitindo entender como você se posiciona no mercado.",
-    },
-    {
-      question: "Qual plano vocês recomendam para começar?",
-      answer:
-        "Para empresas que estão iniciando, o Bronze é ideal. Para quem já tem uma operação de dados estruturada e quer monitorar a evolução regularmente, recomendamos o Silver.",
+      name: "Gold", price: 499, tagline: "Para líderes que levam dados a sério",
+      description: "Solução completa para organizações que usam dados como vantagem competitiva real.",
+      icon: Trophy, badge: "Completo", planKey: "gold",
+      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_GOLD,
+      features: [
+        { name: "Diagnósticos ilimitados", included: true },
+        { name: "Score em 7 dimensões", included: true },
+        { name: "Relatório executivo premium", included: true },
+        { name: "Benchmarking multi-setorial", included: true },
+        { name: "Biblioteca Completa (20 docs)", included: true },
+        { name: "Roadmap personalizado", included: true },
+        { name: "Suporte prioritário", included: true },
+        { name: "Análise de tendências", included: true },
+        { name: "Consultoria estratégica", included: true },
+        { name: "Acesso antecipado a novidades", included: true },
+      ],
+      cta: "Começar com Gold", isPopular: false, isGold: true,
     },
   ];
 
+  const faqs = [
+    { question: "Posso mudar de plano a qualquer momento?", answer: "Sim! Você pode fazer upgrade ou downgrade a qualquer momento. O ajuste é proporcional ao ciclo de cobrança vigente." },
+    { question: "O que é o Benchmarking Setorial?", answer: "Comparamos o seu score com empresas do mesmo setor (Tech, Financeiro, Retail, Saúde, Manufatura), mostrando onde você está em relação à média e ao top 10% do mercado." },
+    { question: "O Roadmap é realmente personalizado?", answer: "Sim. Para cada dimensão com score abaixo da média, geramos automaticamente 3 ações concretas e priorizadas baseadas no seu nível atual, com o objetivo de evoluir para o próximo nível." },
+    { question: "O que está incluído na Biblioteca?", answer: "A Biblioteca tem 20 documentos em 6 categorias: Executivo, Governança, Cultura, Analytics, Talentos e Toolkit. Cada documento é um guia prático, framework ou template." },
+    { question: "Qual plano recomendam para começar?", answer: "Para empresas iniciando, o Bronze é ideal. Para quem já tem uma operação de dados e quer monitorar a evolução com recomendações personalizadas, o Silver é o mais custo-benefício." },
+    { question: "Existe período de teste gratuito?", answer: "Você pode criar uma conta gratuita e fazer um diagnóstico completo sem custo. Os planos pagos desbloqueiam recursos avançados como Roadmap, Biblioteca Completa e Benchmarking." },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* HEADER */}
-      <header className="fixed top-0 w-full border-b bg-white/80 backdrop-blur-md z-50">
+    <div className="min-h-screen bg-white">
+      {/* NAVBAR */}
+      <header className="fixed top-0 w-full border-b border-gray-100 bg-white/90 backdrop-blur-md z-50">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-white font-bold">
-                DM
-              </div>
-              <span className="text-xl font-bold tracking-tight text-gray-900">DataMaturity</span>
-            </div>
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-sm">DM</div>
+            <span className="text-xl font-bold text-gray-900">DataMaturity</span>
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-sm font-medium text-gray-600 hover:text-gray-900">
-              Home
-            </Link>
-            <Button asChild className="bg-brand-primary text-white hover:bg-brand-primary/90">
-              <Link href="/signup">Começar Grátis</Link>
-            </Button>
+            <Link href="/" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition">Home</Link>
+            {user ? (
+              <Link href="/dashboard" className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">Meu Dashboard</Link>
+            ) : (
+              <Link href="/signup" className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">Começar Grátis</Link>
+            )}
           </div>
         </div>
       </header>
 
       {/* HERO */}
-      <section className="pt-32 pb-20 bg-gradient-to-b from-brand-primary/10 to-transparent">
-        <div className="mx-auto max-w-7xl px-6 text-center">
-          <h1 className="text-5xl font-extrabold tracking-tight text-gray-900 sm:text-6xl mb-6">
-            Planos Simples e Transparentes
+      <section className="pt-32 pb-16 bg-gradient-to-b from-indigo-50 to-white px-6">
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
+            <Star className="w-3.5 h-3.5 fill-indigo-500" />
+            Preços em Reais · Sem surpresas
+          </div>
+          <h1 className="text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
+            Invista na maturidade de dados<br />
+            <span className="text-indigo-600">da sua empresa</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-            Escolha o plano ideal para sua empresa e comece sua jornada de maturidade em dados
+          <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-6">
+            Escolha o plano ideal e comece a transformar dados em vantagem competitiva. Cancele quando quiser.
           </p>
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
+            <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" />Sem contrato de fidelidade</div>
+            <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" />Diagnóstico gratuito para começar</div>
+            <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" />Upgrade ou downgrade a qualquer hora</div>
+          </div>
         </div>
       </section>
 
       {/* CARDS DE PLANOS */}
-      <section className="py-20 px-6">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
+      <section className="py-12 px-6">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid md:grid-cols-3 gap-6">
             {plans.map((plan, i) => {
               const PlanIcon = plan.icon;
               return (
-                <div
-                  key={i}
-                  className={`rounded-2xl border transition-all flex flex-col border-gray-200 bg-white shadow-sm hover:shadow-md`}
-                >
-                  <div className="p-8 flex flex-col flex-1">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="h-10 w-10 rounded-lg flex items-center justify-center bg-gray-100 text-gray-600">
-                        <PlanIcon className="h-6 w-6" />
+                <div key={i} className={`relative rounded-2xl flex flex-col transition-all hover:-translate-y-1 ${
+                  plan.isPopular ? "border-2 border-indigo-600 shadow-xl shadow-indigo-100"
+                  : plan.isGold ? "border-2 border-amber-400 shadow-lg shadow-amber-50"
+                  : "border border-gray-200 shadow-sm hover:shadow-md"
+                }`}>
+                  {plan.badge && (
+                    <div className={`absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold text-white ${plan.isPopular ? "bg-indigo-600" : "bg-amber-500"}`}>
+                      {plan.badge}
+                    </div>
+                  )}
+                  <div className={`p-8 rounded-t-2xl ${plan.isPopular ? "bg-indigo-600 text-white" : plan.isGold ? "bg-amber-50" : "bg-white"}`}>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${plan.isPopular ? "bg-white/20" : plan.isGold ? "bg-amber-100" : "bg-gray-100"}`}>
+                        <PlanIcon className={`h-5 w-5 ${plan.isPopular ? "text-white" : plan.isGold ? "text-amber-600" : "text-gray-600"}`} />
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
+                      <div>
+                        <h3 className={`text-xl font-bold ${plan.isPopular ? "text-white" : "text-gray-900"}`}>{plan.name}</h3>
+                        <p className={`text-xs font-medium ${plan.isPopular ? "text-indigo-200" : "text-gray-500"}`}>{plan.tagline}</p>
+                      </div>
                     </div>
-                    <p className="text-gray-600 text-sm mb-6">{plan.description}</p>
-
-                    <div className="mb-6">
-                      <span className="text-5xl font-extrabold text-gray-900">R$ {plan.price}</span>
-                      <span className="text-gray-600 ml-2">/mês</span>
+                    <div className="mt-4 mb-2">
+                      <span className={`text-4xl font-extrabold ${plan.isPopular ? "text-white" : "text-gray-900"}`}>R$ {plan.price}</span>
+                      <span className={`text-sm ml-1 ${plan.isPopular ? "text-indigo-200" : "text-gray-500"}`}>/mês</span>
                     </div>
-
-                    <Button
+                    <p className={`text-sm leading-relaxed ${plan.isPopular ? "text-indigo-100" : "text-gray-500"}`}>{plan.description}</p>
+                  </div>
+                  <div className="p-8 bg-white rounded-b-2xl flex flex-col flex-1">
+                    <button
                       onClick={() => handleCheckout(plan)}
                       disabled={loading === plan.planKey || isCheckingAuth}
-                      className={`w-full mb-8 py-3 text-lg bg-brand-primary text-white hover:bg-brand-primary/90 disabled:opacity-50`}
+                      className={`w-full py-3 rounded-xl font-bold text-sm mb-6 transition-all flex items-center justify-center gap-2 disabled:opacity-50 ${
+                        plan.isPopular ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200"
+                        : plan.isGold ? "bg-amber-500 text-white hover:bg-amber-600 shadow-md shadow-amber-100"
+                        : "bg-gray-900 text-white hover:bg-gray-800"
+                      }`}
                     >
                       {loading === plan.planKey ? "Processando..." : plan.cta}
-                    </Button>
-
-                    <div className="space-y-3 border-t border-gray-200 pt-6 flex-1">
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <div className="space-y-2.5 flex-1">
                       {plan.features.map((feature, j) => (
-                        <div key={j} className="flex items-center gap-3">
+                        <div key={j} className="flex items-center gap-2.5">
                           {feature.included ? (
-                            <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+                            <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${plan.isPopular ? "bg-indigo-100" : "bg-emerald-100"}`}>
+                              <Check className={`w-2.5 h-2.5 ${plan.isPopular ? "text-indigo-600" : "text-emerald-600"}`} />
+                            </div>
                           ) : (
-                            <X className="h-5 w-5 text-gray-300 flex-shrink-0" />
+                            <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                              <X className="w-2.5 h-2.5 text-gray-400" />
+                            </div>
                           )}
-                          <span className={feature.included ? "text-gray-900 text-sm" : "text-gray-400 text-sm"}>
-                            {feature.name}
-                          </span>
+                          <span className={`text-sm ${feature.included ? "text-gray-800" : "text-gray-400"}`}>{feature.name}</span>
                         </div>
                       ))}
                     </div>
@@ -279,25 +225,116 @@ export default function PlanosPage() {
         </div>
       </section>
 
-      {/* FAQs */}
-      <section className="py-20 px-6 bg-white">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-900">Perguntas Frequentes</h2>
-          <div className="space-y-6">
-            {faqs.map((faq, i) => (
-              <div key={i} className="border-b border-gray-200 pb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{faq.question}</h3>
-                <p className="text-gray-600">{faq.answer}</p>
+      {/* TABELA COMPARATIVA */}
+      <section className="py-16 px-6 bg-gray-50">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-10">Comparativo Completo</h2>
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left p-5 font-semibold text-gray-700 w-1/2">Recurso</th>
+                  <th className="text-center p-5 font-bold text-amber-700">Bronze</th>
+                  <th className="text-center p-5 font-bold text-indigo-700 bg-indigo-50">Silver</th>
+                  <th className="text-center p-5 font-bold text-amber-600">Gold</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { feature: "Diagnósticos por mês", bronze: "1", silver: "4", gold: "Ilimitado" },
+                  { feature: "Score em 7 dimensões", bronze: "✅", silver: "✅", gold: "✅" },
+                  { feature: "Relatório em PDF", bronze: "Básico", silver: "Avançado", gold: "Executivo Premium" },
+                  { feature: "Benchmarking setorial", bronze: "Seu setor", silver: "Seu setor", gold: "Todos os setores" },
+                  { feature: "Roadmap personalizado", bronze: "—", silver: "✅", gold: "✅" },
+                  { feature: "Biblioteca de conteúdo", bronze: "5 docs", silver: "20 docs", gold: "20 docs + exclusivos" },
+                  { feature: "Análise de tendências", bronze: "—", silver: "—", gold: "✅" },
+                  { feature: "Suporte", bronze: "Email", silver: "Prioritário", gold: "Prioritário + Consultoria" },
+                ].map((row, i) => (
+                  <tr key={i} className={`border-b border-gray-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
+                    <td className="p-4 text-gray-700 font-medium">{row.feature}</td>
+                    <td className="p-4 text-center text-gray-600">{row.bronze}</td>
+                    <td className="p-4 text-center text-indigo-700 font-medium bg-indigo-50/50">{row.silver}</td>
+                    <td className="p-4 text-center text-amber-700 font-medium">{row.gold}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* PROVA SOCIAL */}
+      <section className="py-16 px-6 bg-white">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-10">O que nossos clientes dizem</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { name: "Ana Paula M.", role: "CDO · Fintech", text: "O diagnóstico revelou gaps que não víamos há anos. Em 3 meses, nosso score subiu de 2.1 para 3.4 seguindo o roadmap.", plan: "Gold" },
+              { name: "Carlos R.", role: "Head de Dados · Varejo", text: "O benchmarking setorial foi um divisor de águas. Mostrou exatamente onde estávamos em relação ao mercado.", plan: "Silver" },
+              { name: "Fernanda L.", role: "CTO · Startup B2B", text: "Simples, direto e acionável. Em 10 minutos tínhamos um diagnóstico completo e um plano de ação para os próximos 6 meses.", plan: "Bronze" },
+            ].map((t, i) => (
+              <div key={i} className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                <div className="flex gap-1 mb-3">
+                  {[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4 text-amber-400 fill-amber-400" />)}
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed mb-4">"{t.text}"</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">{t.name}</p>
+                    <p className="text-xs text-gray-500">{t.role}</p>
+                  </div>
+                  <span className="text-xs font-medium bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">Plano {t.plan}</span>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* FAQ */}
+      <section className="py-16 px-6 bg-gray-50">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-10">Perguntas Frequentes</h2>
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <button className="w-full flex items-center justify-between p-5 text-left" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                  <span className="font-semibold text-gray-900 text-sm">{faq.question}</span>
+                  {openFaq === i ? <ChevronUp className="w-4 h-4 text-gray-400 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />}
+                </button>
+                {openFaq === i && (
+                  <div className="px-5 pb-5">
+                    <p className="text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA FINAL */}
+      <section className="py-20 px-6 bg-gradient-to-br from-indigo-950 via-indigo-900 to-purple-900">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-4xl font-bold text-white mb-4">Pronto para começar?</h2>
+          <p className="text-indigo-200 text-lg mb-8">Faça seu diagnóstico gratuito agora e descubra onde sua empresa está na jornada de maturidade em dados.</p>
+          <Link href={user ? "/assessment" : "/signup"} className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-emerald-500/30">
+            {user ? "Fazer Diagnóstico Agora" : "Criar Conta Gratuita"}
+            <ArrowRight className="w-5 h-5" />
+          </Link>
+          <p className="text-indigo-400 text-sm mt-4">Sem cartão de crédito · Resultado em 10 minutos</p>
+        </div>
+      </section>
+
       {/* FOOTER */}
-      <footer className="bg-gray-900 text-white py-12 px-6">
-        <div className="mx-auto max-w-7xl text-center">
-          <p className="text-gray-400">© 2024 DataMaturity. Todos os direitos reservados.</p>
+      <footer className="bg-gray-950 text-gray-400 py-10 px-6">
+        <div className="mx-auto max-w-7xl flex flex-col sm:flex-row justify-between items-center gap-4 text-sm">
+          <p>&copy; 2026 DataMaturity. Todos os direitos reservados.</p>
+          <div className="flex gap-6">
+            <Link href="/" className="hover:text-white transition">Home</Link>
+            <Link href="/auth/login" className="hover:text-white transition">Entrar</Link>
+            <a href="#" className="hover:text-white transition">Privacidade</a>
+          </div>
         </div>
       </footer>
     </div>

@@ -11,7 +11,7 @@ interface SidebarProps {
     name?: string;
     email?: string;
   };
-  activePage?: "home" | "diagnostico" | "assessment" | "historico" | "biblioteca" | "configuracoes";
+  activePage?: "home" | "diagnostico" | "assessment" | "historico" | "roadmap" | "biblioteca" | "configuracoes";
 }
 
 export function Sidebar({ user, activePage }: SidebarProps) {
@@ -35,6 +35,7 @@ export function Sidebar({ user, activePage }: SidebarProps) {
     { href: "/diagnostico", label: "Diagnóstico Atual", id: "diagnostico" },
     { href: "/assessment", label: "Novo diagnóstico", id: "assessment" },
     { href: "/historico", label: "Histórico", id: "historico" },
+    { href: "/roadmap", label: "Roadmap de Maturidade", id: "roadmap" },
     { href: "/biblioteca", label: "Biblioteca", id: "biblioteca" },
     { href: "/configuracoes", label: "Configurações", id: "configuracoes" },
   ];

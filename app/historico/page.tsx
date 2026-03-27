@@ -16,6 +16,16 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts";
 
 type AssessmentResult = {
   id: string;
@@ -152,6 +162,42 @@ export default function HistoricoPage() {
             <h1 className="text-3xl font-bold text-gray-900">Histórico de Diagnósticos</h1>
             <p className="text-gray-600 mt-1">Acompanhe a evolução da maturidade de dados da sua empresa</p>
           </div>
+
+          {/* GRÁFICO DE EVOLUÇÃO */}
+          {assessments.length > 1 && (
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp className="h-5 w-5 text-indigo-600" />
+                <h3 className="text-lg font-bold text-gray-900">Evolução do Score Geral</h3>
+              </div>
+              <ResponsiveContainer width="100%" height={220}>
+                <LineChart
+                  data={[...assessments].reverse().map((a) => ({
+                    data: new Date(a.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }),
+                    score: a.overall_score,
+                  }))}
+                  margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="data" tick={{ fontSize: 12, fill: "#6b7280" }} />
+                  <YAxis domain={[0, 5]} tick={{ fontSize: 12, fill: "#6b7280" }} />
+                  <Tooltip
+                    contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "13px" }}
+                    formatter={(value: any) => [`${value}/5`, "Score"]}
+                  />
+                  <ReferenceLine y={3} stroke="#10b981" strokeDasharray="4 4" label={{ value: "Meta", position: "right", fontSize: 11, fill: "#10b981" }} />
+                  <Line
+                    type="monotone"
+                    dataKey="score"
+                    stroke="#6366f1"
+                    strokeWidth={2.5}
+                    dot={{ r: 5, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }}
+                    activeDot={{ r: 7 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
 
           {assessments.length === 0 ? (
             <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">

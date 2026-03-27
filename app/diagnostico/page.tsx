@@ -286,24 +286,42 @@ export default function DiagnosticoPage() {
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-start gap-2">
                       <span className="text-brand-primary font-bold mt-1">1.</span>
-                      <span>Focar nas áreas de melhoria identificadas acima para ganhar impacto rápido.</span>
+                      <span>Acesse o <strong>Roadmap de Maturidade</strong> para ver ações concretas priorizadas por dimensão.</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-brand-primary font-bold mt-1">2.</span>
-                      <span>Criar um roadmap de 12 meses alinhado com os objetivos de negócio.</span>
+                      <span>Explore a <strong>Biblioteca</strong> para aprofundar nas áreas com menor score.</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-brand-primary font-bold mt-1">3.</span>
-                      <span>Reavaliar em 6 meses para medir progresso e ajustar estratégia.</span>
+                      <span>Refaça o diagnóstico em 90 dias para medir seu progresso.</span>
                     </li>
                   </ul>
-                  <Button
-                    onClick={() => router.push("/resultado/" + lastAssessment.id)}
-                    className="mt-6 bg-brand-primary text-white hover:opacity-90 flex items-center gap-2"
-                  >
-                    Ver Relatório Completo
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <Button
+                      onClick={() => router.push("/resultado/" + lastAssessment.id)}
+                      className="bg-brand-primary text-white hover:opacity-90 flex items-center gap-2"
+                    >
+                      Ver Relatório Completo
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      onClick={() => router.push("/roadmap")}
+                      variant="outline"
+                      className="flex items-center gap-2 border-brand-primary text-brand-primary hover:bg-brand-primary/10"
+                    >
+                      Ver Roadmap
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      onClick={() => router.push("/biblioteca")}
+                      variant="outline"
+                      className="flex items-center gap-2"
+                    >
+                      Explorar Biblioteca
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
