@@ -17,13 +17,78 @@ type ContentItem = {
   id: string;
   title: string;
   description: string;
-  category: "governanca" | "cultura" | "analytics" | "talentos" | "toolkit";
+  category: "executivo" | "governanca" | "cultura" | "analytics" | "talentos" | "toolkit";
   required_plan: "bronze" | "silver" | "gold";
   content_url: string;
   nivel: "Estratégico" | "Operacional";
 };
 
 const LIBRARY_CONTENT: ContentItem[] = [
+  // EXECUTIVO
+  {
+    id: "21",
+    title: "Governança de Dados",
+    description: "Estratégia, políticas e estrutura de governança para gerenciar dados como ativo corporativo.",
+    category: "executivo",
+    required_plan: "bronze",
+    content_url: "/biblioteca/DataMaturity-Governanca-Dados.pdf",
+    nivel: "Estratégico",
+  },
+  {
+    id: "22",
+    title: "Letramento Executivo em IA e Dados",
+    description: "O que todo líder precisa saber para guiar a organização na era dos dados.",
+    category: "executivo",
+    required_plan: "silver",
+    content_url: "/biblioteca/DataMaturity-Letramento-Executivo.pdf",
+    nivel: "Estratégico",
+  },
+  {
+    id: "23",
+    title: "Transformação e Cultura Data-Driven",
+    description: "Como engajar a organização, implementar letramento e gerenciar mudanças organizacionais.",
+    category: "executivo",
+    required_plan: "bronze",
+    content_url: "/biblioteca/DataMaturity-Transformacao-Cultura.pdf",
+    nivel: "Estratégico",
+  },
+  {
+    id: "24",
+    title: "Casos de Insucesso e Aprendizados",
+    description: "Por que projetos de dados falham e como líderes podem evitar armadilhas comuns.",
+    category: "executivo",
+    required_plan: "gold",
+    content_url: "/biblioteca/DataMaturity-Casos-Insucesso-Aprendizados.pdf",
+    nivel: "Estratégico",
+  },
+  {
+    id: "25",
+    title: "Analytics e Insights",
+    description: "Da análise descritiva ao preditivo: como gerar valor real com dados para o negócio.",
+    category: "executivo",
+    required_plan: "bronze",
+    content_url: "/biblioteca/DataMaturity-Analytics-Insights.pdf",
+    nivel: "Estratégico",
+  },
+  {
+    id: "26",
+    title: "Analytics Aumentada e GenAI",
+    description: "O futuro da democratização de dados com IA Generativa — visão para líderes.",
+    category: "executivo",
+    required_plan: "gold",
+    content_url: "/biblioteca/DataMaturity-Analytics-Aumentada.pdf",
+    nivel: "Estratégico",
+  },
+  {
+    id: "27",
+    title: "Talentos e Papéis em Dados",
+    description: "Estruturação de equipes, papéis críticos e estratégia de retenção de talentos.",
+    category: "executivo",
+    required_plan: "silver",
+    content_url: "/biblioteca/DataMaturity-Talentos-Papeis.pdf",
+    nivel: "Estratégico",
+  },
+
   // GOVERNANÇA
   {
     id: "1",
@@ -216,6 +281,14 @@ const LIBRARY_CONTENT: ContentItem[] = [
 ];
 
 const CATEGORY_CONFIG = {
+  executivo: {
+    label: "Executivo",
+    icon: Star,
+    color: "bg-indigo-50 border-indigo-200",
+    iconColor: "text-indigo-600",
+    badgeColor: "bg-indigo-100 text-indigo-800",
+    activeColor: "bg-indigo-600 text-white border-indigo-600",
+  },
   governanca: {
     label: "Governança",
     icon: Shield,
@@ -264,7 +337,7 @@ export default function BibliotecaPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<keyof typeof CATEGORY_CONFIG | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<keyof typeof CATEGORY_CONFIG | null>("executivo");
 
   useEffect(() => {
     const supabase = createClient();
