@@ -63,28 +63,28 @@ export default function Home() {
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">DM</span>
               </div>
-              <span className="font-bold text-xl text-gray-900">DataMaturity</span>
+              <span className={`font-bold text-xl ${isScrolled ? "text-gray-900" : "text-white"}`}>DataMaturity</span>
             </Link>
             <div className="hidden md:flex items-center gap-8">
-              <a href="#como-funciona" className="text-gray-600 hover:text-indigo-600 transition text-sm font-medium">Como Funciona</a>
-              <a href="#framework" className="text-gray-600 hover:text-indigo-600 transition text-sm font-medium">Metodologia</a>
-              <a href="#roi" className="text-gray-600 hover:text-indigo-600 transition text-sm font-medium">Resultados</a>
-              <Link href="/planos" className="text-gray-600 hover:text-indigo-600 transition text-sm font-medium">Planos</Link>
+              <a href="#como-funciona" className={`transition text-sm font-medium ${isScrolled ? "text-gray-600 hover:text-indigo-600" : "text-white/90 hover:text-white"}`}>Como Funciona</a>
+              <a href="#framework" className={`transition text-sm font-medium ${isScrolled ? "text-gray-600 hover:text-indigo-600" : "text-white/90 hover:text-white"}`}>Metodologia</a>
+              <a href="#roi" className={`transition text-sm font-medium ${isScrolled ? "text-gray-600 hover:text-indigo-600" : "text-white/90 hover:text-white"}`}>Resultados</a>
+              <Link href="/planos" className={`transition text-sm font-medium ${isScrolled ? "text-gray-600 hover:text-indigo-600" : "text-white/90 hover:text-white"}`}>Planos</Link>
             </div>
             <div className="flex items-center gap-3">
               {isLoading ? null : isLoggedIn ? (
                 <>
-                  <Link href="/dashboard" className="flex items-center gap-2 text-sm text-gray-700 hover:text-indigo-600 transition font-medium">
+                  <Link href="/dashboard" className={`flex items-center gap-2 text-sm transition font-medium ${isScrolled ? "text-gray-700 hover:text-indigo-600" : "text-white/90 hover:text-white"}`}>
                     <User className="w-4 h-4" />
                     {userEmail.split("@")[0]}
                   </Link>
-                  <button onClick={handleLogout} className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-600 transition">
+                  <button onClick={handleLogout} className={`flex items-center gap-1 text-sm transition ${isScrolled ? "text-gray-500 hover:text-red-600" : "text-white/70 hover:text-white"}`}>
                     <LogOut className="w-4 h-4" />
                   </button>
                 </>
               ) : (
                 <>
-                  <Link href="/auth/login" className="text-sm text-gray-700 hover:text-indigo-600 transition font-medium">Entrar</Link>
+                  <Link href="/auth/login" className={`text-sm transition font-medium ${isScrolled ? "text-gray-700 hover:text-indigo-600" : "text-white/90 hover:text-white"}`}>Entrar</Link>
                   <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">Começar Grátis</Link>
                 </>
               )}
@@ -128,7 +128,7 @@ export default function Home() {
               <ChevronRight className="w-5 h-5" />
             </Link>
           </div>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center text-sm text-indigo-300">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center text-sm text-white">
             <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-400" /><span>Gratuito para começar</span></div>
             <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-400" /><span>Resultado em 10 minutos</span></div>
             <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-400" /><span>Relatório executivo completo</span></div>
