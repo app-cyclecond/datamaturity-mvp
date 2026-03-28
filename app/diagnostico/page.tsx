@@ -129,7 +129,7 @@ export default function DiagnosticoPage() {
     return (
       <div className="flex min-h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary" />
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600" />
           <p className="mt-4 text-gray-600">Carregando...</p>
         </div>
       </div>
@@ -161,7 +161,7 @@ export default function DiagnosticoPage() {
 
               <Button
                 onClick={() => router.push("/assessment")}
-                className="mt-6 px-8 py-6 text-lg bg-brand-primary text-white hover:opacity-90 transition-all"
+                className="mt-6 px-8 py-6 text-lg bg-indigo-600 text-white hover:opacity-90 transition-all"
               >
                 Iniciar diagnóstico
               </Button>
@@ -276,31 +276,31 @@ export default function DiagnosticoPage() {
             </div>
 
             {/* RECOMENDAÇÕES */}
-            <div className="bg-gradient-to-r from-brand-primary/10 to-purple-500/10 rounded-2xl border border-brand-primary/20 p-8">
+            <div className="bg-gradient-to-r from-indigo-600/10 to-purple-500/10 rounded-2xl border border-indigo-600/20 p-8">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0">
-                  <Lightbulb className="h-6 w-6 text-brand-primary mt-1" />
+                  <Lightbulb className="h-6 w-6 text-indigo-600 mt-1" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-gray-900 mb-3">Próximos Passos Recomendados</h3>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-start gap-2">
-                      <span className="text-brand-primary font-bold mt-1">1.</span>
+                      <span className="text-indigo-600 font-bold mt-1">1.</span>
                       <span>Acesse o <strong>Roadmap de Maturidade</strong> para ver ações concretas priorizadas por dimensão.</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-brand-primary font-bold mt-1">2.</span>
+                      <span className="text-indigo-600 font-bold mt-1">2.</span>
                       <span>Explore a <strong>Biblioteca</strong> para aprofundar nas áreas com menor score.</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-brand-primary font-bold mt-1">3.</span>
+                      <span className="text-indigo-600 font-bold mt-1">3.</span>
                       <span>Refaça o diagnóstico em 90 dias para medir seu progresso.</span>
                     </li>
                   </ul>
                   <div className="mt-6 flex flex-wrap gap-3">
                     <Button
                       onClick={() => router.push("/resultado/" + lastAssessment.id)}
-                      className="bg-brand-primary text-white hover:opacity-90 flex items-center gap-2"
+                      className="bg-indigo-600 text-white hover:opacity-90 flex items-center gap-2"
                     >
                       Ver Relatório Completo
                       <ArrowRight className="h-4 w-4" />
@@ -308,7 +308,7 @@ export default function DiagnosticoPage() {
                     <Button
                       onClick={() => router.push("/roadmap")}
                       variant="outline"
-                      className="flex items-center gap-2 border-brand-primary text-brand-primary hover:bg-brand-primary/10"
+                      className="flex items-center gap-2 border-indigo-600 text-indigo-600 hover:bg-indigo-600/10"
                     >
                       Ver Roadmap
                       <ArrowRight className="h-4 w-4" />
@@ -338,7 +338,7 @@ export default function DiagnosticoPage() {
                     </div>
                     <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-brand-primary rounded-full"
+                        className="h-full bg-indigo-600 rounded-full"
                         style={{ width: `${(score / 5) * 100}%` }}
                       ></div>
                     </div>

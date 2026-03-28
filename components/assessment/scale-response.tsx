@@ -25,7 +25,7 @@ export function ScaleResponse({
             rounded-xl border-2 p-4 text-center transition-all
             ${
               value === level.level
-                ? "border-brand-primary bg-brand-primary text-white shadow-md"
+                ? "border-indigo-600 bg-indigo-600 text-white shadow-md"
                 : "border-gray-200 bg-white text-gray-900 hover:border-gray-300 hover:bg-gray-50"
             }
             ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}

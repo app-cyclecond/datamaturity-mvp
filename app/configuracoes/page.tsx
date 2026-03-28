@@ -97,7 +97,7 @@ export default function ConfiguracoesPage() {
     return (
       <div className="flex min-h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary" />
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600" />
           <p className="mt-4 text-gray-600">Carregando...</p>
         </div>
       </div>
@@ -161,7 +161,7 @@ export default function ConfiguracoesPage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   placeholder="Seu nome"
                 />
               </div>
@@ -175,7 +175,7 @@ export default function ConfiguracoesPage() {
                   type="text"
                   value={formData.company}
                   onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   placeholder="Nome da sua empresa"
                 />
               </div>
@@ -189,7 +189,7 @@ export default function ConfiguracoesPage() {
                   type="text"
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   placeholder="Seu cargo"
                 />
               </div>
@@ -205,7 +205,7 @@ export default function ConfiguracoesPage() {
                 <select
                   value={formData.industry}
                   onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
                 >
                   {INDUSTRIES.map((industry) => (
                     <option key={industry} value={industry}>
@@ -220,12 +220,12 @@ export default function ConfiguracoesPage() {
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   Plano Atual
                 </label>
-                <div className="inline-block px-4 py-2 bg-brand-primary text-white rounded-lg text-sm font-medium">
+                <div className="inline-block px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium">
                   {user?.plan?.toUpperCase() || "N/A"}
                 </div>
                 <p className="text-sm text-gray-600 mt-3">
                   Para alterar seu plano, acesse a página de{" "}
-                  <Link href="/planos" className="text-brand-primary hover:underline">
+                  <Link href="/planos" className="text-indigo-600 hover:underline">
                     Planos
                   </Link>
                 </p>
@@ -253,7 +253,7 @@ export default function ConfiguracoesPage() {
               <Button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center gap-2 bg-brand-primary text-white hover:opacity-90 px-6 py-2"
+                className="flex items-center gap-2 bg-indigo-600 text-white hover:opacity-90 px-6 py-2"
               >
                 <Save className="h-4 w-4" />
                 {isSaving ? "Salvando..." : "Salvar Alterações"}

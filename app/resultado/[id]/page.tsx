@@ -103,7 +103,7 @@ export default function ResultadoPage({
     return (
       <div className="flex min-h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary" />
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600" />
           <p className="mt-4 text-gray-600">Carregando resultado...</p>
         </div>
       </div>
@@ -135,7 +135,7 @@ export default function ResultadoPage({
         </Link>
 
         {/* HEADER */}
-        <div className="bg-gradient-to-r from-brand-primary to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
           <h1 className="text-3xl font-bold mb-2">Seu Diagnóstico</h1>
           <p className="text-purple-100">
             Resultado de{" "}
@@ -147,7 +147,7 @@ export default function ResultadoPage({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-sm">
             <p className="text-gray-600 text-sm font-medium mb-2">Score Geral</p>
-            <div className="text-5xl font-bold text-brand-primary mb-2">
+            <div className="text-5xl font-bold text-indigo-600 mb-2">
               {result.overall_score}
             </div>
             <div
@@ -215,7 +215,7 @@ export default function ResultadoPage({
 
                     <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-brand-primary">
+                        <div className="text-2xl font-bold text-indigo-600">
                           {Math.round((score / 5) * 100)}%
                         </div>
                       </div>
@@ -240,7 +240,7 @@ export default function ResultadoPage({
         {/* AÇÕES */}
         <div className="flex gap-4 justify-center">
           <Link href="/assessment">
-            <Button className="px-8 py-3 bg-brand-primary text-white hover:opacity-90">
+            <Button className="px-8 py-3 bg-indigo-600 text-white hover:opacity-90">
               Fazer Novo Diagnóstico
             </Button>
           </Link>
