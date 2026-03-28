@@ -17,15 +17,32 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  TooltipProps,
 } from "recharts";
+
+const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    const score = payload[0].value as number;
+    const getColor = (s: number) => s >= 4 ? "#10b981" : s >= 3 ? "#6366f1" : s >= 2 ? "#f59e0b" : "#ef4444";
+    const getLabel = (s: number) => s >= 4.5 ? "Otimizado" : s >= 3.5 ? "Avançado" : s >= 2.5 ? "Intermediário" : s >= 1.5 ? "Inicial" : "Inexistente";
+    return (
+      <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-3 min-w-[140px]">
+        <p className="text-xs text-gray-500 mb-1">{label}</p>
+        <p className="text-2xl font-bold" style={{ color: getColor(score) }}>{score}<span className="text-sm font-normal text-gray-400">/5</span></p>
+        <span className="inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: getColor(score) + "20", color: getColor(score) }}>{getLabel(score)}</span>
+      </div>
+    );
+  }
+  return null;
+};
 
 type AssessmentResult = {
   id: string;
@@ -170,31 +187,54 @@ export default function HistoricoPage() {
                 <TrendingUp className="h-5 w-5 text-indigo-600" />
                 <h3 className="text-lg font-bold text-gray-900">Evolução do Score Geral</h3>
               </div>
-              <ResponsiveContainer width="100%" height={220}>
-                <LineChart
+              <ResponsiveContainer width="100%" height={260}>
+                <AreaChart
                   data={[...assessments].reverse().map((a) => ({
-                    data: new Date(a.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }),
+                    data: new Date(a.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }),
                     score: a.overall_score,
                   }))}
-                  margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
+                  margin={{ top: 10, right: 30, left: -10, bottom: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="data" tick={{ fontSize: 12, fill: "#6b7280" }} />
-                  <YAxis domain={[0, 5]} tick={{ fontSize: 12, fill: "#6b7280" }} />
-                  <Tooltip
-                    contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "13px" }}
-                    formatter={(value: any) => [`${value}/5`, "Score"]}
+                  <defs>
+                    <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                  <XAxis
+                    dataKey="data"
+                    tick={{ fontSize: 11, fill: "#9ca3af" }}
+                    axisLine={false}
+                    tickLine={false}
+                    dy={8}
                   />
-                  <ReferenceLine y={3} stroke="#10b981" strokeDasharray="4 4" label={{ value: "Meta", position: "right", fontSize: 11, fill: "#10b981" }} />
-                  <Line
-                    type="monotone"
+                  <YAxis
+                    domain={[0, 5]}
+                    ticks={[0, 1, 2, 3, 4, 5]}
+                    tick={{ fontSize: 11, fill: "#9ca3af" }}
+                    axisLine={false}
+                    tickLine={false}
+                    dx={-4}
+                  />
+                  <Tooltip content={<CustomTooltip />} cursor={{ stroke: "#6366f1", strokeWidth: 1, strokeDasharray: "4 4" }} />
+                  <ReferenceLine
+                    y={3}
+                    stroke="#10b981"
+                    strokeDasharray="5 5"
+                    strokeWidth={1.5}
+                    label={{ value: "Meta 3.0", position: "insideTopRight", fontSize: 11, fill: "#10b981", fontWeight: 600 }}
+                  />
+                  <Area
+                    type="monotoneX"
                     dataKey="score"
                     stroke="#6366f1"
-                    strokeWidth={2.5}
-                    dot={{ r: 5, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }}
-                    activeDot={{ r: 7 }}
+                    strokeWidth={3}
+                    fill="url(#scoreGradient)"
+                    dot={{ r: 5, fill: "#6366f1", strokeWidth: 2.5, stroke: "#fff" }}
+                    activeDot={{ r: 8, fill: "#6366f1", stroke: "#fff", strokeWidth: 3 }}
                   />
-                </LineChart>
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           )}
