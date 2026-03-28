@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import {
   TrendingUp, TrendingDown, Minus, ArrowRight, Target, Zap,
   BarChart3, AlertTriangle, CheckCircle2, Clock, ChevronRight, Activity,
+  BookOpen, ExternalLink, Globe, Rss,
 } from "lucide-react";
 import Link from "next/link";
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from "recharts";
@@ -46,6 +47,254 @@ const DIMENSIONS = [
   "Cultura & Literacy",
   "IA & Advanced Analytics",
 ];
+
+// ─── RECURSOS CURADOS POR DIMENSÃO ───────────────────────────────────────────
+type Resource = {
+  title: string;
+  description: string;
+  url: string;
+  source: string;
+  type: "artigo" | "notícia" | "guia" | "site";
+  dimension: string;
+  row: 1 | 2;
+};
+
+const DIMENSION_RESOURCES: Record<string, Resource[]> = {
+  "Estratégia & Governança": [
+    {
+      title: "DAMA-DMBOK: O Guia Definitivo de Gestão de Dados",
+      description: "Framework global de referência para governança e estratégia de dados em organizações.",
+      url: "https://www.dama.org/cpages/body-of-knowledge",
+      source: "DAMA International",
+      type: "guia",
+      dimension: "Estratégia & Governança",
+      row: 1,
+    },
+    {
+      title: "Como criar uma estratégia de dados que gera valor real",
+      description: "Artigo prático sobre como alinhar a estratégia de dados aos objetivos de negócio.",
+      url: "https://hbr.org/2020/02/how-to-set-up-a-data-architecture-to-support-both-business-and-it-goals",
+      source: "Harvard Business Review",
+      type: "artigo",
+      dimension: "Estratégia & Governança",
+      row: 2,
+    },
+    {
+      title: "Data Governance Institute — Recursos e Frameworks",
+      description: "Portal com frameworks, templates e melhores práticas de governança de dados.",
+      url: "https://datagovernance.com",
+      source: "Data Governance Institute",
+      type: "site",
+      dimension: "Estratégia & Governança",
+      row: 2,
+    },
+  ],
+  "Arquitetura & Engenharia": [
+    {
+      title: "Modern Data Stack: O que é e como implementar",
+      description: "Guia completo sobre as ferramentas e arquiteturas modernas para engenharia de dados.",
+      url: "https://www.moderndatastack.xyz",
+      source: "Modern Data Stack",
+      type: "site",
+      dimension: "Arquitetura & Engenharia",
+      row: 1,
+    },
+    {
+      title: "Data Mesh vs Data Lakehouse: qual escolher?",
+      description: "Comparativo aprofundado entre as principais arquiteturas de dados modernas.",
+      url: "https://www.databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html",
+      source: "Databricks Blog",
+      type: "artigo",
+      dimension: "Arquitetura & Engenharia",
+      row: 1,
+    },
+    {
+      title: "dbt: Transformação de dados com qualidade e rastreabilidade",
+      description: "Como usar dbt para criar pipelines de dados confiáveis e documentados.",
+      url: "https://docs.getdbt.com/docs/introduction",
+      source: "dbt Labs",
+      type: "guia",
+      dimension: "Arquitetura & Engenharia",
+      row: 2,
+    },
+  ],
+  "Gestão de Dados": [
+    {
+      title: "Data Catalog: Por que toda empresa precisa de um",
+      description: "Como implementar um catálogo de dados para melhorar a descoberta e governança.",
+      url: "https://www.alation.com/blog/what-is-a-data-catalog/",
+      source: "Alation Blog",
+      type: "artigo",
+      dimension: "Gestão de Dados",
+      row: 1,
+    },
+    {
+      title: "Master Data Management: Guia Prático",
+      description: "Estratégias para implementar MDM e garantir consistência de dados mestres.",
+      url: "https://www.informatica.com/resources/articles/what-is-master-data-management.html",
+      source: "Informatica",
+      type: "guia",
+      dimension: "Gestão de Dados",
+      row: 1,
+    },
+    {
+      title: "LGPD e Gestão de Dados: O que muda na prática",
+      description: "Impactos da Lei Geral de Proteção de Dados na gestão e governança de dados.",
+      url: "https://www.gov.br/anpd/pt-br",
+      source: "ANPD Brasil",
+      type: "site",
+      dimension: "Gestão de Dados",
+      row: 2,
+    },
+  ],
+  "Qualidade de Dados": [
+    {
+      title: "The Data Quality Manifesto: 6 dimensões essenciais",
+      description: "Framework para avaliar e melhorar a qualidade dos dados em sua organização.",
+      url: "https://www.ibm.com/topics/data-quality",
+      source: "IBM Think",
+      type: "artigo",
+      dimension: "Qualidade de Dados",
+      row: 1,
+    },
+    {
+      title: "Great Expectations: Validação de dados em pipelines",
+      description: "Ferramenta open source para testes e validação automática de qualidade de dados.",
+      url: "https://greatexpectations.io",
+      source: "Great Expectations",
+      type: "site",
+      dimension: "Qualidade de Dados",
+      row: 1,
+    },
+    {
+      title: "Data Observability: O próximo nível da qualidade",
+      description: "Como monitorar a saúde dos dados em tempo real com observabilidade end-to-end.",
+      url: "https://www.montecarlodata.com/blog-what-is-data-observability/",
+      source: "Monte Carlo Data",
+      type: "artigo",
+      dimension: "Qualidade de Dados",
+      row: 2,
+    },
+  ],
+  "Analytics & Valor": [
+    {
+      title: "Gartner: Tendências em Analytics e BI para 2025",
+      description: "As principais tendências em analytics, BI e inteligência de negócios segundo o Gartner.",
+      url: "https://www.gartner.com/en/data-analytics",
+      source: "Gartner",
+      type: "site",
+      dimension: "Analytics & Valor",
+      row: 1,
+    },
+    {
+      title: "Como construir uma cultura data-driven de verdade",
+      description: "Guia prático para transformar dados em decisões de negócio com impacto mensurável.",
+      url: "https://hbr.org/2020/02/how-to-actually-be-a-data-driven-company",
+      source: "Harvard Business Review",
+      type: "artigo",
+      dimension: "Analytics & Valor",
+      row: 1,
+    },
+    {
+      title: "Metabase: BI open source para equipes ágeis",
+      description: "Ferramenta de BI acessível para criar dashboards e relatórios sem código.",
+      url: "https://www.metabase.com",
+      source: "Metabase",
+      type: "site",
+      dimension: "Analytics & Valor",
+      row: 2,
+    },
+  ],
+  "Cultura & Literacy": [
+    {
+      title: "Data Literacy: Como desenvolver competências em dados",
+      description: "Framework para desenvolver letramento em dados em todos os níveis da organização.",
+      url: "https://www.datacamp.com/blog/what-is-data-literacy",
+      source: "DataCamp Blog",
+      type: "artigo",
+      dimension: "Cultura & Literacy",
+      row: 1,
+    },
+    {
+      title: "Storytelling com Dados — Cole Nussbaumer Knaflic",
+      description: "O livro referência para comunicar dados de forma clara e persuasiva para executivos.",
+      url: "https://www.storytellingwithdata.com",
+      source: "Storytelling with Data",
+      type: "site",
+      dimension: "Cultura & Literacy",
+      row: 1,
+    },
+    {
+      title: "Como criar um programa de Data Champions",
+      description: "Guia passo a passo para identificar e capacitar embaixadores de dados nas áreas de negócio.",
+      url: "https://www.thoughtspot.com/data-trends/data-literacy/data-champion",
+      source: "ThoughtSpot",
+      type: "guia",
+      dimension: "Cultura & Literacy",
+      row: 2,
+    },
+  ],
+  "IA & Advanced Analytics": [
+    {
+      title: "MIT Sloan: IA Generativa nas Empresas em 2025",
+      description: "Pesquisa sobre como líderes estão implementando GenAI com governança e ROI mensurável.",
+      url: "https://sloanreview.mit.edu/topic/artificial-intelligence/",
+      source: "MIT Sloan Review",
+      type: "artigo",
+      dimension: "IA & Advanced Analytics",
+      row: 1,
+    },
+    {
+      title: "MLOps: Levando modelos de ML para produção",
+      description: "Guia prático de MLOps para escalar modelos de machine learning com qualidade.",
+      url: "https://ml-ops.org",
+      source: "ml-ops.org",
+      type: "guia",
+      dimension: "IA & Advanced Analytics",
+      row: 1,
+    },
+    {
+      title: "Hugging Face: Plataforma de modelos de IA open source",
+      description: "Repositório com milhares de modelos de IA prontos para uso em projetos corporativos.",
+      url: "https://huggingface.co",
+      source: "Hugging Face",
+      type: "site",
+      dimension: "IA & Advanced Analytics",
+      row: 2,
+    },
+  ],
+};
+
+function getRecommendedResources(
+  topDimensions: Array<{ name: string; score: number }>,
+  secondRow = false
+): Resource[] {
+  const row = secondRow ? (2 as const) : (1 as const);
+  const resources: Resource[] = [];
+  for (const dim of topDimensions) {
+    const dimResources = DIMENSION_RESOURCES[dim.name] || [];
+    const rowResources = dimResources.filter((r) => r.row === row);
+    if (rowResources.length > 0) {
+      resources.push(rowResources[0]);
+    }
+    if (resources.length >= 3) break;
+  }
+  // Completar com recursos de outras dimensões se necessário
+  if (resources.length < 3) {
+    for (const [, dimResources] of Object.entries(DIMENSION_RESOURCES)) {
+      for (const r of dimResources) {
+        if (r.row === row && !resources.find((x) => x.title === r.title)) {
+          resources.push(r);
+          if (resources.length >= 3) break;
+        }
+      }
+      if (resources.length >= 3) break;
+    }
+  }
+  return resources.slice(0, 3);
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 
 const DIMENSION_ICONS: Record<string, string> = {
   "Estratégia & Governança": "🎯",
@@ -428,6 +677,101 @@ export default function CockpitPage() {
                   </Link>
                 </div>
 
+              </div>
+            </div>
+          )}
+
+          {/* LEITURAS & RECURSOS RECOMENDADOS */}
+          {lastAssessment && (
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-indigo-600" />
+                  <h2 className="text-base font-bold text-gray-900">Leituras & Recursos Recomendados</h2>
+                </div>
+                <span className="text-xs text-gray-400 bg-gray-50 border border-gray-200 px-2 py-1 rounded-lg">
+                  Curado para suas áreas críticas
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                {getRecommendedResources(sortedDimensions.slice(0, 3)).map((resource, i) => (
+                  <a
+                    key={i}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex flex-col gap-3 p-4 rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all bg-gray-50 hover:bg-indigo-50/30"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        resource.type === "artigo" ? "bg-blue-100 text-blue-700" :
+                        resource.type === "notícia" ? "bg-emerald-100 text-emerald-700" :
+                        resource.type === "guia" ? "bg-purple-100 text-purple-700" :
+                        "bg-amber-100 text-amber-700"
+                      }`}>
+                        {resource.type === "artigo" ? "📄 Artigo" :
+                         resource.type === "notícia" ? "📰 Notícia" :
+                         resource.type === "guia" ? "📘 Guia" : "🌐 Site"}
+                      </span>
+                      <ExternalLink className="h-3.5 w-3.5 text-gray-300 group-hover:text-indigo-400 transition-colors flex-shrink-0 mt-0.5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors line-clamp-2 leading-snug">
+                        {resource.title}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-2">{resource.description}</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-auto">
+                      <Globe className="h-3 w-3 text-gray-300" />
+                      <span className="text-xs text-gray-400">{resource.source}</span>
+                      <span className="ml-auto text-xs text-indigo-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                        {resource.dimension}
+                      </span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+
+              {/* Segunda linha de recursos */}
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                {getRecommendedResources(sortedDimensions.slice(0, 3), true).map((resource, i) => (
+                  <a
+                    key={i}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all"
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                      resource.type === "artigo" ? "bg-blue-100" :
+                      resource.type === "notícia" ? "bg-emerald-100" :
+                      resource.type === "guia" ? "bg-purple-100" : "bg-amber-100"
+                    }`}>
+                      <span className="text-sm">
+                        {resource.type === "artigo" ? "📄" :
+                         resource.type === "notícia" ? "📰" :
+                         resource.type === "guia" ? "📘" : "🌐"}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-800 group-hover:text-indigo-700 transition-colors truncate">{resource.title}</p>
+                      <p className="text-xs text-gray-400 truncate">{resource.source}</p>
+                    </div>
+                    <ExternalLink className="h-3 w-3 text-gray-300 group-hover:text-indigo-400 flex-shrink-0" />
+                  </a>
+                ))}
+              </div>
+
+              <div className="mt-4 flex items-center justify-between">
+                <p className="text-xs text-gray-400 flex items-center gap-1">
+                  <Rss className="h-3 w-3" /> Recursos atualizados mensalmente pela equipe DataMaturity
+                </p>
+                <Link href="/biblioteca">
+                  <button className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                    Ver Biblioteca Completa <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+                </Link>
               </div>
             </div>
           )}
