@@ -617,6 +617,88 @@ export default function BenchmarkingPage() {
             </div>
           )}
 
+          {/* METODOLOGIA E FONTES */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+            <div className="flex items-start gap-3 mb-5">
+              <Info className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">Metodologia dos Benchmarks</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Como calculamos as médias setoriais exibidas nesta página</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-6 mb-6">
+              {/* Coluna 1: Composição */}
+              <div>
+                <p className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Composição dos dados</p>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm">📊</span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-800">Dados da plataforma DataMaturity</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Respostas anonimizadas de diagnósticos realizados na plataforma, agregadas por setor. Peso: <strong>40%</strong></p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm">🔬</span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-800">Pesquisas acadêmicas e de mercado</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Estudos publicados por institutos reconhecidos sobre maturidade de dados por setor. Peso: <strong>60%</strong></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Coluna 2: Fontes */}
+              <div>
+                <p className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Fontes de referência</p>
+                <div className="space-y-2">
+                  {[
+                    { name: "BCG DAICAMA Survey 2024", desc: "Data & AI maturity por setor e geografia", url: "https://www.bcg.com/publications/2024/leaders-in-data-ai-racing-away-from-pack" },
+                    { name: "Gartner D&A Maturity Score", desc: "Benchmark de maturidade para CDAOs", url: "https://www.gartner.com/en/data-analytics/research/data-analytics-maturity-score" },
+                    { name: "Carruthers & Jackson DMI 2024", desc: "Índice anual de maturidade de dados global", url: "https://carruthersandjackson.com/data-maturity-index-2024/" },
+                    { name: "DAMA DMBOK Framework", desc: "Framework global de gestão e governança de dados", url: "https://www.dama.org/cpages/body-of-knowledge" },
+                    { name: "IDC Data Modernization 2024", desc: "Avaliação de maturidade em modernização de dados", url: "https://www.idc.com" },
+                  ].map((src) => (
+                    <a key={src.name} href={src.url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-start gap-2 group">
+                      <span className="text-indigo-400 mt-0.5 flex-shrink-0">↗</span>
+                      <div>
+                        <p className="text-xs font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors">{src.name}</p>
+                        <p className="text-xs text-gray-400">{src.desc}</p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* Coluna 3: Avisos */}
+              <div>
+                <p className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Notas importantes</p>
+                <div className="space-y-2.5 text-xs text-gray-500">
+                  <p>📅 <strong>Atualização:</strong> Os benchmarks são revisados trimestralmente conforme novos diagnósticos são realizados na plataforma.</p>
+                  <p>🔒 <strong>Privacidade:</strong> Nenhum dado individual é utilizado. Apenas médias agregadas e anonimizadas por setor.</p>
+                  <p>🌎 <strong>Escopo:</strong> Os dados refletem principalmente empresas brasileiras e latino-americanas, complementados por referências globais.</p>
+                  <p>⚠️ <strong>Limitação:</strong> Setores com menos de 30 respostas na plataforma utilizam predominantemente as fontes externas como referência.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Rodapé da metodologia */}
+            <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+              <p className="text-xs text-gray-400">
+                Os benchmarks setoriais são estimativas baseadas em dados compostos e devem ser interpretados como referência orientativa, não como dado absoluto.
+              </p>
+              <a href="mailto:contato@datamaturity.com.br" className="text-xs text-indigo-500 hover:text-indigo-700 font-medium flex-shrink-0 ml-4">
+                Dúvidas sobre a metodologia? Fale conosco
+              </a>
+            </div>
+          </div>
+
         </div>
       </main>
     </div>
