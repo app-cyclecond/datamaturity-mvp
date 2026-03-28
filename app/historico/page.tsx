@@ -25,12 +25,11 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
-  TooltipProps,
 } from "recharts";
 
-const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
   if (active && payload && payload.length) {
-    const score = payload[0].value as number;
+    const score = payload[0].value;
     const getColor = (s: number) => s >= 4 ? "#10b981" : s >= 3 ? "#6366f1" : s >= 2 ? "#f59e0b" : "#ef4444";
     const getLabel = (s: number) => s >= 4.5 ? "Otimizado" : s >= 3.5 ? "Avançado" : s >= 2.5 ? "Intermediário" : s >= 1.5 ? "Inicial" : "Inexistente";
     return (
