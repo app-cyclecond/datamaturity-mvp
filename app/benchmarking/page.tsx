@@ -149,11 +149,11 @@ const DIMENSION_SHORT: Record<string, string> = {
 };
 
 const getPercentileLabel = (score: number, benchmark: typeof INDUSTRY_BENCHMARKS[string]) => {
-  if (score >= benchmark.top10) return { label: "Top 10%", color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200" };
-  if (score >= benchmark.top25) return { label: "Top 25%", color: "text-blue-600", bg: "bg-blue-50 border-blue-200" };
-  if (score >= benchmark.avg) return { label: "Acima da média", color: "text-indigo-600", bg: "bg-indigo-50 border-indigo-200" };
+  if (score >= benchmark.top10) return { label: "Top 10% do setor", color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200" };
+  if (score >= benchmark.top25) return { label: "Top 25% do setor", color: "text-blue-600", bg: "bg-blue-50 border-blue-200" };
+  if (score >= benchmark.avg) return { label: "Dentro da média", color: "text-indigo-600", bg: "bg-indigo-50 border-indigo-200" };
   if (score >= benchmark.bottom25) return { label: "Abaixo da média", color: "text-amber-600", bg: "bg-amber-50 border-amber-200" };
-  return { label: "Bottom 25%", color: "text-red-600", bg: "bg-red-50 border-red-200" };
+  return { label: "Quartil Inferior", color: "text-red-600", bg: "bg-red-50 border-red-200" };
 };
 
 const CustomRadarTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }> }) => {
@@ -671,8 +671,8 @@ export default function BenchmarkingPage() {
                         <Info className="h-4 w-4 text-indigo-600 flex-shrink-0 mt-0.5" />
                         <p className="text-xs text-indigo-800">
                           <strong>Sua posição:</strong> Com score de <strong>{currentScore}</strong>, você está{" "}
-                          {currentScore >= userBenchmark.top10 ? "no <strong>Top 10%</strong> do setor " + userIndustry :
-                           currentScore >= userBenchmark.top25 ? "no <strong>Top 25%</strong> do setor " + userIndustry :
+                          {currentScore >= userBenchmark.top10 ? "no <strong>Top 10% do setor</strong> " + userIndustry :
+                           currentScore >= userBenchmark.top25 ? "no <strong>Top 25% do setor</strong> " + userIndustry :
                            currentScore >= userBenchmark.avg ? "<strong>acima da média</strong> do setor " + userIndustry :
                            "<strong>abaixo da média</strong> do setor " + userIndustry}.
                           {currentScore < userBenchmark.top10 && ` Você precisa de +${(userBenchmark.top10 - currentScore).toFixed(1)} pontos para atingir o Top 10%.`}
