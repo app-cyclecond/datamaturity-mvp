@@ -10,7 +10,7 @@ import {
 import Link from "next/link";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, Cell,
+  ResponsiveContainer, Tooltip,
 } from "recharts";
 
 type AssessmentResult = {
@@ -223,11 +223,13 @@ export default function BenchmarkingPage() {
     [`Média ${compareIndustry}`]: compareBenchmark.dimensions[d] ?? 0,
   }));
 
-  // Dados para bar chart comparativo
-  const barData = DIMENSIONS.map((d) => ({
-    name: DIMENSION_SHORT[d],
-    Você: dimensionScores[d] ?? 0,
-    Setor: compareBenchmark.dimensions[d] ?? 0,
+  // Dados para o comparativo visual por dimensão (sem recharts)
+  const dimCompareData = DIMENSIONS.map((d) => ({
+    name: d,
+    short: DIMENSION_SHORT[d],
+    you: dimensionScores[d] ?? 0,
+    sector: compareBenchmark.dimensions[d] ?? 0,
+    gap: +((dimensionScores[d] ?? 0) - (compareBenchmark.dimensions[d] ?? 0)).toFixed(1),
   }));
 
   // Ranking de todos os setores
@@ -401,26 +403,84 @@ export default function BenchmarkingPage() {
                   </div>
                 </div>
 
-                {/* Bar Chart */}
+                {/* Comparativo Premium por Dimensão */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="flex items-center gap-2 mb-5">
                     <BarChart3 className="h-5 w-5 text-indigo-600" />
                     <h2 className="text-base font-bold text-gray-900">Comparativo por Dimensão</h2>
+                    <span className="ml-auto text-xs text-gray-400">vs. {compareIndustry}</span>
                   </div>
-                  <ResponsiveContainer width="100%" height={280}>
-                    <BarChart data={barData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                      <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#6b7280" }} />
-                      <YAxis domain={[0, 5]} tick={{ fontSize: 10 }} />
-                      <Tooltip
-                        contentStyle={{ borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "12px" }}
-                        formatter={(value) => [`${value}/5`]}
-                      />
-                      <Legend wrapperStyle={{ fontSize: "12px" }} />
-                      <Bar dataKey="Você" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="Setor" fill="#f97316" radius={[4, 4, 0, 0]} opacity={0.7} />
-                    </BarChart>
-                  </ResponsiveContainer>
+
+                  {/* Legenda */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <span className="w-3 h-3 rounded-sm bg-indigo-500 inline-block" /> Você
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <span className="w-3 h-3 rounded-sm bg-orange-300 inline-block" /> Média {compareIndustry}
+                    </div>
+                  </div>
+
+                  {/* Barras horizontais */}
+                  <div className="space-y-3">
+                    {dimCompareData.map((d) => {
+                      const youPct = (d.you / 5) * 100;
+                      const sectorPct = (d.sector / 5) * 100;
+                      const isAhead = d.gap >= 0;
+                      return (
+                        <div key={d.name}>
+                          {/* Label + scores */}
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-semibold text-gray-700">{d.short}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-indigo-600">{d.you}</span>
+                              <span className="text-xs text-gray-300">/</span>
+                              <span className="text-xs font-medium text-orange-400">{d.sector}</span>
+                              <span className={`text-xs font-bold px-1.5 py-0.5 rounded-md ${
+                                isAhead ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"
+                              }`}>
+                                {d.gap > 0 ? "+" : ""}{d.gap}
+                              </span>
+                            </div>
+                          </div>
+                          {/* Track duplo */}
+                          <div className="relative h-5">
+                            {/* Barra setor (fundo) */}
+                            <div className="absolute inset-0 flex items-center">
+                              <div className="w-full bg-gray-100 rounded-full h-3" />
+                            </div>
+                            <div className="absolute inset-0 flex items-center">
+                              <div
+                                className="bg-orange-200 h-3 rounded-full transition-all duration-500"
+                                style={{ width: `${sectorPct}%` }}
+                              />
+                            </div>
+                            {/* Barra você (frente) */}
+                            <div className="absolute inset-0 flex items-center">
+                              <div
+                                className={`h-2 rounded-full transition-all duration-500 ${
+                                  isAhead ? "bg-indigo-500" : "bg-indigo-400"
+                                }`}
+                                style={{ width: `${youPct}%` }}
+                              />
+                            </div>
+                            {/* Marcador de score você */}
+                            <div
+                              className="absolute top-0 bottom-0 flex items-center"
+                              style={{ left: `calc(${youPct}% - 6px)` }}
+                            >
+                              <div className="w-3 h-3 rounded-full bg-indigo-600 border-2 border-white shadow-sm" />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Escala */}
+                  <div className="flex justify-between text-xs text-gray-300 mt-3 px-0.5">
+                    <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                  </div>
                 </div>
               </div>
 
