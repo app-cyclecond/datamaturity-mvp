@@ -5,8 +5,10 @@ import { createClient } from "@/lib/supabase/client";
 import { Sidebar } from "@/components/layout/sidebar";
 import {
   BarChart3, TrendingUp, TrendingDown, Minus, Lock, ChevronRight,
-  Info, Award, Target, AlertTriangle,
+  Info, Award, Target, AlertTriangle, ChevronDown, ChevronUp,
+  CheckCircle2, Lightbulb, Zap,
 } from "lucide-react";
+import { DIMENSION_INSIGHTS, getInsightTier } from "@/lib/dimension-insights";
 import Link from "next/link";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
@@ -177,6 +179,7 @@ export default function BenchmarkingPage() {
   const [lastAssessment, setLastAssessment] = useState<AssessmentResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
+  const [expandedDimension, setExpandedDimension] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -484,50 +487,138 @@ export default function BenchmarkingPage() {
                 </div>
               </div>
 
-              {/* TABELA DETALHADA POR DIMENSÃO */}
-              <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-5">
+              {/* ANÁLISE DETALHADA POR DIMENSÃO — ACCORDION */}
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="flex items-center gap-2 p-6 pb-4 border-b border-gray-100">
                   <Target className="h-5 w-5 text-indigo-600" />
                   <h2 className="text-base font-bold text-gray-900">Análise Detalhada por Dimensão</h2>
                   <div className="ml-auto flex items-center gap-1 text-xs text-gray-400">
                     <Info className="h-3.5 w-3.5" />
-                    <span>Comparando com {compareBenchmark.companies} empresas do setor {compareIndustry}</span>
+                    <span>Clique em uma dimensão para ver o diagnóstico completo</span>
                   </div>
                 </div>
-                <div className="space-y-3">
+                <div className="divide-y divide-gray-100">
                   {DIMENSIONS.map((dim) => {
                     const yourScore = dimensionScores[dim] ?? 0;
                     const sectorScore = compareBenchmark.dimensions[dim] ?? 0;
                     const diff = +(yourScore - sectorScore).toFixed(1);
+                    const isExpanded = expandedDimension === dim;
+                    const tier = getInsightTier(yourScore);
+                    const insight = DIMENSION_INSIGHTS[dim]?.[tier];
+                    const gapColor = diff > 0 ? "text-emerald-600" : diff < 0 ? "text-red-500" : "text-gray-400";
+                    const scoreBadgeColor = yourScore >= 3.5 ? "bg-emerald-100 text-emerald-700" : yourScore >= 2.5 ? "bg-blue-100 text-blue-700" : yourScore >= 1.5 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700";
                     return (
-                      <div key={dim} className="flex items-center gap-4 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                        <div className="w-36 flex-shrink-0">
-                          <p className="text-xs font-semibold text-gray-800 truncate">{dim}</p>
-                        </div>
-                        <div className="flex-1 flex items-center gap-3">
-                          <div className="flex-1">
-                            <div className="flex justify-between text-xs mb-1">
-                              <span className="text-gray-500">Você</span>
-                              <span className="font-bold text-indigo-600">{yourScore}</span>
+                      <div key={dim}>
+                        {/* HEADER CLICÁVEL */}
+                        <button
+                          onClick={() => setExpandedDimension(isExpanded ? null : dim)}
+                          className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-colors text-left"
+                        >
+                          {/* Nome e score */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <p className="text-sm font-semibold text-gray-900">{dim}</p>
+                              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${scoreBadgeColor}`}>
+                                {yourScore}/5
+                              </span>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-1.5">
-                              <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${(yourScore / 5) * 100}%` }} />
+                            {/* Barra de progresso dupla */}
+                            <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
+                              <div
+                                className="absolute inset-y-0 left-0 bg-orange-300 rounded-full opacity-60"
+                                style={{ width: `${(sectorScore / 5) * 100}%` }}
+                              />
+                              <div
+                                className="absolute inset-y-0 left-0 bg-indigo-500 rounded-full"
+                                style={{ width: `${(yourScore / 5) * 100}%` }}
+                              />
+                            </div>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="text-xs text-gray-400">Setor: <span className="text-orange-500 font-medium">{sectorScore}</span></span>
+                              <span className="text-xs text-gray-300">·</span>
+                              <span className="text-xs text-gray-400">Você: <span className="text-indigo-600 font-medium">{yourScore}</span></span>
                             </div>
                           </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between text-xs mb-1">
-                              <span className="text-gray-500">Setor</span>
-                              <span className="font-bold text-orange-500">{sectorScore}</span>
+                          {/* Gap e chevron */}
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <div className={`flex items-center gap-1 ${gapColor}`}>
+                              {diff > 0 ? <TrendingUp className="h-4 w-4" /> : diff < 0 ? <TrendingDown className="h-4 w-4" /> : <Minus className="h-4 w-4" />}
+                              <span className="text-sm font-bold">{diff > 0 ? "+" : ""}{diff}</span>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-1.5">
-                              <div className="bg-orange-400 h-1.5 rounded-full" style={{ width: `${(sectorScore / 5) * 100}%` }} />
+                            <div className="text-gray-400">
+                              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                             </div>
                           </div>
-                        </div>
-                        <div className={`flex items-center gap-1 flex-shrink-0 w-20 justify-end ${diff > 0 ? "text-emerald-600" : diff < 0 ? "text-red-500" : "text-gray-400"}`}>
-                          {diff > 0 ? <TrendingUp className="h-3.5 w-3.5" /> : diff < 0 ? <TrendingDown className="h-3.5 w-3.5" /> : <Minus className="h-3.5 w-3.5" />}
-                          <span className="text-xs font-bold">{diff > 0 ? "+" : ""}{diff}</span>
-                        </div>
+                        </button>
+
+                        {/* CONTEÚDO EXPANDIDO */}
+                        {isExpanded && insight && (
+                          <div className="px-6 pb-6 bg-gray-50 border-t border-gray-100">
+                            <div className="pt-4 grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+                              {/* Ponto forte */}
+                              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                  <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">Ponto Forte</span>
+                                </div>
+                                <p className="text-sm text-emerald-800">{insight.strength}</p>
+                              </div>
+                              {/* Gap principal */}
+                              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                                  <span className="text-xs font-bold text-red-600 uppercase tracking-wide">Gap Principal</span>
+                                </div>
+                                <p className="text-sm text-red-800">{insight.gap}</p>
+                              </div>
+                              {/* Ação recomendada */}
+                              <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Zap className="h-4 w-4 text-indigo-600 flex-shrink-0" />
+                                  <span className="text-xs font-bold text-indigo-700 uppercase tracking-wide">Ação Prioritária</span>
+                                </div>
+                                <p className="text-sm text-indigo-800">{insight.action}</p>
+                              </div>
+                            </div>
+
+                            {/* Diagnóstico por critério */}
+                            <div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <Lightbulb className="h-4 w-4 text-amber-500" />
+                                <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Diagnóstico por Critério</span>
+                              </div>
+                              <div className="space-y-2">
+                                {insight.questions.map((q, i) => (
+                                  <div key={i} className="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                                    <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold ${
+                                      yourScore >= 3.5 ? "bg-emerald-100 text-emerald-700" :
+                                      yourScore >= 2.5 ? "bg-blue-100 text-blue-700" :
+                                      yourScore >= 1.5 ? "bg-amber-100 text-amber-700" :
+                                      "bg-red-100 text-red-700"
+                                    }`}>
+                                      {i + 1}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-semibold text-gray-800 mb-0.5">{q.text}</p>
+                                      <p className="text-xs text-gray-500">{q.interpretation}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Link para Roadmap */}
+                            <div className="mt-4 flex justify-end">
+                              <Link
+                                href="/roadmap"
+                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                Ver plano de ação no Roadmap
+                                <ChevronRight className="h-3.5 w-3.5" />
+                              </Link>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
