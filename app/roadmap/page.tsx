@@ -214,7 +214,7 @@ export default function RoadmapPage() {
                   const isLocked = !isGoldOrSilver && index >= 3;
 
                   return (
-                    <div key={dimensionName} className={`bg-white rounded-2xl border-2 transition-all ${getScoreBg(score)} overflow-hidden`}>
+                    <div key={dimensionName} className={`bg-white rounded-2xl border-2 transition-all ${getScoreBg(score)}`}>
                       <button
                         className="w-full p-6 flex items-center gap-4 text-left"
                         onClick={() => !isLocked && setExpandedDimension(isExpanded ? null : dimensionName)}

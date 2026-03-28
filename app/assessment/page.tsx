@@ -395,7 +395,7 @@ export default function AssessmentPage() {
           ))}
         </div>
 
-        <div className="mt-12 flex gap-4 justify-between">
+        <div className="mt-12 flex gap-4 justify-between sticky bottom-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 px-4 py-3">
           <Button
             onClick={handlePreviousDimension}
             disabled={currentDimensionIndex === 0 || isSaving}
