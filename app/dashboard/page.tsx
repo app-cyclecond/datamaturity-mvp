@@ -1,23 +1,14 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/layout/sidebar";
 import {
-  ArrowRight,
-  TrendingUp,
-  Target,
-  Zap,
-  BarChart3,
-  CheckCircle,
-  AlertCircle,
-  Trophy,
-  Lightbulb,
-  Lock,
+  TrendingUp, TrendingDown, Minus, ArrowRight, Target, Zap,
+  BarChart3, AlertTriangle, CheckCircle2, Clock, ChevronRight, Activity,
 } from "lucide-react";
 import Link from "next/link";
+import { AreaChart, Area, ResponsiveContainer, Tooltip } from "recharts";
 
 type AssessmentResult = {
   id: string;
@@ -37,7 +28,7 @@ type UserProfile = {
   plan: string;
 };
 
-const INDUSTRY_BENCHMARKS = {
+const INDUSTRY_BENCHMARKS: Record<string, { avg: number; top10: number }> = {
   Tech: { avg: 3.8, top10: 4.5 },
   Financeiro: { avg: 3.2, top10: 4.2 },
   Retail: { avg: 2.5, top10: 3.8 },
@@ -46,365 +37,401 @@ const INDUSTRY_BENCHMARKS = {
   Outro: { avg: 2.8, top10: 4.0 },
 };
 
-export default function HomeExecutivaPage() {
+const DIMENSIONS = [
+  "Estratégia & Governança",
+  "Arquitetura & Engenharia",
+  "Gestão de Dados",
+  "Qualidade de Dados",
+  "Analytics & Valor",
+  "Cultura & Literacy",
+  "IA & Advanced Analytics",
+];
+
+const DIMENSION_ICONS: Record<string, string> = {
+  "Estratégia & Governança": "🎯",
+  "Arquitetura & Engenharia": "⚙️",
+  "Gestão de Dados": "🗄️",
+  "Qualidade de Dados": "✅",
+  "Analytics & Valor": "📊",
+  "Cultura & Literacy": "🧠",
+  "IA & Advanced Analytics": "🤖",
+};
+
+const getDimensionColor = (score: number) => {
+  if (score >= 4) return { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-700", bar: "bg-emerald-500" };
+  if (score >= 3) return { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-700", bar: "bg-blue-500" };
+  if (score >= 2) return { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", bar: "bg-amber-500" };
+  return { bg: "bg-red-50", border: "border-red-200", text: "text-red-700", bar: "bg-red-500" };
+};
+
+const getDimensionStatus = (score: number) => {
+  if (score >= 4) return "Avançado";
+  if (score >= 3) return "Intermediário";
+  if (score >= 2) return "Inicial";
+  return "Crítico";
+};
+
+const SparklineTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ value: number }> }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg shadow-md px-2 py-1 text-xs font-semibold text-indigo-700">
+        {payload[0].value}/5
+      </div>
+    );
+  }
+  return null;
+};
+
+export default function CockpitPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [lastAssessment, setLastAssessment] = useState<AssessmentResult | null>(null);
+  const [allAssessments, setAllAssessments] = useState<AssessmentResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const supabase = createClient();
-
     const load = async () => {
       const { data: authData } = await supabase.auth.getUser();
-      if (!authData.user) {
-        router.push("/login");
-        return;
-      }
-
-      // Carregar dados do usuário
-      const { data: userData } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", authData.user.id)
-        .single();
-
-      if (userData) {
-        setUser(userData as UserProfile);
-      }
-
-      // Carregar último assessment
+      if (!authData.user) { router.push("/auth/login"); return; }
+      const { data: userData } = await supabase.from("users").select("*").eq("id", authData.user.id).single();
+      if (userData) setUser(userData as UserProfile);
       const { data: results } = await supabase
-        .from("assessment_results")
-        .select("*")
-        .eq("user_id", authData.user.id)
-        .order("created_at", { ascending: false })
-        .limit(1);
-
+        .from("assessment_results").select("*").eq("user_id", authData.user.id)
+        .order("created_at", { ascending: false }).limit(10);
       if (results && results.length > 0) {
         setLastAssessment(results[0] as AssessmentResult);
+        setAllAssessments(results as AssessmentResult[]);
       }
-
       setIsLoading(false);
     };
-
     load();
   }, [router]);
-
-  const getLevelColor = (level: string) => {
-    switch (level) {
-      case "Inexistente":
-        return "bg-red-50 text-red-900 border-red-200";
-      case "Inicial":
-        return "bg-orange-50 text-orange-900 border-orange-200";
-      case "Intermediário":
-        return "bg-yellow-50 text-yellow-900 border-yellow-200";
-      case "Avançado":
-        return "bg-blue-50 text-blue-900 border-blue-200";
-      case "Otimizado":
-        return "bg-green-50 text-green-900 border-green-200";
-      default:
-        return "bg-gray-50 text-gray-900 border-gray-200";
-    }
-  };
-
-  const userIndustry = (user?.industry || "Tech") as keyof typeof INDUSTRY_BENCHMARKS;
-  const benchmark = INDUSTRY_BENCHMARKS[userIndustry];
-  const currentScore = lastAssessment?.overall_score || 0;
-  const scoreGap = benchmark.avg - currentScore;
-  const isGoldPlan = user?.plan === "gold";
 
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary" />
-          <p className="mt-4 text-gray-600">Carregando...</p>
+          <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600" />
+          <p className="mt-3 text-gray-500 text-sm">Carregando cockpit...</p>
         </div>
       </div>
     );
   }
 
+  const userIndustry = (user?.industry || "Tech") as keyof typeof INDUSTRY_BENCHMARKS;
+  const benchmark = INDUSTRY_BENCHMARKS[userIndustry] || INDUSTRY_BENCHMARKS["Outro"];
+  const currentScore = lastAssessment?.overall_score ?? 0;
+  const prevScore = allAssessments[1]?.overall_score ?? null;
+  const scoreDelta = prevScore !== null ? +(currentScore - prevScore).toFixed(1) : null;
+  const scoreGap = +(benchmark.avg - currentScore).toFixed(1);
+  const isGold = user?.plan === "gold";
+
+  const sparkData = [...allAssessments].reverse().map((a, i) => ({ i, score: a.overall_score }));
+
+  const dimensionScores = lastAssessment?.dimension_scores || {};
+  const sortedDimensions = DIMENSIONS.map((d) => ({ name: d, score: dimensionScores[d] ?? 0 }))
+    .sort((a, b) => a.score - b.score);
+
+  const criticalDimensions = sortedDimensions.filter((d) => d.score < 2);
+  const topPriority = sortedDimensions[0];
+
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "Bom dia";
+    if (h < 18) return "Boa tarde";
+    return "Boa noite";
+  };
+
+  const firstName = user?.name?.split(" ")[0] || "Executivo";
+
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* SIDEBAR */}
       <Sidebar user={user || undefined} activePage="home" />
+      <main className="flex-1 ml-64 p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 ml-64 p-10">
-        <div className="space-y-8">
-          {/* HEADER */}
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900">Home Executiva</h1>
-            <p className="text-lg text-gray-600 mt-2">
-              Visão estratégica da maturidade de dados da sua empresa
-            </p>
+          {/* HEADER PERSONALIZADO */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{getGreeting()}, {firstName} 👋</h1>
+              <p className="text-gray-500 text-sm mt-0.5">
+                {user?.company ? `${user.company} · ` : ""}{userIndustry} · Plano{" "}
+                <span className="font-semibold capitalize text-indigo-600">{user?.plan || "Starter"}</span>
+              </p>
+            </div>
+            <Link href="/assessment">
+              <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm">
+                <Zap className="h-4 w-4" /> Novo Diagnóstico
+              </button>
+            </Link>
           </div>
 
-          {/* SCORE ATUAL */}
-          {lastAssessment && (
-            <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 rounded-2xl p-8 text-white shadow-lg">
-              <div className="grid grid-cols-3 gap-8">
-                <div>
-                  <p className="text-white text-base font-semibold mb-3 opacity-90">Score Atual</p>
-                  <p className="text-6xl font-bold text-white">{lastAssessment.overall_score}</p>
-                  <p className="text-white text-lg font-medium mt-3">{lastAssessment.level}</p>
+          {/* KPI ROW */}
+          {lastAssessment ? (
+            <div className="grid grid-cols-4 gap-4">
+              {/* Score */}
+              <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5 text-white shadow-md">
+                <p className="text-xs font-semibold uppercase tracking-wider opacity-80 mb-1">Score de Maturidade</p>
+                <p className="text-5xl font-bold">{currentScore}</p>
+                <p className="text-sm font-medium mt-1 opacity-90">{lastAssessment.level}</p>
+                <div className="mt-3 w-full bg-white/20 rounded-full h-1.5">
+                  <div className="bg-white h-1.5 rounded-full" style={{ width: `${(currentScore / 5) * 100}%` }} />
                 </div>
-                <div>
-                  <p className="text-white text-base font-semibold mb-3 opacity-90">Tendência</p>
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-8 w-8 text-white" />
-                    <p className="text-4xl font-bold text-white">+0.2</p>
+                <p className="text-xs opacity-70 mt-1">{currentScore}/5.0</p>
+              </div>
+
+              {/* Tendência */}
+              <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Tendência</p>
+                {scoreDelta !== null ? (
+                  <div className={`flex items-center gap-1 ${scoreDelta > 0 ? "text-emerald-600" : scoreDelta < 0 ? "text-red-500" : "text-gray-500"}`}>
+                    {scoreDelta > 0 ? <TrendingUp className="h-6 w-6" /> : scoreDelta < 0 ? <TrendingDown className="h-6 w-6" /> : <Minus className="h-6 w-6" />}
+                    <span className="text-3xl font-bold">{scoreDelta > 0 ? "+" : ""}{scoreDelta}</span>
                   </div>
-                  <p className="text-white text-base font-medium mt-3 opacity-90">vs. último diagnóstico</p>
+                ) : (
+                  <p className="text-2xl font-bold text-gray-400">—</p>
+                )}
+                <p className="text-xs text-gray-400 mt-1">vs. diagnóstico anterior</p>
+                {sparkData.length > 1 && (
+                  <div className="mt-3 h-10">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={sparkData} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
+                        <defs>
+                          <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <Tooltip content={<SparklineTooltip />} />
+                        <Area type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={2} fill="url(#sparkGrad)" dot={false} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
+
+              {/* Gap vs Mercado */}
+              <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Gap vs. Mercado</p>
+                <div className={`flex items-center gap-1 ${scoreGap > 0 ? "text-amber-600" : "text-emerald-600"}`}>
+                  {scoreGap > 0 ? <AlertTriangle className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
+                  <span className="text-3xl font-bold">{scoreGap > 0 ? "-" : "+"}{Math.abs(scoreGap)}</span>
                 </div>
-                <div>
-                  <p className="text-white text-base font-semibold mb-3 opacity-90">Data</p>
-                  <p className="text-3xl font-bold text-white">
-                    {new Date(lastAssessment.created_at).toLocaleDateString("pt-BR")}
-                  </p>
+                <p className="text-xs text-gray-400 mt-1">vs. média {userIndustry} ({benchmark.avg})</p>
+                <div className="mt-3 space-y-1.5">
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Você</span><span className="font-semibold text-indigo-600">{currentScore}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-1.5">
+                    <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${(currentScore / 5) * 100}%` }} />
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Média setor</span><span className="font-semibold text-orange-500">{benchmark.avg}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-1.5">
+                    <div className="bg-orange-400 h-1.5 rounded-full" style={{ width: `${(benchmark.avg / 5) * 100}%` }} />
+                  </div>
                 </div>
               </div>
+
+              {/* Último Diagnóstico */}
+              <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Último Diagnóstico</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {new Date(lastAssessment.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                </p>
+                <div className="flex items-center gap-1 mt-1">
+                  <Clock className="h-3.5 w-3.5 text-gray-400" />
+                  <p className="text-xs text-gray-400">
+                    {Math.floor((Date.now() - new Date(lastAssessment.created_at).getTime()) / (1000 * 60 * 60 * 24))} dias atrás
+                  </p>
+                </div>
+                <div className="mt-3 p-2 bg-indigo-50 rounded-lg">
+                  <p className="text-xs text-indigo-700 font-medium">💡 Recomendado: reavalie em 90 dias</p>
+                </div>
+                <Link href="/assessment">
+                  <button className="mt-3 w-full text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center justify-center gap-1 py-1.5 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-all">
+                    Iniciar novo <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            /* ESTADO VAZIO */
+            <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-12 text-center">
+              <Activity className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">Nenhum diagnóstico realizado ainda</h3>
+              <p className="text-gray-500 text-sm mb-6">
+                Faça seu primeiro diagnóstico para ver o cockpit completo com insights e benchmarking.
+              </p>
+              <Link href="/assessment">
+                <button className="bg-indigo-600 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition-all">
+                  Iniciar Diagnóstico Gratuito →
+                </button>
+              </Link>
             </div>
           )}
 
-          {/* BENCHMARKING */}
-          <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Benchmarking de Mercado</h2>
-
-            <div className="space-y-8">
-              {/* Sua Empresa */}
-              <div className="p-4 bg-white rounded-lg border border-blue-200">
-                <div className="flex justify-between items-center mb-3">
-                  <div>
-                    <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Sua Empresa</span>
-                    <p className="text-sm font-medium text-gray-900 mt-1">{userIndustry}</p>
+          {lastAssessment && (
+            <div className="grid grid-cols-3 gap-6">
+              {/* SCORECARD POR DIMENSÃO */}
+              <div className="col-span-2 bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-indigo-600" />
+                    <h2 className="text-base font-bold text-gray-900">Scorecard por Dimensão</h2>
                   </div>
-                  <span className="text-3xl font-bold text-blue-600">{currentScore}</span>
-                </div>
-                <div className="w-full bg-blue-100 rounded-full h-3">
-                  <div
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full shadow-md"
-                    style={{ width: `${(currentScore / benchmark.top10) * 100}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Média da Indústria */}
-              <div className="p-4 bg-white rounded-lg border border-orange-200">
-                <div className="flex justify-between items-center mb-3">
-                  <div>
-                    <span className="text-xs font-semibold text-orange-600 uppercase tracking-wide">Média da Indústria</span>
-                    <p className="text-sm font-medium text-gray-900 mt-1">{userIndustry}</p>
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block" />Crítico</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />Inicial</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />Interm.</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />Avançado</span>
                   </div>
-                  <span className="text-3xl font-bold text-orange-600">{benchmark.avg}</span>
                 </div>
-                <div className="w-full bg-orange-100 rounded-full h-3">
-                  <div
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 h-3 rounded-full shadow-md"
-                    style={{ width: `${(benchmark.avg / benchmark.top10) * 100}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Top 10% */}
-              <div className="p-4 bg-white rounded-lg border border-green-200">
-                <div className="flex justify-between items-center mb-3">
-                  <div>
-                    <span className="text-xs font-semibold text-green-600 uppercase tracking-wide">Top 10% da Indústria</span>
-                    <p className="text-sm font-medium text-gray-900 mt-1">{userIndustry}</p>
-                  </div>
-                  <span className="text-3xl font-bold text-green-600">{benchmark.top10}</span>
-                </div>
-                <div className="w-full bg-green-100 rounded-full h-3">
-                  <div
-                    className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-md"
-                    style={{ width: `${(benchmark.top10 / benchmark.top10) * 100}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Insight */}
-              {scoreGap > 0 && (
-                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-sm text-yellow-900">
-                    <strong>Gap identificado:</strong> Você está {scoreGap.toFixed(1)} pontos
-                    abaixo da média da indústria. Fechar esse gap pode gerar impacto
-                    significativo em eficiência operacional.
-                  </p>
-                </div>
-              )}
-
-              {/* Comparativo Completo (Gold) */}
-              {isGoldPlan && (
-                <div className="mt-8 pt-8 border-t border-gray-200">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Trophy className="h-5 w-5 text-yellow-500" />
-                    <h3 className="text-lg font-bold text-gray-900">
-                      Comparativo Completo (Plano Gold)
-                    </h3>
-                  </div>
-
-                  <div className="space-y-4">
-                    {Object.entries(INDUSTRY_BENCHMARKS).map(([industry, data]) => (
-                      <div key={industry}>
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-sm text-gray-700">Média - {industry}</span>
-                          <span className="text-sm font-bold text-gray-900">{data.avg}</span>
+                <div className="space-y-3">
+                  {sortedDimensions.map((dim) => {
+                    const colors = getDimensionColor(dim.score);
+                    const pct = (dim.score / 5) * 100;
+                    return (
+                      <div key={dim.name} className={`flex items-center gap-4 p-3 rounded-xl border ${colors.bg} ${colors.border}`}>
+                        <span className="text-xl w-7 text-center flex-shrink-0">{DIMENSION_ICONS[dim.name]}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-center mb-1.5">
+                            <span className="text-sm font-semibold text-gray-800 truncate">{dim.name}</span>
+                            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.bg} ${colors.text} border ${colors.border}`}>
+                                {getDimensionStatus(dim.score)}
+                              </span>
+                              <span className={`text-sm font-bold ${colors.text}`}>{dim.score}/5</span>
+                            </div>
+                          </div>
+                          <div className="w-full bg-white/70 rounded-full h-1.5">
+                            <div className={`${colors.bar} h-1.5 rounded-full`} style={{ width: `${pct}%` }} />
+                          </div>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-1.5">
-                          <div
-                            className="bg-blue-400 h-1.5 rounded-full"
-                            style={{ width: `${(data.avg / benchmark.top10) * 100}%` }}
-                          />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* COLUNA DIREITA */}
+              <div className="space-y-4">
+
+                {/* PRIORIDADE #1 */}
+                {topPriority && (
+                  <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl border border-red-200 p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Target className="h-4 w-4 text-red-600" />
+                      <h3 className="text-sm font-bold text-red-800">Prioridade #1</h3>
+                    </div>
+                    <p className="text-base font-bold text-gray-900 mb-1">{topPriority.name}</p>
+                    <p className="text-xs text-gray-600 mb-3">
+                      Score atual de <strong className="text-red-600">{topPriority.score}/5</strong> — dimensão mais crítica do diagnóstico.
+                    </p>
+                    <div className="bg-white rounded-lg p-3 border border-red-100 mb-3">
+                      <p className="text-xs font-semibold text-gray-700 mb-1">Ação recomendada:</p>
+                      <p className="text-xs text-gray-600">
+                        {topPriority.score < 1.5
+                          ? "Estruture uma política básica e defina responsáveis por esta área."
+                          : topPriority.score < 2.5
+                          ? "Formalize processos existentes e capacite a equipe."
+                          : "Automatize e monitore com KPIs definidos."}
+                      </p>
+                    </div>
+                    <Link href="/roadmap">
+                      <button className="w-full text-xs font-semibold text-red-700 hover:text-red-900 flex items-center justify-center gap-1 py-2 border border-red-200 rounded-lg hover:bg-red-100 transition-all">
+                        Ver Roadmap Completo <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    </Link>
+                  </div>
+                )}
+
+                {/* ÁREAS CRÍTICAS */}
+                {criticalDimensions.length > 0 && (
+                  <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <AlertTriangle className="h-4 w-4 text-amber-500" />
+                      <h3 className="text-sm font-bold text-gray-900">Áreas Críticas</h3>
+                      <span className="ml-auto bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                        {criticalDimensions.length}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {criticalDimensions.map((d) => (
+                        <div key={d.name} className="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0">
+                          <span className="text-xs text-gray-700 font-medium">{DIMENSION_ICONS[d.name]} {d.name}</span>
+                          <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">{d.score}/5</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* BENCHMARK COMPACTO */}
+                <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <BarChart3 className="h-4 w-4 text-indigo-600" />
+                    <h3 className="text-sm font-bold text-gray-900">Benchmark {userIndustry}</h3>
+                  </div>
+                  <div className="space-y-2.5">
+                    {[
+                      { label: "Sua empresa", value: currentScore, color: "bg-indigo-500", textColor: "text-indigo-600" },
+                      { label: "Média do setor", value: benchmark.avg, color: "bg-orange-400", textColor: "text-orange-500" },
+                      { label: "Top 10%", value: benchmark.top10, color: "bg-emerald-500", textColor: "text-emerald-600" },
+                    ].map((item) => (
+                      <div key={item.label}>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-gray-500">{item.label}</span>
+                          <span className={`font-bold ${item.textColor}`}>{item.value}</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2">
+                          <div className={`${item.color} h-2 rounded-full`} style={{ width: `${(item.value / 5) * 100}%` }} />
                         </div>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {/* CTA para upgrade (Bronze/Silver) */}
-              {!isGoldPlan && (
-                <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
-                  <Lock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-blue-900 mb-2">
-                      Desbloqueie o comparativo completo com o plano Gold
-                    </p>
-                    <p className="text-sm text-blue-800 mb-3">
-                      Veja como sua empresa se compara com TODOS os segmentos de mercado e
-                      identifique oportunidades de melhoria.
-                    </p>
+                  {!isGold && (
                     <Link href="/planos">
-                      <button className="text-sm font-medium text-blue-600 hover:text-blue-800 underline">
-                        Upgrade para Gold →
-                      </button>
+                      <p className="text-xs text-indigo-600 font-medium mt-3 flex items-center gap-1 hover:underline cursor-pointer">
+                        Ver comparativo completo (Gold) <ChevronRight className="h-3 w-3" />
+                      </p>
                     </Link>
+                  )}
+                </div>
+
+                {/* QUICK WINS */}
+                <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Zap className="h-4 w-4 text-amber-500" />
+                    <h3 className="text-sm font-bold text-gray-900">Quick Wins (30 dias)</h3>
                   </div>
+                  <div className="space-y-2">
+                    {[
+                      "Mapear responsáveis por dados em cada área",
+                      "Criar glossário básico de dados da empresa",
+                      "Definir 3 KPIs de qualidade de dados",
+                    ].map((win, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <span className="flex-shrink-0 w-5 h-5 bg-amber-100 text-amber-700 rounded-full text-xs font-bold flex items-center justify-center mt-0.5">
+                          {i + 1}
+                        </span>
+                        <p className="text-xs text-gray-700">{win}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <Link href="/roadmap">
+                    <button className="mt-3 w-full text-xs font-semibold text-amber-700 hover:text-amber-900 flex items-center justify-center gap-1 py-2 border border-amber-200 rounded-lg hover:bg-amber-50 transition-all">
+                      Ver Roadmap Completo <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                  </Link>
                 </div>
-              )}
-            </div>
-          </div>
 
-          {/* QUICK WINS */}
-          <div className="bg-white rounded-xl border border-gray-200 p-8">
-            <div className="flex items-center gap-2 mb-6">
-              <Zap className="h-6 w-6 text-yellow-500" />
-              <h2 className="text-2xl font-bold text-gray-900">Quick Wins (30 dias)</h2>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-brand-primary text-white rounded-full flex items-center justify-center font-bold">
-                  1
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">Focar nas áreas de melhoria identificadas</p>
-                  <p className="text-sm text-gray-600">
-                    Priorize as 3 dimensões com menor score para ganho rápido de 0.5 pontos
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-brand-primary text-white rounded-full flex items-center justify-center font-bold">
-                  2
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">Criar um roadmap de 12 meses</p>
-                  <p className="text-sm text-gray-600">
-                    Alinhado com os objetivos de negócio para escalar iniciativas de dados
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-brand-primary text-white rounded-full flex items-center justify-center font-bold">
-                  3
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">Reavaliar em 6 meses</p>
-                  <p className="text-sm text-gray-600">
-                    Medir progresso e ajustar estratégia com base nos resultados
-                  </p>
-                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* PLANOS */}
-          <div className="bg-white rounded-xl border border-gray-200 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Planos e Recursos</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Bronze */}
-              <div className="border-2 border-gray-300 rounded-lg p-8 min-h-fit bg-white shadow-sm hover:shadow-md transition-shadow">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Bronze</h3>
-                <p className="text-2xl font-bold text-gray-900 mb-8">R$ 99/mês</p>
-                <ul className="space-y-4 text-lg text-gray-800">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
-                    <span className="font-medium">1 diagnóstico/ano</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
-                    <span className="font-medium">Relatório básico</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
-                    <span className="font-medium">Benchmarking seu segmento</span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Silver */}
-              <div className="border-3 border-brand-primary rounded-lg p-8 bg-purple-50 min-h-fit shadow-md hover:shadow-lg transition-shadow">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Silver</h3>
-                <p className="text-2xl font-bold text-gray-900 mb-8">R$ 299/mês</p>
-                <ul className="space-y-4 text-lg text-gray-800">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
-                    <span className="font-medium">4 diagnósticos/ano</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
-                    <span className="font-medium">Relatório detalhado</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
-                    <span className="font-medium">Recomendações priorizadas</span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Gold */}
-              <div className="border-2 border-yellow-500 rounded-lg p-8 bg-yellow-50 min-h-fit shadow-sm hover:shadow-md transition-shadow">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Gold</h3>
-                <p className="text-2xl font-bold text-gray-900 mb-8">R$ 999/mês</p>
-                <ul className="space-y-4 text-lg text-gray-800">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
-                    <span className="font-medium">Ilimitado</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
-                    <span className="font-medium">Relatório executivo + técnico</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
-                    <span className="font-medium">Comparativo completo</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <Link href="/planos">
-              <button className="mt-6 w-full py-3 bg-brand-primary text-white rounded-lg font-medium hover:opacity-90 transition-all">
-                Ver todos os planos →
-              </button>
-            </Link>
-          </div>
         </div>
       </main>
     </div>
