@@ -151,7 +151,7 @@ const DIMENSION_SHORT: Record<string, string> = {
 const getPercentileLabel = (score: number, benchmark: typeof INDUSTRY_BENCHMARKS[string]) => {
   if (score >= benchmark.top10) return { label: "Top 10% do setor", color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200" };
   if (score >= benchmark.top25) return { label: "Top 25% do setor", color: "text-blue-600", bg: "bg-blue-50 border-blue-200" };
-  if (score >= benchmark.avg) return { label: "Dentro da média", color: "text-gray-600", bg: "bg-gray-100 border-gray-300" };
+  if (score >= benchmark.avg) return { label: "Dentro da média", color: "text-zinc-700", bg: "bg-zinc-100 border-zinc-400" };
   if (score >= benchmark.bottom25) return { label: "Abaixo da média", color: "text-amber-600", bg: "bg-amber-50 border-amber-200" };
   return { label: "Quartil Inferior", color: "text-red-600", bg: "bg-red-50 border-red-200" };
 };
