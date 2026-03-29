@@ -82,9 +82,9 @@ const LIBRARY_CONTENT: ContentItem[] = [
   {
     id: "27",
     title: "Talentos e Papéis em Dados",
-    description: "Estruturação de equipes, papéis críticos e estratégia de retenção de talentos.",
+    description: "Papéis, responsabilidades, hard/soft skills e fluxos de entrada e saída para estruturar times de dados de alta performance.",
     category: "executivo",
-    required_plan: "silver",
+    required_plan: "bronze",
     content_url: "/biblioteca/DataMaturity-Talentos-Papeis.pdf",
     nivel: "Estratégico",
   },
@@ -234,9 +234,9 @@ const LIBRARY_CONTENT: ContentItem[] = [
   {
     id: "16",
     title: "Talentos e Papéis em Dados",
-    description: "Estruturação de equipes, papéis críticos e estratégia de retenção de talentos.",
+    description: "Papéis, responsabilidades, hard/soft skills e fluxos de entrada e saída para estruturar times de dados de alta performance.",
     category: "talentos",
-    required_plan: "silver",
+    required_plan: "bronze",
     content_url: "/biblioteca/DataMaturity-Talentos-Papeis.pdf",
     nivel: "Estratégico",
   },
