@@ -102,9 +102,9 @@ const LIBRARY_CONTENT: ContentItem[] = [
   {
     id: "2",
     title: "Ciclo de Vida de Soluções de Dados & IA",
-    description: "Do protótipo à produção: como escalar valor de forma estruturada.",
+    description: "Da captura de demanda à captura de ganho: 7 fases, 4 Gates de governança e 2 trilhos (Dados & IA) para estruturar o ciclo completo de soluções.",
     category: "governanca",
-    required_plan: "bronze",
+    required_plan: "silver",
     content_url: "/biblioteca/DataMaturity-Ciclo-Vida-Solucoes.pdf",
     nivel: "Operacional",
   },
