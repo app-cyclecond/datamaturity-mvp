@@ -111,10 +111,10 @@ const LIBRARY_CONTENT: ContentItem[] = [
   {
     id: "3",
     title: "Política de Inteligência Artificial",
-    description: "Diretrizes éticas, seguras e responsáveis para o uso de IA na empresa.",
+    description: "Modelo editável de política corporativa de IA: classificação de risco, GenAI, MLOps, LGPD/GDPR, segurança cibernética e governança — baseado em EU AI Act, ISO 42001, NIST AI RMF e OWASP.",
     category: "governanca",
-    required_plan: "silver",
-    content_url: "/biblioteca/DataMaturity-Politica-IA.pdf",
+    required_plan: "gold",
+    content_url: "/biblioteca/DataMaturity-Politica-IA.docx",
     nivel: "Estratégico",
   },
   {
