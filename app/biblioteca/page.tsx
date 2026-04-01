@@ -542,7 +542,7 @@ export default function BibliotecaPage() {
                           className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 active:scale-95 transition-all shadow-sm"
                         >
                           <Download className="h-4 w-4" />
-                          Baixar PDF
+                          {item.content_url.endsWith('.docx') ? 'Baixar DOCX' : item.content_url.endsWith('.xlsx') ? 'Baixar XLSX' : 'Baixar PDF'}
                         </a>
                       ) : (
                         <Link href="/planos">
