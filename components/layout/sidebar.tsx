@@ -108,7 +108,7 @@ export function Sidebar({ user, activePage }: SidebarProps) {
             Contato por Email
           </a>
           <button
-            onClick={() => window.open("https://wa.me/5511999999999", "_blank")}
+            onClick={() => window.open("https://wa.me/5511919771377", "_blank")}
             className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all text-sm"
           >
             <MessageCircle className="h-4 w-4 text-gray-400" />
