@@ -123,7 +123,7 @@ export default function RoadmapPage() {
   }
 
   const industry = (user?.industry || "Tech") as keyof typeof INDUSTRY_BENCHMARKS;
-  const isGoldOrSilver = user?.plan === "gold" || user?.plan === "silver";
+  const hasPaidPlan = user?.plan === "gold" || user?.plan === "silver" || user?.plan === "bronze";
 
   // Ordenar dimensões por score (menor primeiro = maior prioridade)
   const sortedDimensions = lastAssessment
@@ -211,7 +211,7 @@ export default function RoadmapPage() {
                   const actions = ROADMAP_ACTIONS[dimensionName]?.[currentLevel] || [];
                   const benchmarkAvg = DIMENSION_BENCHMARKS[dimensionName]?.[industry] || 0;
                   const isExpanded = expandedDimension === dimensionName;
-                  const isLocked = !isGoldOrSilver && index >= 3;
+                  const isLocked = !hasPaidPlan;
 
                   return (
                     <div key={dimensionName} className={`bg-white rounded-2xl border-2 transition-all ${getScoreBg(score)}`}>
@@ -295,8 +295,8 @@ export default function RoadmapPage() {
                           <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
                             <Lock className="w-5 h-5 text-gray-400 flex-shrink-0" />
                             <div>
-                              <p className="text-sm font-medium text-gray-700">Desbloqueie com Silver ou Gold</p>
-                              <p className="text-xs text-gray-500 mt-0.5">Acesse o plano de ação completo para todas as 7 dimensões</p>
+                              <p className="text-sm font-medium text-gray-700">Desbloqueie com uma licença anual</p>
+                              <p className="text-xs text-gray-500 mt-0.5">Acesse o plano de ação completo para todas as 7 dimensões com Bronze, Silver ou Gold</p>
                             </div>
                             <Link href="/planos" className="ml-auto">
                               <button className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 whitespace-nowrap">

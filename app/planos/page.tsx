@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import {
   Check, X, Zap, Trophy, Target, ArrowRight, Star,
-  ChevronDown, ChevronUp,
+  ChevronDown, ChevronUp, MessageCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -44,73 +44,78 @@ export default function PlanosPage() {
     } finally { setLoading(null); }
   };
 
+  const handleGoldWhatsApp = () => {
+    window.open("https://wa.me/5511919771377?text=Olá!%20Tenho%20interesse%20no%20Plano%20Gold%20do%20DataMaturity.%20Podemos%20conversar%3F", "_blank");
+  };
+
   const plans = [
     {
-      name: "Bronze", price: 99, tagline: "Para começar com clareza",
-      description: "Ideal para empresas que querem entender onde estão e dar o primeiro passo na jornada de dados.",
+      name: "Bronze", price: "4.900", tagline: "Para começar com clareza",
+      description: "Ideal para empresas que querem entender onde estão e dar o primeiro passo estruturado na jornada de dados.",
       icon: Target, badge: null, planKey: "bronze",
       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_BRONZE,
       features: [
-        { name: "1 diagnóstico por mês", included: true },
+        { name: "Diagnóstico completo de maturidade", included: true },
         { name: "Score em 7 dimensões", included: true },
         { name: "Relatório básico em PDF", included: true },
         { name: "Benchmarking do seu setor", included: true },
         { name: "Biblioteca Essencial (5 docs)", included: true },
         { name: "Suporte por email", included: true },
         { name: "Roadmap personalizado", included: false },
-        { name: "Biblioteca Completa (20 docs)", included: false },
+        { name: "Biblioteca Completa (20+ docs)", included: false },
         { name: "Benchmarking multi-setorial", included: false },
         { name: "Diagnósticos ilimitados", included: false },
       ],
       cta: "Começar com Bronze", isPopular: false, isGold: false,
     },
     {
-      name: "Silver", price: 299, tagline: "Para quem quer evoluir rápido",
-      description: "Para empresas em crescimento que monitoram continuamente e precisam de recomendações personalizadas.",
+      name: "Silver", price: "9.900", tagline: "Para quem quer evoluir rápido",
+      description: "Para empresas em crescimento que precisam de estrutura, roadmap personalizado e acesso completo à biblioteca.",
       icon: Zap, badge: "Mais Popular", planKey: "silver",
       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_SILVER,
       features: [
-        { name: "4 diagnósticos por mês", included: true },
+        { name: "Diagnósticos ilimitados", included: true },
         { name: "Score em 7 dimensões", included: true },
         { name: "Relatório avançado em PDF", included: true },
         { name: "Benchmarking do seu setor", included: true },
-        { name: "Biblioteca Completa (20 docs)", included: true },
+        { name: "Biblioteca Completa (20+ docs)", included: true },
         { name: "Roadmap personalizado", included: true },
         { name: "Suporte prioritário", included: true },
         { name: "Benchmarking multi-setorial", included: false },
-        { name: "Diagnósticos ilimitados", included: false },
+        { name: "Política de IA e frameworks Gold", included: false },
         { name: "Consultoria estratégica", included: false },
       ],
       cta: "Começar com Silver", isPopular: true, isGold: false,
     },
     {
-      name: "Gold", price: 499, tagline: "Para líderes que levam dados a sério",
-      description: "Solução completa para organizações que usam dados como vantagem competitiva real.",
+      name: "Gold", price: null, tagline: "Para líderes que levam dados a sério",
+      description: "Proposta customizada para a realidade da sua organização. O que consultorias cobram em centenas de milhares, você acessa por uma fração.",
       icon: Trophy, badge: "Completo", planKey: "gold",
-      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_GOLD,
+      priceId: null,
       features: [
         { name: "Diagnósticos ilimitados", included: true },
         { name: "Score em 7 dimensões", included: true },
         { name: "Relatório executivo premium", included: true },
         { name: "Benchmarking multi-setorial", included: true },
-        { name: "Biblioteca Completa (20 docs)", included: true },
+        { name: "Biblioteca Completa (20+ docs)", included: true },
         { name: "Roadmap personalizado", included: true },
-        { name: "Suporte prioritário", included: true },
+        { name: "Política de IA e frameworks Gold", included: true },
         { name: "Análise de tendências", included: true },
-        { name: "Consultoria estratégica", included: true },
+        { name: "Suporte prioritário + consultoria", included: true },
         { name: "Acesso antecipado a novidades", included: true },
       ],
-      cta: "Começar com Gold", isPopular: false, isGold: true,
+      cta: "Solicitar Proposta", isPopular: false, isGold: true,
     },
   ];
 
   const faqs = [
-    { question: "Posso mudar de plano a qualquer momento?", answer: "Sim! Você pode fazer upgrade ou downgrade a qualquer momento. O ajuste é proporcional ao ciclo de cobrança vigente." },
+    { question: "Como funciona a licença anual?", answer: "Você paga uma única vez e tem acesso completo ao plano escolhido por 12 meses. Ao final do período, você pode renovar ou fazer upgrade para um plano superior." },
+    { question: "O diagnóstico é realmente gratuito?", answer: "Sim. Qualquer pessoa pode criar uma conta e realizar o diagnóstico completo de maturidade sem custo. Os planos pagos desbloqueiam o roadmap personalizado, a biblioteca completa e os benchmarkings avançados." },
     { question: "O que é o Benchmarking Setorial?", answer: "Comparamos o seu score com empresas do mesmo setor (Tech, Financeiro, Retail, Saúde, Manufatura), mostrando onde você está em relação à média e ao top 10% do mercado." },
     { question: "O Roadmap é realmente personalizado?", answer: "Sim. Para cada dimensão com score abaixo da média, geramos automaticamente 3 ações concretas e priorizadas baseadas no seu nível atual, com o objetivo de evoluir para o próximo nível." },
-    { question: "O que está incluído na Biblioteca?", answer: "A Biblioteca tem 20 documentos em 6 categorias: Executivo, Governança, Cultura, Analytics, Talentos e Toolkit. Cada documento é um guia prático, framework ou template." },
-    { question: "Qual plano recomendam para começar?", answer: "Para empresas iniciando, o Bronze é ideal. Para quem já tem uma operação de dados e quer monitorar a evolução com recomendações personalizadas, o Silver é o mais custo-benefício." },
-    { question: "Existe período de teste gratuito?", answer: "Você pode criar uma conta gratuita e fazer um diagnóstico completo sem custo. Os planos pagos desbloqueiam recursos avançados como Roadmap, Biblioteca Completa e Benchmarking." },
+    { question: "O que está incluído na Biblioteca?", answer: "A Biblioteca tem 20+ documentos em 6 categorias: Executivo, Governança, Cultura, Analytics, Talentos e Toolkit. Cada documento é um guia prático, framework ou template — do nível de qualidade de uma consultoria McKinsey." },
+    { question: "Por que o Gold não tem preço fixo?", answer: "Porque o valor real depende do tamanho da sua organização, do número de usuários e dos objetivos estratégicos. Assim conseguimos oferecer uma proposta justa para uma startup de 20 pessoas e para um grupo com 5.000 colaboradores." },
+    { question: "Qual plano recomendam para começar?", answer: "Para empresas iniciando a jornada de dados, o Bronze é o ponto de entrada ideal. Para quem já tem uma operação de dados e precisa de roadmap e biblioteca completa, o Silver oferece o melhor custo-benefício." },
   ];
 
   return (
@@ -127,7 +132,7 @@ export default function PlanosPage() {
             {user ? (
               <Link href="/dashboard" className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">Meu Dashboard</Link>
             ) : (
-              <Link href="/signup" className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">Começar Grátis</Link>
+              <Link href="/signup" className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">Diagnóstico Gratuito</Link>
             )}
           </div>
         </div>
@@ -138,19 +143,19 @@ export default function PlanosPage() {
         <div className="mx-auto max-w-4xl text-center">
           <div className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
             <Star className="w-3.5 h-3.5 fill-indigo-500" />
-            Preços em Reais · Sem surpresas
+            Licença Anual · Acesso por 12 meses
           </div>
           <h1 className="text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
-            Invista na maturidade de dados<br />
-            <span className="text-indigo-600">da sua empresa</span>
+            O que consultorias cobram em<br />
+            <span className="text-indigo-600">centenas de milhares</span>
           </h1>
           <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-6">
-            Escolha o plano ideal e comece a transformar dados em vantagem competitiva. Cancele quando quiser.
+            Diagnóstico de maturidade, roadmap personalizado e biblioteca completa de frameworks — por uma fração do custo de uma consultoria tradicional.
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
-            <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" />Sem contrato de fidelidade</div>
             <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" />Diagnóstico gratuito para começar</div>
-            <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" />Upgrade ou downgrade a qualquer hora</div>
+            <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" />Acesso por 12 meses</div>
+            <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" />Renovação anual sem surpresas</div>
           </div>
         </div>
       </section>
@@ -183,24 +188,42 @@ export default function PlanosPage() {
                       </div>
                     </div>
                     <div className="mt-4 mb-2">
-                      <span className={`text-4xl font-extrabold ${plan.isPopular ? "text-white" : "text-gray-900"}`}>R$ {plan.price}</span>
-                      <span className={`text-sm ml-1 ${plan.isPopular ? "text-indigo-200" : "text-gray-500"}`}>/mês</span>
+                      {plan.price ? (
+                        <>
+                          <span className={`text-4xl font-extrabold ${plan.isPopular ? "text-white" : "text-gray-900"}`}>R$ {plan.price}</span>
+                          <span className={`text-sm ml-1 ${plan.isPopular ? "text-indigo-200" : "text-gray-500"}`}>/ano</span>
+                        </>
+                      ) : (
+                        <div>
+                          <span className={`text-2xl font-extrabold ${plan.isGold ? "text-amber-700" : "text-gray-900"}`}>Proposta Customizada</span>
+                          <p className={`text-xs mt-1 ${plan.isGold ? "text-amber-600" : "text-gray-500"}`}>Valor adaptado ao tamanho e objetivos da sua organização</p>
+                        </div>
+                      )}
                     </div>
                     <p className={`text-sm leading-relaxed ${plan.isPopular ? "text-indigo-100" : "text-gray-500"}`}>{plan.description}</p>
                   </div>
                   <div className="p-8 bg-white rounded-b-2xl flex flex-col flex-1">
-                    <button
-                      onClick={() => handleCheckout(plan)}
-                      disabled={loading === plan.planKey || isCheckingAuth}
-                      className={`w-full py-3 rounded-xl font-bold text-sm mb-6 transition-all flex items-center justify-center gap-2 disabled:opacity-50 ${
-                        plan.isPopular ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200"
-                        : plan.isGold ? "bg-amber-500 text-white hover:bg-amber-600 shadow-md shadow-amber-100"
-                        : "bg-gray-900 text-white hover:bg-gray-800"
-                      }`}
-                    >
-                      {loading === plan.planKey ? "Processando..." : plan.cta}
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
+                    {plan.isGold ? (
+                      <button
+                        onClick={handleGoldWhatsApp}
+                        className="w-full py-3 rounded-xl font-bold text-sm mb-6 transition-all flex items-center justify-center gap-2 bg-amber-500 text-white hover:bg-amber-600 shadow-md shadow-amber-100"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        Falar com Especialista
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleCheckout(plan)}
+                        disabled={loading === plan.planKey || isCheckingAuth}
+                        className={`w-full py-3 rounded-xl font-bold text-sm mb-6 transition-all flex items-center justify-center gap-2 disabled:opacity-50 ${
+                          plan.isPopular ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200"
+                          : "bg-gray-900 text-white hover:bg-gray-800"
+                        }`}
+                      >
+                        {loading === plan.planKey ? "Processando..." : plan.cta}
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    )}
                     <div className="space-y-2.5 flex-1">
                       {plan.features.map((feature, j) => (
                         <div key={j} className="flex items-center gap-2.5">
@@ -225,6 +248,29 @@ export default function PlanosPage() {
         </div>
       </section>
 
+      {/* ÂNCORA DE VALOR */}
+      <section className="py-12 px-6 bg-indigo-50">
+        <div className="mx-auto max-w-4xl">
+          <div className="bg-white rounded-2xl border border-indigo-100 p-8 shadow-sm">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Por que vale o investimento?</h2>
+            <p className="text-gray-500 text-center text-sm mb-8">Compare o custo do DataMaturity com alternativas tradicionais</p>
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                { label: "Consultoria tradicional", value: "R$ 80.000–300.000", sub: "por projeto de diagnóstico (3 meses)", color: "text-red-600" },
+                { label: "DataMaturity Gold", value: "Proposta customizada", sub: "acesso por 12 meses, resultados em minutos", color: "text-amber-600" },
+                { label: "DataMaturity Silver", value: "R$ 9.900/ano", sub: "equivale a menos de 1 dia de consultoria", color: "text-indigo-600" },
+              ].map((item, i) => (
+                <div key={i} className="text-center p-4 rounded-xl bg-gray-50">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{item.label}</p>
+                  <p className={`text-xl font-extrabold ${item.color} mb-1`}>{item.value}</p>
+                  <p className="text-xs text-gray-400">{item.sub}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* TABELA COMPARATIVA */}
       <section className="py-16 px-6 bg-gray-50">
         <div className="mx-auto max-w-5xl">
@@ -241,14 +287,16 @@ export default function PlanosPage() {
               </thead>
               <tbody>
                 {[
-                  { feature: "Diagnósticos por mês", bronze: "1", silver: "4", gold: "Ilimitado" },
+                  { feature: "Diagnósticos", bronze: "Completo", silver: "Ilimitados", gold: "Ilimitados" },
                   { feature: "Score em 7 dimensões", bronze: "✅", silver: "✅", gold: "✅" },
                   { feature: "Relatório em PDF", bronze: "Básico", silver: "Avançado", gold: "Executivo Premium" },
                   { feature: "Benchmarking setorial", bronze: "Seu setor", silver: "Seu setor", gold: "Todos os setores" },
                   { feature: "Roadmap personalizado", bronze: "—", silver: "✅", gold: "✅" },
-                  { feature: "Biblioteca de conteúdo", bronze: "5 docs", silver: "20 docs", gold: "20 docs + exclusivos" },
+                  { feature: "Biblioteca de conteúdo", bronze: "5 docs", silver: "20+ docs", gold: "20+ docs + exclusivos" },
+                  { feature: "Política de IA (DOCX editável)", bronze: "—", silver: "—", gold: "✅" },
                   { feature: "Análise de tendências", bronze: "—", silver: "—", gold: "✅" },
                   { feature: "Suporte", bronze: "Email", silver: "Prioritário", gold: "Prioritário + Consultoria" },
+                  { feature: "Licença", bronze: "Anual", silver: "Anual", gold: "Customizada" },
                 ].map((row, i) => (
                   <tr key={i} className={`border-b border-gray-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
                     <td className="p-4 text-gray-700 font-medium">{row.feature}</td>
@@ -316,27 +364,24 @@ export default function PlanosPage() {
       {/* CTA FINAL */}
       <section className="py-20 px-6 bg-gradient-to-br from-indigo-950 via-indigo-900 to-purple-900">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-4xl font-bold text-white mb-4">Pronto para começar?</h2>
-          <p className="text-indigo-200 text-lg mb-8">Faça seu diagnóstico gratuito agora e descubra onde sua empresa está na jornada de maturidade em dados.</p>
-          <Link href={user ? "/assessment" : "/signup"} className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-emerald-500/30">
-            {user ? "Fazer Diagnóstico Agora" : "Criar Conta Gratuita"}
-            <ArrowRight className="w-5 h-5" />
-          </Link>
-          <p className="text-indigo-400 text-sm mt-4">Sem cartão de crédito · Resultado em 10 minutos</p>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="bg-gray-950 text-gray-400 py-10 px-6">
-        <div className="mx-auto max-w-7xl flex flex-col sm:flex-row justify-between items-center gap-4 text-sm">
-          <p>&copy; 2026 DataMaturity. Todos os direitos reservados.</p>
-          <div className="flex gap-6">
-            <Link href="/" className="hover:text-white transition">Home</Link>
-            <Link href="/auth/login" className="hover:text-white transition">Entrar</Link>
-            <a href="#" className="hover:text-white transition">Privacidade</a>
+          <h2 className="text-4xl font-bold text-white mb-4">Comece pelo diagnóstico gratuito</h2>
+          <p className="text-indigo-200 text-lg mb-8">Em 10 minutos você descobre onde sua empresa está na jornada de maturidade em dados — sem custo, sem compromisso.</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/signup">
+              <button className="px-8 py-4 bg-white text-indigo-900 font-bold rounded-xl hover:bg-indigo-50 transition-all text-sm shadow-lg">
+                Fazer Diagnóstico Gratuito →
+              </button>
+            </Link>
+            <button
+              onClick={handleGoldWhatsApp}
+              className="px-8 py-4 border border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition-all text-sm flex items-center justify-center gap-2"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Falar sobre o Plano Gold
+            </button>
           </div>
         </div>
-      </footer>
+      </section>
     </div>
   );
 }
