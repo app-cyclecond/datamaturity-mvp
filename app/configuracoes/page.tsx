@@ -1,5 +1,6 @@
 "use client";
 import { Sidebar } from "@/components/layout/sidebar";
+import AuthenticatedLayout from "@/components/auth/AuthenticatedLayout";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -105,6 +106,7 @@ export default function ConfiguracoesPage() {
   }
 
   return (
+    <AuthenticatedLayout>
     <div className="flex min-h-screen bg-gray-50">
       {/* SIDEBAR */}
       <Sidebar user={user || undefined} activePage="configuracoes" />
@@ -269,5 +271,6 @@ export default function ConfiguracoesPage() {
         </div>
       </main>
     </div>
+      </AuthenticatedLayout>
   );
 }

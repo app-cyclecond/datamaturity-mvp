@@ -1,5 +1,6 @@
 "use client";
 import { Sidebar } from "@/components/layout/sidebar";
+import AuthenticatedLayout from "@/components/auth/AuthenticatedLayout";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DIMENSIONS } from "@/lib/assessment/questions";
@@ -318,6 +319,7 @@ export default function AssessmentPage() {
   const showUsageBanner = accessInfo && accessInfo.plan !== "gold" && accessInfo.limit !== Infinity;
 
   return (
+    <AuthenticatedLayout>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <AssessmentHeader
         currentDimension={currentDimensionIndex + 1}
@@ -427,5 +429,6 @@ export default function AssessmentPage() {
 
       <SaveIndicator status={saveStatus} message={saveMessage} />
     </div>
+      </AuthenticatedLayout>
   );
 }

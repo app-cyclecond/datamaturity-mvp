@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Sidebar } from "@/components/layout/sidebar";
+import AuthenticatedLayout from "@/components/auth/AuthenticatedLayout";
 import {
   BarChart3, TrendingUp, TrendingDown, Minus, Lock, ChevronRight,
   Info, Award, Target, AlertTriangle, ChevronDown, ChevronUp,
@@ -241,6 +242,7 @@ export default function BenchmarkingPage() {
     .map(([name, data], i) => ({ name, ...data, rank: i + 1 }));
 
   return (
+    <AuthenticatedLayout>
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar user={user || undefined} activePage="benchmarking" />
       <main className="flex-1 ml-64 p-8">
@@ -793,5 +795,6 @@ export default function BenchmarkingPage() {
         </div>
       </main>
     </div>
+      </AuthenticatedLayout>
   );
 }

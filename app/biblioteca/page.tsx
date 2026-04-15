@@ -1,5 +1,6 @@
 "use client";
 import { Sidebar } from "@/components/layout/sidebar";
+import AuthenticatedLayout from "@/components/auth/AuthenticatedLayout";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -383,6 +384,7 @@ export default function BibliotecaPage() {
   const userPlanLevel = PLAN_ORDER[user?.plan as keyof typeof PLAN_ORDER] ?? 0;
 
   return (
+    <AuthenticatedLayout>
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar user={user || undefined} activePage="biblioteca" />
 
@@ -578,5 +580,6 @@ export default function BibliotecaPage() {
         </div>
       </main>
     </div>
+      </AuthenticatedLayout>
   );
 }

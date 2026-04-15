@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Sidebar } from "@/components/layout/sidebar";
+import AuthenticatedLayout from "@/components/auth/AuthenticatedLayout";
 import {
   TrendingUp, TrendingDown, Minus, ArrowUp, ArrowDown,
   Calendar, BarChart3, ChevronRight, Activity, CheckCircle2,
@@ -183,6 +184,7 @@ export default function HistoricoPage() {
   }));
 
   return (
+    <AuthenticatedLayout>
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar user={user || undefined} activePage="historico" />
       <main className="flex-1 ml-64 p-8">
@@ -562,5 +564,6 @@ export default function HistoricoPage() {
         </div>
       </main>
     </div>
+      </AuthenticatedLayout>
   );
 }

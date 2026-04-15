@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Sidebar } from "@/components/layout/sidebar";
+import AuthenticatedLayout from "@/components/auth/AuthenticatedLayout";
 import { ROADMAP_ACTIONS, DIMENSION_BENCHMARKS, INDUSTRY_BENCHMARKS } from "@/lib/benchmarks";
 import Link from "next/link";
 import {
@@ -131,6 +132,7 @@ export default function RoadmapPage() {
     : [];
 
   return (
+    <AuthenticatedLayout>
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar user={user || undefined} activePage="roadmap" />
       <main className="flex-1 ml-64 p-10">
@@ -331,5 +333,6 @@ export default function RoadmapPage() {
         </div>
       </main>
     </div>
+      </AuthenticatedLayout>
   );
 }

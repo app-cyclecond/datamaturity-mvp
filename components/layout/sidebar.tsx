@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
-  LogOut, Mail, MessageCircle,
+  LogOut, Mail, MessageCircle, LifeBuoy,
   LayoutDashboard, ClipboardList, Zap, History,
   Map, BookOpen, Settings, BarChart3,
 } from "lucide-react";
@@ -16,7 +16,7 @@ interface SidebarProps {
     email?: string;
     plan?: string;
   };
-  activePage?: "home" | "diagnostico" | "assessment" | "historico" | "roadmap" | "biblioteca" | "configuracoes" | "benchmarking";
+  activePage?: "home" | "diagnostico" | "assessment" | "historico" | "roadmap" | "biblioteca" | "configuracoes" | "benchmarking" | "suporte";
 }
 
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
@@ -100,6 +100,21 @@ export function Sidebar({ user, activePage }: SidebarProps) {
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2 px-3">
             Suporte
           </div>
+
+          {/* Link para a página de Suporte */}
+          <Link href="/suporte">
+            <button
+              className={`w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm ${
+                activePage === "suporte"
+                  ? "bg-indigo-50 text-indigo-700 font-semibold"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              }`}
+            >
+              <LifeBuoy className={`h-4 w-4 flex-shrink-0 ${activePage === "suporte" ? "text-indigo-600" : "text-gray-400"}`} />
+              Central de Suporte
+            </button>
+          </Link>
+
           <a
             href="mailto:contato@datamaturity.com.br"
             className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all text-sm"
