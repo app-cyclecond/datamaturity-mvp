@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Sidebar } from "@/components/layout/sidebar";
 import AuthenticatedLayout from "@/components/auth/AuthenticatedLayout";
 import { ROADMAP_ACTIONS, DIMENSION_BENCHMARKS, INDUSTRY_BENCHMARKS } from "@/lib/benchmarks";
+import { ROADMAP_METADATA, getEsforcoStyle, getPrazoStyle, getTipoStyle } from "@/lib/roadmap-metadata";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -275,14 +276,45 @@ export default function RoadmapPage() {
                             <strong>Objetivo:</strong> Evoluir do nível <strong>{LEVEL_LABELS[currentLevel]}</strong> para <strong>{LEVEL_LABELS[Math.min(currentLevel + 1, 5)]}</strong>
                           </p>
                           <div className="space-y-3">
-                            {actions.map((action, i) => (
-                              <div key={i} className="flex items-start gap-3 p-3 bg-white rounded-xl border border-gray-100">
-                                <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                                  {i + 1}
+                            {actions.map((action, i) => {
+                              const meta = ROADMAP_METADATA[action];
+                              const esforcoStyle = meta ? getEsforcoStyle(meta.esforco) : null;
+                              const prazoStyle   = meta ? getPrazoStyle(meta.prazo)     : null;
+                              const tipoStyle    = meta ? getTipoStyle(meta.tipo)       : null;
+                              return (
+                                <div key={i} className="p-4 bg-white rounded-xl border border-gray-100 space-y-2.5">
+                                  <div className="flex items-start gap-3">
+                                    <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                                      {i + 1}
+                                    </div>
+                                    <p className="text-sm text-gray-800 font-medium leading-snug">{action}</p>
+                                  </div>
+                                  {meta && (
+                                    <div className="flex flex-wrap gap-1.5 pl-9">
+                                      {/* Tipo */}
+                                      {tipoStyle && (
+                                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${tipoStyle.bg} ${tipoStyle.text} ${tipoStyle.border}`}>
+                                          {meta.tipo}
+                                        </span>
+                                      )}
+                                      {/* Esforço */}
+                                      {esforcoStyle && (
+                                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border ${esforcoStyle.bg} ${esforcoStyle.text} ${esforcoStyle.border}`}>
+                                          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${esforcoStyle.dot}`} />
+                                          Esforço {meta.esforco}
+                                        </span>
+                                      )}
+                                      {/* Prazo */}
+                                      {prazoStyle && (
+                                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${prazoStyle.bg} ${prazoStyle.text} ${prazoStyle.border}`}>
+                                          ⏱ {meta.prazo}
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
-                                <p className="text-sm text-gray-700">{action}</p>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                           <div className="mt-4 flex items-center gap-2 text-xs text-gray-500">
                             <Award className="w-3.5 h-3.5" />
