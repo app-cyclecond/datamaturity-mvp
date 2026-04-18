@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Sidebar } from "@/components/layout/sidebar";
 import AuthenticatedLayout from "@/components/auth/AuthenticatedLayout";
@@ -332,7 +332,7 @@ const SparklineTooltip = ({ active, payload }: { active?: boolean; payload?: Arr
   return null;
 };
 
-function CockpitPageInner() {
+export default function CockpitPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [lastAssessment, setLastAssessment] = useState<AssessmentResult | null>(null);
@@ -393,8 +393,13 @@ function CockpitPageInner() {
     return "Boa noite";
   };
 
-  const searchParams = useSearchParams();
-  const checkoutStatus = searchParams.get("checkout");
+  const [checkoutStatus, setCheckoutStatus] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setCheckoutStatus(params.get("checkout"));
+    }
+  }, []);
   const firstName = user?.name?.split(" ")[0] || "Executivo";
 
   return (
@@ -803,17 +808,5 @@ function CockpitPageInner() {
       </main>
     </div>
     </AuthenticatedLayout>
-  );
-}
-
-export default function CockpitPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
-        <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600" />
-      </div>
-    }>
-      <CockpitPageInner />
-    </Suspense>
   );
 }
