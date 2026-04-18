@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DIMENSIONS } from "@/lib/assessment/questions";
 import { ExportActions } from "@/components/assessment/export-actions";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Lock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -22,6 +22,7 @@ type UserProfile = {
   name: string;
   email: string;
   company: string;
+  plan: string;
 };
 
 // Determinar nível baseado no score
@@ -53,6 +54,7 @@ export default function ResultadoPage({
   const [result, setResult] = useState<AssessmentResult | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPaid, setIsPaid] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -79,7 +81,7 @@ export default function ResultadoPage({
           return;
         }
 
-        // Buscar dados do usuário
+        // Buscar dados do usuário (incluindo plano)
         const { data: userData } = await supabase
           .from("users")
           .select("*")
@@ -88,6 +90,10 @@ export default function ResultadoPage({
 
         setResult(resultData as AssessmentResult);
         setUser(userData as UserProfile);
+
+        // Verificar se tem plano pago
+        const plan = (userData as UserProfile)?.plan || "starter";
+        setIsPaid(plan !== "starter");
       } catch (error) {
         console.error("Erro ao carregar resultado:", error);
         router.push("/dashboard");
@@ -143,7 +149,7 @@ export default function ResultadoPage({
           </p>
         </div>
 
-        {/* SCORE GERAL */}
+        {/* SCORE GERAL — visível para todos */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-sm">
             <p className="text-gray-600 text-sm font-medium mb-2">Score Geral</p>
@@ -177,65 +183,126 @@ export default function ResultadoPage({
           </div>
         </div>
 
-        {/* DIMENSÕES */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Resultados por Dimensão
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {DIMENSIONS.map((dimension) => {
-              const score = result.dimension_scores[dimension.name] || 0;
-              return (
-                <div
-                  key={dimension.name}
-                  className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {dimension.name}
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {dimension.description}
-                      </p>
+        {/* PAYWALL — bloqueia detalhes para usuários sem plano */}
+        {!isPaid ? (
+          <div className="relative mb-8">
+            {/* Preview desfocado das dimensões */}
+            <div className="pointer-events-none select-none filter blur-sm opacity-60">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Resultados por Dimensão
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {DIMENSIONS.slice(0, 4).map((dimension) => (
+                  <div
+                    key={dimension.name}
+                    className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm"
+                  >
+                    <h3 className="text-lg font-semibold text-gray-900">{dimension.name}</h3>
+                    <p className="text-sm text-gray-600 mt-1">{dimension.description}</p>
+                    <div className="flex items-center justify-between mt-6">
+                      <div>
+                        <div className="text-3xl font-bold text-gray-900">—</div>
+                        <div className="inline-block px-3 py-1 rounded-lg border bg-gray-100 text-gray-400 text-xs font-semibold mt-2">
+                          Bloqueado
+                        </div>
+                      </div>
+                      <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
+                        <Lock className="h-8 w-8 text-gray-300" />
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+            </div>
 
-                  <div className="flex items-center justify-between mt-6">
-                    <div>
-                      <div className="text-3xl font-bold text-gray-900">
-                        {score}
+            {/* Card de paywall sobreposto */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-white rounded-2xl border border-indigo-200 shadow-2xl p-8 max-w-md w-full mx-4 text-center">
+                <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Lock className="h-8 w-8 text-indigo-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  Resultados detalhados bloqueados
+                </h3>
+                <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+                  Você concluiu o diagnóstico! Para acessar os resultados por dimensão, 
+                  recomendações personalizadas e seu roadmap de maturidade, 
+                  escolha um plano.
+                </p>
+                <Link href="/planos">
+                  <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 text-base font-semibold">
+                    Ver planos e desbloquear
+                  </Button>
+                </Link>
+                <p className="text-xs text-gray-400 mt-3">
+                  A partir de R$ 297/ano · Acesso completo por 12 meses
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* DIMENSÕES — visível apenas para planos pagos */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Resultados por Dimensão
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {DIMENSIONS.map((dimension) => {
+                  const score = result.dimension_scores[dimension.name] || 0;
+                  return (
+                    <div
+                      key={dimension.name}
+                      className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {dimension.name}
+                          </h3>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {dimension.description}
+                          </p>
+                        </div>
                       </div>
-                      <div
-                        className={`inline-block px-3 py-1 rounded-lg border text-xs font-semibold mt-2 ${getLevelColor(score)}`}
-                      >
-                        {getLevel(score)}
-                      </div>
-                    </div>
 
-                    <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-indigo-600">
-                          {Math.round((score / 5) * 100)}%
+                      <div className="flex items-center justify-between mt-6">
+                        <div>
+                          <div className="text-3xl font-bold text-gray-900">
+                            {score}
+                          </div>
+                          <div
+                            className={`inline-block px-3 py-1 rounded-lg border text-xs font-semibold mt-2 ${getLevelColor(score)}`}
+                          >
+                            {getLevel(score)}
+                          </div>
+                        </div>
+
+                        <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-indigo-600">
+                              {Math.round((score / 5) * 100)}%
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                  );
+                })}
+              </div>
+            </div>
 
-        {/* EXPORT ACTIONS */}
-        <div className="mb-8 bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Compartilhar Resultado</h3>
-          <ExportActions
-            resultId={result.id}
-            assessmentData={result}
-            user={user || { name: "Usuário", email: "", company: "" }}
-          />
-        </div>
+            {/* EXPORT ACTIONS — apenas para planos pagos */}
+            <div className="mb-8 bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Compartilhar Resultado</h3>
+              <ExportActions
+                resultId={result.id}
+                assessmentData={result}
+                user={user || { name: "Usuário", email: "", company: "" }}
+              />
+            </div>
+          </>
+        )}
 
         {/* AÇÕES */}
         <div className="flex gap-4 justify-center">
