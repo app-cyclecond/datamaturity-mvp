@@ -342,8 +342,20 @@ export default function CockpitPage() {
   useEffect(() => {
     const supabase = createClient();
     const load = async () => {
-      const { data: authData } = await supabase.auth.getUser();
-      if (!authData.user) { router.push("/auth/login"); return; }
+      try {
+        // Limpar sessão inválida antes de tentar carregar
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData.session) {
+          await supabase.auth.signOut();
+          router.push("/auth/login");
+          return;
+        }
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError || !authData.user) {
+          await supabase.auth.signOut();
+          router.push("/auth/login");
+          return;
+        }
       const { data: userData } = await supabase.from("users").select("*").eq("id", authData.user.id).single();
       if (userData) setUser(userData as UserProfile);
       const { data: results } = await supabase
@@ -354,6 +366,10 @@ export default function CockpitPage() {
         setAllAssessments(results as AssessmentResult[]);
       }
       setIsLoading(false);
+      } catch (err) {
+        console.error("Dashboard load error:", err);
+        router.push("/auth/login");
+      }
     };
     load();
   }, [router]);
