@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
@@ -13,11 +13,8 @@ export async function POST(req: Request) {
       });
     }
 
-    // Obter usuário autenticado
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-    );
+    // Obter usuário autenticado via cookies (server-side)
+    const supabase = await createClient();
 
     const {
       data: { user },
@@ -29,12 +26,11 @@ export async function POST(req: Request) {
       });
     }
 
-    // Validar que o priceId é um dos configurados
+    // Validar que o priceId é um dos configurados (variáveis server-side)
     const validPriceIds = [
-      process.env.NEXT_PUBLIC_STRIPE_PRICE_BRONZE,
-      process.env.NEXT_PUBLIC_STRIPE_PRICE_SILVER,
-      process.env.NEXT_PUBLIC_STRIPE_PRICE_GOLD,
-    ];
+      process.env.STRIPE_PRICE_BRONZE,
+      process.env.STRIPE_PRICE_SILVER,
+    ].filter(Boolean);
 
     if (!validPriceIds.includes(priceId)) {
       return new Response(
@@ -50,24 +46,35 @@ export async function POST(req: Request) {
       .from("subscriptions")
       .select("stripe_customer_id")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (subscription?.stripe_customer_id) {
       customerId = subscription.stripe_customer_id;
     } else {
+      // Buscar nome do usuário
+      const { data: userData } = await supabase
+        .from("users")
+        .select("name, company")
+        .eq("id", user.id)
+        .maybeSingle();
+
       const customer = await stripe.customers.create({
         email: user.email,
+        name: userData?.name || undefined,
         metadata: {
           user_id: user.id,
+          company: userData?.company || "",
         },
       });
       customerId = customer.id;
     }
 
-    // Criar checkout session
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://datamaturity.com.br";
+
+    // Criar checkout session — mode: "payment" para pagamento avulso (one-time)
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      mode: "subscription",
+      mode: "payment",
       payment_method_types: ["card"],
       line_items: [
         {
@@ -75,15 +82,22 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?checkout=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/planos?checkout=cancelled`,
+      allow_promotion_codes: true,
+      success_url: `${appUrl}/dashboard?checkout=success`,
+      cancel_url: `${appUrl}/planos?checkout=cancelled`,
       metadata: {
         user_id: user.id,
         price_id: priceId,
       },
+      payment_intent_data: {
+        metadata: {
+          user_id: user.id,
+          price_id: priceId,
+        },
+      },
     });
 
-    return new Response(JSON.stringify({ sessionId: session.id }), {
+    return new Response(JSON.stringify({ sessionId: session.id, url: session.url }), {
       status: 200,
     });
   } catch (error: any) {

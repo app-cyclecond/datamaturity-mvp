@@ -7,19 +7,23 @@ export async function POST(req: Request) {
   const body = await req.text();
   const signature = headers().get("stripe-signature");
 
-  let event;
+  if (!signature) {
+    return new Response("No signature", { status: 400 });
+  }
 
+  let event: any;
   try {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET
     );
-  } catch (error: any) {
-    console.error("Webhook signature verification failed:", error.message);
-    return new Response(`Webhook Error: ${error.message}`, { status: 400 });
+  } catch (err: any) {
+    console.error("Webhook signature verification failed:", err.message);
+    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
   }
 
+  // Cliente Supabase com service role para operações administrativas
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.SUPABASE_SERVICE_ROLE_KEY || "",
@@ -31,49 +35,53 @@ export async function POST(req: Request) {
     }
   );
 
+  // Mapeamento de price_id → plano
+  const priceIdToPlan: Record<string, string> = {
+    [process.env.STRIPE_PRICE_BRONZE || ""]: "bronze",
+    [process.env.STRIPE_PRICE_SILVER || ""]: "silver",
+  };
+
   try {
     switch (event.type) {
-      case "customer.subscription.created":
-      case "customer.subscription.updated": {
-        const subscription = event.data.object;
+      // ─── Pagamento avulso confirmado ───────────────────────────────────────
+      case "checkout.session.completed": {
+        const session = event.data.object;
 
-        // Obter user_id do customer metadata
-        const customer = await stripe.customers.retrieve(subscription.customer);
-        const userId = customer.metadata?.user_id;
+        // Apenas processar sessões de pagamento (não subscription)
+        if (session.mode !== "payment") break;
+        if (session.payment_status !== "paid") break;
 
-        if (!userId) {
-          console.error("No user_id found in customer metadata");
-          return new Response("No user_id found", { status: 400 });
+        const userId = session.metadata?.user_id;
+        const priceId = session.metadata?.price_id;
+
+        if (!userId || !priceId) {
+          console.error("Missing metadata in checkout.session.completed", { userId, priceId });
+          return new Response("Missing metadata", { status: 400 });
         }
 
-        // Mapear Stripe price ID para plano
-        const priceIdToPlan: Record<string, string> = {
-          [process.env.STRIPE_PRICE_BRONZE || ""]: "bronze",
-          [process.env.STRIPE_PRICE_SILVER || ""]: "silver",
-          [process.env.STRIPE_PRICE_GOLD || ""]: "gold",
-        };
+        const plan = priceIdToPlan[priceId];
+        if (!plan) {
+          console.error("Unknown price_id:", priceId);
+          return new Response("Unknown price_id", { status: 400 });
+        }
 
-        const items = subscription.items.data;
-        const priceId = items[0]?.price.id;
-        const plan = priceIdToPlan[priceId] || "starter";
+        const now = new Date();
+        const expiresAt = new Date(now);
+        expiresAt.setFullYear(expiresAt.getFullYear() + 1); // +12 meses
 
-        // Atualizar ou criar subscription
+        // Upsert na tabela subscriptions
         const { error: upsertError } = await supabase
           .from("subscriptions")
           .upsert(
             {
               user_id: userId,
               plan,
-              status: subscription.status === "active" ? "active" : "pending",
-              stripe_subscription_id: subscription.id,
-              stripe_customer_id: subscription.customer,
-              current_period_start: new Date(
-                subscription.current_period_start * 1000
-              ).toISOString(),
-              current_period_end: new Date(
-                subscription.current_period_end * 1000
-              ).toISOString(),
-              cancel_at_period_end: subscription.cancel_at_period_end,
+              status: "active",
+              stripe_customer_id: session.customer || null,
+              stripe_subscription_id: session.id, // checkout session ID como referência
+              current_period_start: now.toISOString(),
+              current_period_end: expiresAt.toISOString(),
+              cancel_at_period_end: false,
             },
             { onConflict: "user_id" }
           );
@@ -91,80 +99,44 @@ export async function POST(req: Request) {
 
         if (updateUserError) {
           console.error("Error updating user plan:", updateUserError);
+          return new Response("Error updating user plan", { status: 500 });
         }
 
-        break;
-      }
-
-      case "customer.subscription.deleted": {
-        const subscription = event.data.object;
-        const customer = await stripe.customers.retrieve(subscription.customer);
-        const userId = customer.metadata?.user_id;
-
-        if (!userId) {
-          return new Response("No user_id found", { status: 400 });
-        }
-
-        // Atualizar subscription para cancelled
-        const { error: updateError } = await supabase
-          .from("subscriptions")
-          .update({
-            status: "cancelled",
-            plan: "starter",
-          })
-          .eq("user_id", userId);
-
-        if (updateError) {
-          console.error("Error updating subscription:", updateError);
-          return new Response("Error updating subscription", { status: 500 });
-        }
-
-        // Atualizar plano na tabela users para starter
-        const { error: updateUserError } = await supabase
-          .from("users")
-          .update({ plan: "starter" })
-          .eq("id", userId);
-
-        if (updateUserError) {
-          console.error("Error updating user plan:", updateUserError);
-        }
-
-        break;
-      }
-
-      case "invoice.paid": {
-        const invoice = event.data.object;
-        const customer = await stripe.customers.retrieve(invoice.customer);
-        const userId = customer.metadata?.user_id;
-
-        if (!userId) {
-          return new Response("No user_id found", { status: 400 });
-        }
-
-        // Criar registro de invoice
+        // Registrar invoice
+        const amountTotal = session.amount_total || 0;
         const { error: invoiceError } = await supabase
           .from("invoices")
           .insert({
             user_id: userId,
-            stripe_subscription_id: invoice.subscription,
-            stripe_invoice_id: invoice.id,
-            amount_paid: invoice.amount_paid,
-            currency: invoice.currency,
+            stripe_subscription_id: session.id,
+            stripe_invoice_id: session.payment_intent || session.id,
+            amount_paid: amountTotal,
+            currency: session.currency || "brl",
             status: "paid",
-            period_start: new Date(invoice.period_start * 1000).toISOString(),
-            period_end: new Date(invoice.period_end * 1000).toISOString(),
-            paid_at: new Date(invoice.paid_at * 1000).toISOString(),
+            period_start: now.toISOString(),
+            period_end: expiresAt.toISOString(),
+            paid_at: now.toISOString(),
           });
 
         if (invoiceError) {
+          // Não crítico — logar mas não falhar
           console.error("Error creating invoice record:", invoiceError);
         }
 
+        console.log(`Plano ${plan} ativado para user ${userId} ate ${expiresAt.toISOString()}`);
+        break;
+      }
+
+      // ─── Falha no pagamento ────────────────────────────────────────────────
+      case "payment_intent.payment_failed": {
+        const paymentIntent = event.data.object;
+        const userId = paymentIntent.metadata?.user_id;
+        console.warn(`Pagamento falhou para user ${userId || "desconhecido"}:`, paymentIntent.last_payment_error?.message);
         break;
       }
 
       default:
-        console.log(`Unhandled event type ${event.type}`);
+        console.log(`Unhandled event type: ${event.type}`);
     }
 
     return new Response(JSON.stringify({ received: true }), { status: 200 });

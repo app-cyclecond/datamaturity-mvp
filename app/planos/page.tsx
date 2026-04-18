@@ -38,7 +38,13 @@ export default function PlanosPage() {
       });
       if (!response.ok) throw new Error("Erro ao criar sessão");
       const data = await response.json();
-      if (data.sessionId) window.location.href = `https://checkout.stripe.com/pay/${data.sessionId}`;
+      if (data.url) {
+        window.location.href = data.url;
+      } else if (data.sessionId) {
+        window.location.href = `https://checkout.stripe.com/pay/${data.sessionId}`;
+      } else {
+        throw new Error(data.error || "Erro ao criar sessão de pagamento");
+      }
     } catch (error: any) {
       alert(`Erro: ${error.message}`);
     } finally { setLoading(null); }

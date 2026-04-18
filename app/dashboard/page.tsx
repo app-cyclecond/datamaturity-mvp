@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Sidebar } from "@/components/layout/sidebar";
 import AuthenticatedLayout from "@/components/auth/AuthenticatedLayout";
@@ -332,7 +332,7 @@ const SparklineTooltip = ({ active, payload }: { active?: boolean; payload?: Arr
   return null;
 };
 
-export default function CockpitPage() {
+function CockpitPageInner() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [lastAssessment, setLastAssessment] = useState<AssessmentResult | null>(null);
@@ -393,6 +393,8 @@ export default function CockpitPage() {
     return "Boa noite";
   };
 
+  const searchParams = useSearchParams();
+  const checkoutStatus = searchParams.get("checkout");
   const firstName = user?.name?.split(" ")[0] || "Executivo";
 
   return (
@@ -402,6 +404,25 @@ export default function CockpitPage() {
       <main className="flex-1 ml-64 p-8">
         <div className="max-w-7xl mx-auto space-y-6">
 
+          {/* BANNER SUCESSO CHECKOUT */}
+          {checkoutStatus === "success" && (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-emerald-800">Pagamento confirmado! Seu plano foi ativado.</p>
+                <p className="text-sm text-emerald-700 mt-0.5">Caso o plano não apareça atualizado, recarregue a página em alguns segundos.</p>
+              </div>
+            </div>
+          )}
+          {checkoutStatus === "cancelled" && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-amber-800">Pagamento cancelado.</p>
+                <p className="text-sm text-amber-700 mt-0.5">Nenhuma cobrança foi realizada. <a href="/planos" className="underline">Ver planos</a>.</p>
+              </div>
+            </div>
+          )}
           {/* HEADER PERSONALIZADO */}
           <div className="flex items-center justify-between">
             <div>
@@ -782,5 +803,17 @@ export default function CockpitPage() {
       </main>
     </div>
     </AuthenticatedLayout>
+  );
+}
+
+export default function CockpitPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
+        <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600" />
+      </div>
+    }>
+      <CockpitPageInner />
+    </Suspense>
   );
 }
