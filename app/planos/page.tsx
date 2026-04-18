@@ -55,7 +55,7 @@ export default function PlanosPage() {
       icon: Target, badge: null, planKey: "bronze",
       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_BRONZE,
       features: [
-        { name: "Diagnóstico completo de maturidade", included: true },
+        { name: "Até 2 diagnósticos inclusos", included: true },
         { name: "Score em 7 dimensões", included: true },
         { name: "Relatório básico em PDF", included: true },
         { name: "Benchmarking do seu setor", included: true },
@@ -64,7 +64,7 @@ export default function PlanosPage() {
         { name: "Roadmap personalizado", included: false },
         { name: "Biblioteca Silver e Gold (bloqueada)", included: false },
         { name: "Benchmarking multi-setorial", included: false },
-        { name: "Diagnósticos ilimitados", included: false },
+        { name: "Diagnósticos adicionais", included: false },
       ],
       cta: "Começar com Bronze", isPopular: false, isGold: false,
     },
@@ -74,7 +74,7 @@ export default function PlanosPage() {
       icon: Zap, badge: "Mais Popular", planKey: "silver",
       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_SILVER,
       features: [
-        { name: "Diagnósticos ilimitados", included: true },
+        { name: "Até 4 diagnósticos inclusos", included: true },
         { name: "Score em 7 dimensões", included: true },
         { name: "Relatório avançado em PDF", included: true },
         { name: "Benchmarking do seu setor", included: true },
@@ -109,7 +109,7 @@ export default function PlanosPage() {
   ];
 
   const faqs = [
-    { question: "Como funciona a licença anual?", answer: "Você paga uma única vez e tem acesso completo ao plano escolhido por 12 meses. Ao final do período, você pode renovar ou fazer upgrade para um plano superior." },
+    { question: "Como funciona o acesso por 12 meses?", answer: "Você paga uma única vez e tem acesso completo ao plano escolhido por 12 meses. Não há renovação automática — ao final do período, você decide se quer renovar ou fazer upgrade para um plano superior." },
     { question: "O diagnóstico é realmente gratuito?", answer: "Sim. Qualquer pessoa pode criar uma conta e realizar o diagnóstico completo de maturidade sem custo. Os planos pagos desbloqueiam o roadmap personalizado, a biblioteca completa e os benchmarkings avançados." },
     { question: "O que é o Benchmarking Setorial?", answer: "Comparamos o seu score com empresas do mesmo setor (Tech, Financeiro, Retail, Saúde, Manufatura), mostrando onde você está em relação à média e ao top 10% do mercado." },
     { question: "O Roadmap é realmente personalizado?", answer: "Sim. Para cada dimensão com score abaixo da média, geramos automaticamente 3 ações concretas e priorizadas baseadas no seu nível atual, com o objetivo de evoluir para o próximo nível." },
@@ -143,7 +143,7 @@ export default function PlanosPage() {
         <div className="mx-auto max-w-4xl text-center">
           <div className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
             <Star className="w-3.5 h-3.5 fill-indigo-500" />
-            Licença Anual · Acesso por 12 meses
+            Acesso por 12 meses · Sem renovação automática
           </div>
           <h1 className="text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
             O que consultorias cobram em<br />
@@ -191,7 +191,7 @@ export default function PlanosPage() {
                       {plan.price ? (
                         <>
                           <span className={`text-4xl font-extrabold ${plan.isPopular ? "text-white" : "text-gray-900"}`}>R$ {plan.price}</span>
-                          <span className={`text-sm ml-1 ${plan.isPopular ? "text-indigo-200" : "text-gray-500"}`}>/ano</span>
+                          <span className={`text-sm ml-1 ${plan.isPopular ? "text-indigo-200" : "text-gray-500"}`}>/ 12 meses</span>
                         </>
                       ) : (
                         <div>
@@ -258,7 +258,7 @@ export default function PlanosPage() {
               {[
                 { label: "Consultoria tradicional", value: "R$ 80.000–300.000", sub: "por projeto de diagnóstico (3 meses)", color: "text-red-600" },
                 { label: "DataMaturity Gold", value: "Proposta customizada", sub: "acesso por 12 meses, resultados em minutos", color: "text-amber-600" },
-                { label: "DataMaturity Silver", value: "R$ 9.900/ano", sub: "equivale a menos de 1 dia de consultoria", color: "text-indigo-600" },
+                { label: "DataMaturity Silver", value: "R$ 9.900 / 12 meses", sub: "equivale a menos de 1 dia de consultoria", color: "text-indigo-600" },
               ].map((item, i) => (
                 <div key={i} className="text-center p-4 rounded-xl bg-gray-50">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{item.label}</p>
@@ -287,7 +287,7 @@ export default function PlanosPage() {
               </thead>
               <tbody>
                 {[
-                  { feature: "Diagnósticos", bronze: "Completo", silver: "Ilimitados", gold: "Ilimitados" },
+                  { feature: "Diagnósticos inclusos", bronze: "2 diagnósticos", silver: "4 diagnósticos", gold: "Ilimitados" },
                   { feature: "Score em 7 dimensões", bronze: "✅", silver: "✅", gold: "✅" },
                   { feature: "Relatório em PDF", bronze: "Básico", silver: "Avançado", gold: "Executivo Premium" },
                   { feature: "Benchmarking setorial", bronze: "Seu setor", silver: "Seu setor", gold: "Todos os setores" },
@@ -296,7 +296,7 @@ export default function PlanosPage() {
                   { feature: "Política de IA (DOCX editável)", bronze: "—", silver: "—", gold: "✅" },
                   { feature: "Análise de tendências", bronze: "—", silver: "—", gold: "✅" },
                   { feature: "Suporte", bronze: "Email", silver: "Prioritário", gold: "Prioritário + Consultoria" },
-                  { feature: "Licença", bronze: "Anual", silver: "Anual", gold: "Customizada" },
+                  { feature: "Acesso", bronze: "12 meses", silver: "12 meses", gold: "Customizado" },
                 ].map((row, i) => (
                   <tr key={i} className={`border-b border-gray-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
                     <td className="p-4 text-gray-700 font-medium">{row.feature}</td>

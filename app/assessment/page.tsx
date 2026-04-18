@@ -20,8 +20,8 @@ type UserPlan = "starter" | "bronze" | "silver" | "gold";
 
 const PLAN_LIMITS: Record<UserPlan, number> = {
   starter: 1,
-  bronze: 1,
-  silver: 3,
+  bronze: 2,
+  silver: 4,
   gold: Infinity,
 };
 
@@ -80,16 +80,11 @@ export default function AssessmentPage() {
           return;
         }
 
-        // Para outros planos, contar diagnósticos do mês atual
-        const monthStart = new Date();
-        monthStart.setDate(1);
-        monthStart.setHours(0, 0, 0, 0);
-
+        // Para outros planos, contar total de diagnósticos realizados
         const { data: results } = await supabase
           .from("assessment_results")
           .select("created_at")
-          .eq("user_id", authData.user.id)
-          .gte("created_at", monthStart.toISOString());
+          .eq("user_id", authData.user.id);
 
         const used = results?.length || 0;
         const limit = PLAN_LIMITS[plan];
@@ -100,7 +95,7 @@ export default function AssessmentPage() {
           plan,
           used,
           limit,
-          reason: hasAccess ? undefined : `Você atingiu o limite de ${limit} diagnóstico(s) por mês no plano ${PLAN_LABELS[plan]}.`,
+          reason: hasAccess ? undefined : `Você atingiu o limite de ${limit} diagnóstico(s) incluído(s) no plano ${PLAN_LABELS[plan]}. Faça upgrade para continuar.`,
         });
 
         setIsLoading(false);
