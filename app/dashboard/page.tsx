@@ -338,6 +338,14 @@ export default function CockpitPage() {
   const [lastAssessment, setLastAssessment] = useState<AssessmentResult | null>(null);
   const [allAssessments, setAllAssessments] = useState<AssessmentResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [checkoutStatus, setCheckoutStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setCheckoutStatus(params.get("checkout"));
+    }
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -409,13 +417,7 @@ export default function CockpitPage() {
     return "Boa noite";
   };
 
-  const [checkoutStatus, setCheckoutStatus] = useState<string | null>(null);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      setCheckoutStatus(params.get("checkout"));
-    }
-  }, []);
+
   const firstName = user?.name?.split(" ")[0] || "Executivo";
 
   return (
