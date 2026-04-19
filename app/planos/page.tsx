@@ -197,7 +197,7 @@ export default function PlanosPage() {
                       {plan.price ? (
                         <>
                           <span className={`text-4xl font-extrabold ${plan.isPopular ? "text-white" : "text-gray-900"}`}>R$ {plan.price}</span>
-                          <span className={`text-sm ml-1 ${plan.isPopular ? "text-indigo-200" : "text-gray-500"}`}>/ 12 meses</span>
+                          <span className={`text-sm ml-1 ${plan.isPopular ? "text-indigo-200" : "text-gray-500"}`}>Válido por 12 meses</span>
                         </>
                       ) : (
                         <div>
@@ -264,7 +264,7 @@ export default function PlanosPage() {
               {[
                 { label: "Consultoria tradicional", value: "R$ 80.000–300.000", sub: "por projeto de diagnóstico (3 meses)", color: "text-red-600" },
                 { label: "DataMaturity Gold", value: "Proposta customizada", sub: "acesso por 12 meses, resultados em minutos", color: "text-amber-600" },
-                { label: "DataMaturity Silver", value: "R$ 9.900 / 12 meses", sub: "equivale a menos de 1 dia de consultoria", color: "text-indigo-600" },
+                { label: "DataMaturity Silver", value: "R$ 9.900 · Válido por 12 meses", sub: "equivale a menos de 1 dia de consultoria", color: "text-indigo-600" },
               ].map((item, i) => (
                 <div key={i} className="text-center p-4 rounded-xl bg-gray-50">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{item.label}</p>
