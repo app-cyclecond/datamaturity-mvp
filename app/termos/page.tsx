@@ -39,11 +39,9 @@ export default function TermosPage() {
                   A plataforma DataMaturity é operada por:
                 </p>
                 <ul className="list-disc pl-5 mt-2 space-y-1">
-                  <li><strong>Razão Social:</strong> VINICIUS FIORIN XAVIER DOS SANTOS CONSULTORIA EM TECNOLOGIA DA INFORMACAO LTDA</li>
+                  <li><strong>Nome:</strong> DataMaturity</li>
                   <li><strong>CNPJ:</strong> 54.730.434/0001-92</li>
-                  <li><strong>Endereço:</strong> Rua Francisco Marengo, 1210, Apt 31, Edif Lisboa, Tatuapé, São Paulo - SP, CEP: 03313-001</li>
                 </ul>
-                <p className="mt-2 text-sm italic text-gray-500">* O CNPJ foi deduzido a partir da data de abertura (16/04/2024) e do nome empresarial, devendo ser confirmado pelo usuário.</p>
               </section>
 
               <section>
@@ -70,7 +68,7 @@ export default function TermosPage() {
               <section>
                 <h2 className="text-xl font-semibold text-gray-900 mb-3">6. Propriedade Intelectual</h2>
                 <p>
-                  Todo o conteúdo, metodologias, frameworks, documentos da biblioteca e software presentes na plataforma DataMaturity são de propriedade exclusiva da VINICIUS FIORIN XAVIER DOS SANTOS CONSULTORIA EM TECNOLOGIA DA INFORMACAO LTDA. É estritamente proibida a reprodução, distribuição ou revenda não autorizada deste material.
+                  Todo o conteúdo, metodologias, frameworks, documentos da biblioteca e software presentes na plataforma DataMaturity são de propriedade exclusiva da DataMaturity. É estritamente proibida a reprodução, distribuição ou revenda não autorizada deste material.
                 </p>
               </section>
 
