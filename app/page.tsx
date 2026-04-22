@@ -331,7 +331,7 @@ export default function Home() {
                 <li><a href="#como-funciona" className="hover:text-white transition">Como Funciona</a></li>
                 <li><Link href="/planos" className="hover:text-white transition">Planos</Link></li>
                 <li><a href="#framework" className="hover:text-white transition">Metodologia</a></li>
-                <li><Link href="/biblioteca" className="hover:text-white transition">Biblioteca</Link></li>
+                <li><Link href="/biblioteca-publica" className="hover:text-white transition">Biblioteca</Link></li>
               </ul>
             </div>
             <div>
@@ -339,15 +339,15 @@ export default function Home() {
               <ul className="space-y-2 text-sm">
                 <li><Link href="/auth/login" className="hover:text-white transition">Entrar</Link></li>
                 <li><Link href="/signup" className="hover:text-white transition">Criar Conta</Link></li>
-                <li><Link href="/dashboard" className="hover:text-white transition">Dashboard</Link></li>
+                <li><Link href="/dashboard-demo" className="hover:text-white transition">Dashboard</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-white mb-4">Legal</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Privacidade</a></li>
-                <li><a href="#" className="hover:text-white transition">Termos de Uso</a></li>
-                <li><a href="#" className="hover:text-white transition">LGPD</a></li>
+                <li><Link href="/privacidade" className="hover:text-white transition">Privacidade</Link></li>
+                <li><Link href="/termos" className="hover:text-white transition">Termos de Uso</Link></li>
+                <li><Link href="/lgpd" className="hover:text-white transition">LGPD</Link></li>
               </ul>
             </div>
           </div>
