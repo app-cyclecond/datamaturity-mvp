@@ -145,7 +145,7 @@ export default function LoginPage() {
         {/* Footer */}
         <p className="text-center text-sm text-neutral-600 mt-6">
           Ao entrar, você concorda com nossos{' '}
-          <Link href="#" className="text-primary-600 hover:text-primary-700 font-medium">
+          <Link href="/termos" className="text-primary-600 hover:text-primary-700 font-medium">
             Termos de Serviço
           </Link>
         </p>

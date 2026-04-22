@@ -191,6 +191,7 @@ export default function SuportePage() {
               <div>
                 <div className="font-semibold text-gray-900 text-sm">WhatsApp</div>
                 <div className="text-xs text-gray-500 mt-0.5">(11) 91977-1377</div>
+                <div className="text-xs text-gray-400 mt-0.5">Seg–Sex, 9h às 18h</div>
               </div>
             </a>
             <a

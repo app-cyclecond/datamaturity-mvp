@@ -170,7 +170,7 @@ export default function SignupPage() {
               <input type="checkbox" className="rounded border-neutral-300 mt-1" required />
               <span className="text-sm text-neutral-600">
                 Concordo com os{' '}
-                <Link href="#" className="text-primary-600 hover:text-primary-700 font-medium">
+                <Link href="/termos" className="text-primary-600 hover:text-primary-700 font-medium">
                   Termos de Serviço
                 </Link>
               </span>

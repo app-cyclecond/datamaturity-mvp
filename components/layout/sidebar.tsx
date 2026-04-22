@@ -34,7 +34,7 @@ export function Sidebar({ user, activePage }: SidebarProps) {
       setIsLoggingOut(true);
       const supabase = createClient();
       await supabase.auth.signOut();
-      router.push("/auth/login");
+      router.push("/");
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
       setIsLoggingOut(false);
