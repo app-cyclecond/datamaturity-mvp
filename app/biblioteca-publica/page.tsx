@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, FileText, Download, CheckCircle, ArrowRight, Lock } from "lucide-react";
+import { BookOpen, FileText, Download, CheckCircle, ArrowRight, ArrowLeft, Lock } from "lucide-react";
 
 export const metadata = {
   title: "Biblioteca de Recursos | DataMaturity",
@@ -19,11 +19,15 @@ export default function BibliotecaPublicaPage() {
             <span className="font-bold text-slate-900 text-lg">DataMaturity</span>
           </Link>
           <div className="flex items-center gap-4">
+            <Link href="/" className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition flex items-center gap-1">
+              <ArrowLeft className="w-4 h-4" />
+              Voltar
+            </Link>
             <Link href="/auth/login" className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition">
               Entrar
             </Link>
             <Link
-              href="/auth/signup"
+              href="/signup"
               className="text-sm font-medium bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition shadow-sm"
             >
               Começar Grátis

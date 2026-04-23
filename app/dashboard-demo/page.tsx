@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, PieChart, TrendingUp, Download, ArrowRight, Activity, Users, Shield, Database, Lock } from "lucide-react";
+import { BarChart3, PieChart, TrendingUp, Download, ArrowRight, ArrowLeft, Activity, Users, Shield, Database, Lock } from "lucide-react";
 
 export const metadata = {
   title: "Demo do Dashboard | DataMaturity",
@@ -21,7 +21,14 @@ export default function DashboardDemoPage() {
           </Link>
           <div className="flex items-center gap-4">
             <Link
-              href="/auth/signup"
+              href="/"
+              className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition flex items-center gap-1"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar
+            </Link>
+            <Link
+              href="/signup"
               className="text-sm font-medium bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition shadow-sm"
             >
               Criar Conta Real
