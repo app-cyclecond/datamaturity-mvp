@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthenticatedUser } from "@/lib/auth";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface SendEmailRequest {
   resultId: string;
@@ -87,10 +90,28 @@ export async function POST(request: NextRequest) {
 
     console.log("📧 [SEND-EMAIL] Emails a enviar:", emailsToSend.length);
 
-    // TODO: Integrar com Resend, SendGrid, ou outro serviço
-    // await sendEmails(emailsToSend);
+    // Enviar via Resend
+    const sendPromises = emailsToSend.map((emailData) =>
+      resend.emails.send({
+        from: "DataMaturity <noreply@datamaturity.com.br>",
+        to: emailData.to,
+        subject: emailData.subject,
+        html: emailData.html,
+      })
+    );
 
-    // Por enquanto, retornar sucesso simulado
+    const results = await Promise.allSettled(sendPromises);
+    const failures = results.filter((r) => r.status === "rejected");
+
+    if (failures.length > 0) {
+      console.error("❌ [SEND-EMAIL] Falhas no envio:", failures);
+      return NextResponse.json(
+        { error: "Erro ao enviar alguns emails" },
+        { status: 500 }
+      );
+    }
+
+    console.log(`✅ [SEND-EMAIL] ${emails.length} email(s) enviado(s) com sucesso`);
     return NextResponse.json({
       success: true,
       message: `Email enviado para ${emails.length} destinatário(s)`,
@@ -124,7 +145,7 @@ function generateEmailHTML(
         <style>
           body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; }
+          .header { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 28px; border-radius: 8px; text-align: center; }
           .score-box { background: ${scoreColor}; color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
           .score-value { font-size: 48px; font-weight: bold; }
           .score-level { font-size: 18px; margin-top: 10px; }
@@ -143,7 +164,7 @@ function generateEmailHTML(
           </div>
 
           <div class="section">
-            <p>Olá,</p>
+            <p>Olá${userData?.name ? `, ${userData.name.split(' ')[0]}` : ''},</p>
             <p>Segue em anexo seu diagnóstico de maturidade de dados realizado em ${new Date(result.created_at).toLocaleDateString("pt-BR")}.</p>
             ${message ? `<p><strong>Mensagem:</strong> ${message}</p>` : ""}
           </div>
@@ -174,7 +195,7 @@ function generateEmailHTML(
 
           <div class="footer">
             <p>Este é um email automático do sistema DataMaturity.</p>
-            <p>© 2026 DataMaturity. Todos os direitos reservados.</p>
+            <p>© ${new Date().getFullYear()} DataMaturity. Todos os direitos reservados.</p>
           </div>
         </div>
       </body>
@@ -185,16 +206,18 @@ function generateEmailHTML(
 function getScoreColor(level: string): string {
   switch (level) {
     case "Inexistente":
-      return "#ef4444"; // red
+      return "#ef4444";
     case "Inicial":
-      return "#f97316"; // orange
+    case "Reativo":
+      return "#f97316";
     case "Estruturado":
-      return "#eab308"; // yellow
+      return "#eab308";
+    case "Proativo":
     case "Gerenciado":
-      return "#3b82f6"; // blue
+      return "#3b82f6";
     case "Otimizado":
-      return "#22c55e"; // green
+      return "#22c55e";
     default:
-      return "#6b7280"; // gray
+      return "#6366f1";
   }
 }
