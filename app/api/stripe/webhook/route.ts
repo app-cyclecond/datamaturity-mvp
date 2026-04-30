@@ -422,12 +422,12 @@ export async function POST(req: Request) {
         // Rebaixar para free
         await supabase
           .from("subscriptions")
-          .update({ plan: "free", status: "canceled", cancel_at_period_end: false })
+          .update({ plan: "starter", status: "cancelled", cancel_at_period_end: false })
           .eq("user_id", userId);
 
         await supabase
           .from("users")
-          .update({ plan: "free" })
+          .update({ plan: "starter" })
           .eq("id", userId);
 
         // Atualizar invoice como reembolsado
@@ -454,7 +454,7 @@ export async function POST(req: Request) {
           );
         }
 
-        console.log(`Plano rebaixado para free após reembolso — user ${userId}`);
+        console.log(`Plano rebaixado para starter após reembolso — user ${userId}`);
         break;
       }
 
