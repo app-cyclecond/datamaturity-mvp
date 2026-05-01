@@ -209,7 +209,7 @@ export default function BenchmarkingPage() {
     );
   }
 
-  const isPaidPlan = user?.plan === "silver" || user?.plan === "gold";
+  const isPaidPlan = user?.plan === "bronze" || user?.plan === "silver" || user?.plan === "gold";
   const isGold = user?.plan === "gold";
   const userIndustry = (user?.industry || "Tech") as keyof typeof INDUSTRY_BENCHMARKS;
   const userBenchmark = INDUSTRY_BENCHMARKS[userIndustry] || INDUSTRY_BENCHMARKS["Outro"];

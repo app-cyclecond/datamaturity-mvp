@@ -332,7 +332,7 @@ const CATEGORY_CONFIG = {
   },
 };
 
-const PLAN_ORDER = { bronze: 1, silver: 2, gold: 3 };
+const PLAN_ORDER = { starter: 0, bronze: 1, silver: 2, gold: 3 };
 
 export default function BibliotecaPage() {
   const router = useRouter();
