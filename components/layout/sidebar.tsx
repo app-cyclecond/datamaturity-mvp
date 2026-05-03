@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   LogOut, Mail, MessageCircle, LifeBuoy,
   LayoutDashboard, ClipboardList, Zap, History,
-  Map, BookOpen, Settings, BarChart3,
+  Map, BookOpen, Settings, BarChart3, CreditCard
 } from "lucide-react";
 import { useState } from "react";
 
@@ -16,7 +16,7 @@ interface SidebarProps {
     email?: string;
     plan?: string;
   };
-  activePage?: "home" | "diagnostico" | "assessment" | "historico" | "roadmap" | "biblioteca" | "configuracoes" | "benchmarking" | "suporte";
+  activePage?: "home" | "diagnostico" | "assessment" | "historico" | "roadmap" | "biblioteca" | "configuracoes" | "benchmarking" | "suporte" | "assinatura";
 }
 
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
@@ -49,6 +49,7 @@ export function Sidebar({ user, activePage }: SidebarProps) {
     { href: "/roadmap", label: "Roadmap", id: "roadmap", icon: Map },
     { href: "/benchmarking", label: "Benchmarking", id: "benchmarking", icon: BarChart3 },
     { href: "/biblioteca", label: "Biblioteca", id: "biblioteca", icon: BookOpen },
+    { href: "/assinatura", label: "Assinatura", id: "assinatura", icon: CreditCard },
     { href: "/configuracoes", label: "Configurações", id: "configuracoes", icon: Settings },
   ];
 
