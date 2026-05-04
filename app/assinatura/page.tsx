@@ -216,7 +216,7 @@ export default function AssinaturaPage() {
                 Manter Assinatura
               </Button>
               <Button 
-                variant="destructive" 
+                variant="default" 
                 onClick={handleCancel}
                 disabled={!cancelReason || isCanceling}
                 className="bg-red-600 hover:bg-red-700 text-white"
