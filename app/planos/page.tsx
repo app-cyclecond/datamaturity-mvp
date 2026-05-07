@@ -116,7 +116,7 @@ export default function PlanosPage() {
 
   const faqs = [
     { question: "Como funciona o acesso por 12 meses?", answer: "Você paga uma única vez e tem acesso completo ao plano escolhido por 12 meses. Não há renovação automática — ao final do período, você decide se quer renovar ou fazer upgrade para um plano superior." },
-    { question: "O diagnóstico é realmente gratuito?", answer: "Sim. Qualquer pessoa pode criar uma conta e realizar o diagnóstico completo de maturidade sem custo. Os planos pagos desbloqueiam o roadmap personalizado, a biblioteca completa e os benchmarkings avançados." },
+    { question: "Posso ver como a plataforma funciona antes de assinar?", answer: "Sim. Existe uma demonstração interativa disponível em /demo onde você pode explorar o diagnóstico, o roadmap e a biblioteca sem precisar criar uma conta. Para ter acesso completo ao seu diagnóstico real e ao roadmap personalizado, escolha um dos planos pagos." },
     { question: "O que é o Benchmarking Setorial?", answer: "Comparamos o seu score com empresas do mesmo setor (Tech, Financeiro, Retail, Saúde, Manufatura), mostrando onde você está em relação à média e ao top 10% do mercado." },
     { question: "O Roadmap é realmente personalizado?", answer: "Sim. Para cada dimensão com score abaixo da média, geramos automaticamente 3 ações concretas e priorizadas baseadas no seu nível atual, com o objetivo de evoluir para o próximo nível." },
     { question: "O que está incluído na Biblioteca?", answer: "A Biblioteca tem 20+ documentos em 6 categorias: Executivo, Governança, Cultura, Analytics, Talentos e Toolkit. Cada documento é um guia prático, framework ou template — do nível de qualidade de uma consultoria McKinsey." },
@@ -138,7 +138,7 @@ export default function PlanosPage() {
             {user ? (
               <Link href="/dashboard" className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">Meu Dashboard</Link>
             ) : (
-              <Link href="/signup" className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">Diagnóstico Gratuito</Link>
+              <Link href="/demo" className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">Ver Demo</Link>
             )}
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function PlanosPage() {
             Diagnóstico de maturidade, roadmap personalizado e biblioteca completa de frameworks — por uma fração do custo de uma consultoria tradicional.
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
-            <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" />Diagnóstico gratuito para começar</div>
+            <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" />Demo interativa disponível</div>
             <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" />Acesso por 12 meses</div>
             <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" />Renovação anual sem surpresas</div>
           </div>
@@ -370,12 +370,12 @@ export default function PlanosPage() {
       {/* CTA FINAL */}
       <section className="py-20 px-6 bg-gradient-to-br from-indigo-950 via-indigo-900 to-purple-900">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-4xl font-bold text-white mb-4">Comece pelo diagnóstico gratuito</h2>
-          <p className="text-indigo-200 text-lg mb-8">Em 10 minutos você descobre onde sua empresa está na jornada de maturidade em dados — sem custo, sem compromisso.</p>
+          <h2 className="text-4xl font-bold text-white mb-4">Veja a plataforma em ação antes de decidir</h2>
+          <p className="text-indigo-200 text-lg mb-8">Explore uma demonstração interativa e entenda como o diagnóstico, o roadmap e a biblioteca funcionam na prática.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
+            <Link href="/demo">
               <button className="px-8 py-4 bg-white text-indigo-900 font-bold rounded-xl hover:bg-indigo-50 transition-all text-sm shadow-lg">
-                Fazer Diagnóstico Gratuito →
+                Ver Demonstração →
               </button>
             </Link>
             <button
