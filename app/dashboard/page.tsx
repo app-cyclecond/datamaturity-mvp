@@ -427,13 +427,34 @@ export default function CockpitPage() {
       <main className="flex-1 ml-64 p-8">
         <div className="max-w-7xl mx-auto space-y-6">
 
-          {/* BANNER SUCESSO CHECKOUT */}
+          {/* BOAS-VINDAS PÓS-PAGAMENTO */}
           {checkoutStatus === "success" && (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-emerald-800">Pagamento confirmado! Seu plano foi ativado.</p>
-                <p className="text-sm text-emerald-700 mt-0.5">Caso o plano não apareça atualizado, recarregue a página em alguns segundos.</p>
+            <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 text-white shadow-lg">
+              <div className="flex items-start gap-4">
+                <div className="bg-white/20 rounded-full p-2 flex-shrink-0">
+                  <CheckCircle2 className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold mb-1">Bem-vindo ao plano {user?.plan ? user.plan.charAt(0).toUpperCase() + user.plan.slice(1) : ""}, {firstName}! 🎉</h2>
+                  <p className="text-indigo-100 text-sm mb-5">Pagamento confirmado. Agora você tem acesso completo — veja por onde começar:</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <Link href="/assessment" className="bg-white/15 hover:bg-white/25 transition rounded-xl p-4 flex flex-col gap-2 cursor-pointer">
+                      <Zap className="h-5 w-5 text-amber-300" />
+                      <p className="font-semibold text-sm">Fazer o diagnóstico</p>
+                      <p className="text-xs text-indigo-200">Descubra seu nível de maturidade em 7 dimensões</p>
+                    </Link>
+                    <Link href="/biblioteca" className="bg-white/15 hover:bg-white/25 transition rounded-xl p-4 flex flex-col gap-2 cursor-pointer">
+                      <BookOpen className="h-5 w-5 text-emerald-300" />
+                      <p className="font-semibold text-sm">Explorar a Biblioteca</p>
+                      <p className="text-xs text-indigo-200">Acesse documentos, templates e guias estratégicos</p>
+                    </Link>
+                    <Link href="/roadmap" className="bg-white/15 hover:bg-white/25 transition rounded-xl p-4 flex flex-col gap-2 cursor-pointer">
+                      <Target className="h-5 w-5 text-pink-300" />
+                      <p className="font-semibold text-sm">Ver o Roadmap</p>
+                      <p className="text-xs text-indigo-200">Plano de ação personalizado para evoluir sua maturidade</p>
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           )}

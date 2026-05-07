@@ -286,6 +286,66 @@ export default function Home() {
         </div>
       </section>
 
+      {/* DEPOIMENTOS */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-indigo-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">O que dizem os líderes que já usaram</h2>
+            <p className="text-xl text-gray-500">Empresas que mapearam seus gaps e construíram um plano claro para evoluir</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                quote: "O diagnóstico revelou exatamente onde estávamos errando na governança de dados. Em 3 meses seguindo o roadmap, reduzimos retrabalho em 40%.",
+                name: "Rodrigo Mendes",
+                role: "Head de Dados",
+                company: "Fintech São Paulo",
+                plan: "Silver",
+                initial: "R",
+                color: "bg-indigo-600",
+              },
+              {
+                quote: "Finalmente consegui apresentar para o board um plano estruturado de maturidade. O DataMaturity deu a linguagem e os números que eu precisava.",
+                name: "Camila Torres",
+                role: "CDO",
+                company: "Varejista Nacional",
+                plan: "Bronze",
+                initial: "C",
+                color: "bg-purple-600",
+              },
+              {
+                quote: "A biblioteca de documentos sozinha já valeu o investimento. Economizamos semanas de trabalho usando os templates de governança prontos.",
+                name: "Felipe Augusto",
+                role: "Gerente de TI",
+                company: "Indústria Manufatureira",
+                plan: "Silver",
+                initial: "F",
+                color: "bg-emerald-600",
+              },
+            ].map((t, i) => (
+              <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4">
+                <div className="flex gap-1">
+                  {[...Array(5)].map((_, s) => (
+                    <Star key={s} className="w-4 h-4 text-amber-400 fill-amber-400" />
+                  ))}
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
+                <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+                  <div className={`w-10 h-10 rounded-full ${t.color} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
+                    {t.initial}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">{t.name}</p>
+                    <p className="text-xs text-gray-500">{t.role} · {t.company}</p>
+                  </div>
+                  <span className="ml-auto text-xs font-medium bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full">Plano {t.plan}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA FINAL */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-950 via-indigo-900 to-purple-900">
         <div className="max-w-4xl mx-auto text-center">
